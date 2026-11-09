@@ -959,6 +959,25 @@
          Hoshino Kōbō has no logo file and always keeps its monogram. */
       .connect-house-avatar { width: 2.75rem; height: 2.75rem; border-radius: 999px; background: var(--popover); border: 1px solid var(--border); display: grid; place-items: center; flex-shrink: 0; overflow: hidden; box-shadow: 0 1px 4px oklch(0 0 0 / 6%); }
       .connect-house-avatar img { width: 100%; height: 100%; object-fit: contain; padding: 0.3rem; }
+      /* Connect chat image — every conversation shows a real, clearly
+         visible image (the piece the chat is about), not initials
+         alone; the Elevate crown rides as a small badge on its corner
+         so the house logo is visible on every row too. */
+      .connect-chat-img { position: relative; width: 3.5rem; height: 3.5rem; border-radius: 0.625rem; overflow: hidden; flex-shrink: 0; border: 1px solid color-mix(in oklab, var(--gold) 45%, var(--border)); box-shadow: 0 2px 8px oklch(0 0 0 / 10%); background: var(--popover); display: block; }
+      .connect-chat-img > img.photo { width: 100%; height: 100%; object-fit: cover; display: block; }
+      .connect-chat-img > img.logo { width: 100%; height: 100%; object-fit: contain; padding: 0.45rem; display: block; }
+      .connect-chat-img .cci-badge { position: absolute; right: 2px; bottom: 2px; width: 1.05rem; height: 1.05rem; border-radius: 999px; background: var(--popover); border: 1px solid color-mix(in oklab, var(--gold) 50%, transparent); display: grid; place-items: center; }
+      .connect-chat-img .cci-badge img { width: 0.8rem; height: 0.8rem; object-fit: contain; display: block; }
+      .connect-chat-img.lg { width: 4.25rem; height: 4.25rem; border-radius: 0.75rem; }
+      /* Messages top banner — the Elevate crown logo as a large image
+         at the very top of the chat section, over the atelier photo,
+         so the logo is the first thing seen in the section. */
+      .connect-top-banner { position: relative; border-radius: 0.75rem; overflow: hidden; border: 1px solid color-mix(in oklab, var(--gold) 35%, var(--border)); background: #241a10; }
+      .connect-top-banner > img.photo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: .55; }
+      .connect-top-banner .ctb-shade { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(28,20,8,.18), rgba(28,20,8,.55)); }
+      .connect-top-banner .ctb-inner { position: relative; padding: 1.4rem 1rem 1.15rem; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 0.35rem; }
+      .connect-top-banner .ctb-logo { height: 4.25rem; width: auto; max-width: 70%; object-fit: contain; filter: drop-shadow(0 3px 10px rgba(0,0,0,.35)); }
+      .connect-top-banner .ctb-word { font-size: 10px; letter-spacing: 0.34em; text-transform: uppercase; color: #f5ecd9; }
       .connect-house-avatar .brand-mark { border: none; background: transparent; width: 100%; height: 100%; font-size: 13px; }
       .ow-logo { display: flex; align-items: center; justify-content: center; min-height: 5rem; }
       .ow-logo img { max-height: 5rem; max-width: 100%; width: auto; object-fit: contain; }
@@ -1164,6 +1183,171 @@
       .chat-log .m.d { background: color-mix(in oklab, var(--gold) 10%, transparent); }
       .chat-log .m.c { margin-left: auto; background: color-mix(in oklab, var(--background) 70%, transparent); color: color-mix(in oklab, var(--foreground) 80%, transparent); }
       input[type="range"] { accent-color: var(--gold); }
+
+      /* ===== Elevate Custom Studio — the design studio that opens from
+         the Custom Jewels section and from "Customize this piece".
+         Layout follows the owner's reference: Design Controls left,
+         the piece large in the centre, Gemstone + Dynamic Pricing
+         right, Alternative Designs along the bottom. Soft silk-light
+         panels on the page's warm ivory, champagne gold accents.
+         On phones the grid stacks: piece first, then Gemstone, then
+         Design Controls, then Pricing — nothing runs sideways. ===== */
+      .studio-shell { position: relative; border-radius: 24px; padding: 1.25rem 1rem 1.5rem; overflow: hidden;
+        background:
+          radial-gradient(42rem 20rem at 8% -6%, rgba(232,207,200,.55), transparent 62%),
+          radial-gradient(38rem 20rem at 96% 0%, rgba(227,192,120,.38), transparent 60%),
+          radial-gradient(36rem 22rem at 55% 112%, rgba(199,216,232,.42), transparent 62%),
+          linear-gradient(150deg, #fdfbf7 0%, #f7f1e5 52%, #fbf8f2 100%);
+        border: 1px solid color-mix(in oklab, var(--gold) 26%, var(--border));
+        box-shadow: 0 18px 44px -22px oklch(0.35 0.05 70 / .28);
+      }
+      @media (min-width: 768px) { .studio-shell { padding: 2rem 1.75rem 1.75rem; } }
+      .studio-head { text-align: center; margin-bottom: 1.5rem; }
+      .studio-head .s-kicker { font-family: var(--font-sans); font-weight: 600; font-size: clamp(1.02rem, 3.4vw, 1.55rem); letter-spacing: .14em; text-transform: uppercase; color: #7a5c1e; }
+      .studio-head h1 { margin-top: .3rem; font-family: var(--font-sans); font-weight: 400; font-size: clamp(1.25rem, 3.8vw, 1.8rem); letter-spacing: .01em; color: var(--foreground); }
+      .studio-head .s-sub { margin: .55rem auto 0; max-width: 34rem; font-size: .8125rem; line-height: 1.6; color: var(--muted-foreground); }
+      .studio-grid { display: grid; gap: 1rem; grid-template-columns: minmax(0,1fr); grid-template-areas: "center" "gem" "controls"; align-items: start; }
+      @media (min-width: 1024px) {
+        .studio-grid { grid-template-columns: 17.5rem minmax(0,1fr) 18.5rem; grid-template-areas: "controls center gem" "controls center pricing"; gap: 1.25rem; }
+      }
+      .studio-controls { grid-area: controls; }
+      .studio-center { grid-area: center; }
+      .studio-gem { grid-area: gem; }
+      .studio-pricing { grid-area: pricing; }
+      /* R3 — every studio card is a frosted GLASS card in the site's
+         own glass language (as .frost-row): translucent ivory-white,
+         blur, hairline gold border, soft shadow. */
+      .studio-panel { background: color-mix(in oklab, var(--popover) 58%, transparent); -webkit-backdrop-filter: blur(14px) saturate(115%); backdrop-filter: blur(14px) saturate(115%); border: 1px solid color-mix(in oklab, var(--gold) 32%, transparent); border-radius: 16px; box-shadow: 0 8px 24px oklch(0 0 0 / 5%); padding: 1.1rem 1.1rem 1.2rem; scroll-margin-top: 6rem; }
+      /* R2 — Gemstone starts collapsed behind its filter icon */
+      .studio-gem-head { display: flex; align-items: center; gap: .6rem; width: 100%; padding: 0; text-align: left; }
+      .studio-gem-head .sg-ico { display: grid; place-items: center; width: 2.3rem; height: 2.3rem; flex-shrink: 0; border-radius: 999px; border: 1px solid color-mix(in oklab, var(--gold) 45%, transparent); color: var(--gold); background: color-mix(in oklab, var(--popover) 45%, transparent); }
+      .studio-gem-head .sg-title { font-family: var(--font-sans); font-weight: 500; font-size: 1.02rem; }
+      .studio-gem-head .sg-sum { display: block; margin-top: .1rem; font-size: .72rem; color: var(--muted-foreground); }
+      .studio-gem-head .sg-chev { margin-left: auto; color: var(--gold); display: grid; place-items: center; transition: transform .3s ease; flex-shrink: 0; }
+      .studio-gem.open .studio-gem-head .sg-chev { transform: rotate(90deg); }
+      .studio-gem-body { margin-top: .4rem; }
+      /* R6 — on phones the pricing + ADD bar is FIXED just above the
+         site's bottom navigation, always reachable. The breakdown
+         lines and estimate note rest inside the bar on desktop; on
+         phones the bar condenses to Total + the gold button. */
+      @media (max-width: 1023px) {
+        .studio-pricing { position: fixed; left: .75rem; right: .75rem; bottom: calc(4.4rem + env(safe-area-inset-bottom)); z-index: 45; padding: .8rem .95rem .9rem; background: color-mix(in oklab, var(--popover) 82%, transparent); box-shadow: 0 14px 34px -10px oklch(0.3 0.04 70 / .35); }
+        .studio-pricing h2 { font-size: .68rem; letter-spacing: .22em; text-transform: uppercase; color: var(--muted-foreground); }
+        .studio-pricing .studio-price-total { margin-top: .3rem; }
+        .studio-pricing .studio-price-total .pt-value { font-size: 1.3rem; }
+        .studio-pricing .studio-price-lines, .studio-pricing .studio-est { display: none; }
+        .studio-pricing .studio-add { margin-top: .6rem; padding: .8rem 1rem; }
+        .studio-pricing .studio-added { max-height: 5.2rem; overflow-y: auto; }
+      }
+      .studio-panel h2, .studio-panel h3 { font-family: var(--font-sans); font-weight: 500; font-size: 1.02rem; letter-spacing: .01em; color: var(--foreground); }
+      .studio-group-label { margin-top: 1.05rem; font-size: .9rem; font-weight: 500; color: var(--foreground); }
+      .studio-metal { display: block; width: 100%; margin-top: .5rem; padding: .62rem .8rem; border-radius: 9px; border: 1px solid rgba(122,92,30,.16); font-size: .83rem; font-weight: 500; letter-spacing: .02em; color: #4c3d1c; text-align: center; box-shadow: inset 0 1px 0 rgba(255,255,255,.65); transition: box-shadow .18s, outline-color .18s, filter .18s; outline: 2px solid transparent; outline-offset: 1px; }
+      .studio-metal:hover { filter: brightness(1.04); }
+      .studio-metal.on { outline-color: var(--gold); box-shadow: 0 4px 14px -6px oklch(0.45 0.09 75 / .5), inset 0 1px 0 rgba(255,255,255,.7); }
+      .studio-select { width: 100%; margin-top: .5rem; padding: .62rem .8rem; border-radius: 9px; border: 1px solid rgba(122,92,30,.2); background: linear-gradient(180deg, #f3e3bd, #ecd9ab); font: inherit; font-size: .83rem; font-weight: 500; color: #4c3d1c; }
+      .studio-shapes { display: grid; grid-template-columns: repeat(3, 1fr); gap: .5rem; margin-top: .55rem; }
+      .studio-shape { display: flex; flex-direction: column; align-items: center; gap: .3rem; padding: .6rem .25rem .5rem; border-radius: 10px; border: 1px solid var(--border); background: rgba(255,255,255,.85); font-size: .72rem; color: var(--foreground); transition: border-color .18s, background .18s; }
+      .studio-shape svg { width: 22px; height: 22px; color: #8a6d2f; }
+      .studio-shape:hover { border-color: color-mix(in oklab, var(--gold) 55%, transparent); }
+      .studio-shape.on { border-color: var(--gold); background: linear-gradient(180deg, #f6ead0, #efe0ba); box-shadow: 0 4px 12px -6px oklch(0.45 0.09 75 / .45); }
+      .studio-more { margin-top: .55rem; padding: .42rem .9rem; border-radius: 8px; border: 1px solid var(--border); background: rgba(255,255,255,.85); font-size: .75rem; color: var(--foreground); }
+      .studio-more:hover { border-color: var(--gold); color: #7a5c1e; }
+      .studio-stage { position: relative; border-radius: 16px; overflow: hidden; background: linear-gradient(160deg, #fffdf9, #f4ecdb 58%, #efe6d2); border: 1px solid color-mix(in oklab, var(--gold) 32%, transparent); box-shadow: 0 14px 34px -16px oklch(0.35 0.05 70 / .3), inset 0 1px 0 rgba(255,255,255,.95); touch-action: pan-y; cursor: grab; }
+      .studio-stage:active { cursor: grabbing; }
+      .studio-stage img { width: 100%; aspect-ratio: 1 / .92; object-fit: cover; display: block; }
+      @media (min-width: 1024px) { .studio-stage img { aspect-ratio: 1 / 1.02; } }
+      .studio-expand { position: absolute; top: .7rem; right: .7rem; z-index: 3; width: 2.4rem; height: 2.4rem; display: grid; place-items: center; border-radius: 10px; background: rgba(255,255,255,.88); border: 1px solid rgba(122,92,30,.18); color: #7a5c1e; box-shadow: 0 4px 12px oklch(0 0 0 / 10%); }
+      .studio-expand:hover { background: #fff; }
+      .studio-dots { position: absolute; left: 0; right: 0; bottom: .7rem; z-index: 3; display: flex; justify-content: center; gap: .45rem; }
+      .studio-dot { width: .55rem; height: .55rem; padding: 0; border-radius: 999px; background: rgba(90,70,30,.28); border: 1px solid rgba(255,255,255,.7); }
+      .studio-dot.on { background: var(--gold); }
+      .studio-caption { margin-top: .8rem; text-align: center; }
+      .studio-caption .sc-name { font-family: var(--font-display); font-size: 1.3rem; line-height: 1.2; }
+      .studio-caption .sc-line { margin-top: .3rem; font-size: .8rem; line-height: 1.55; color: var(--muted-foreground); }
+      .studio-caption .sc-note { margin-top: .3rem; font-size: .72rem; line-height: 1.5; color: var(--muted-foreground); font-style: italic; }
+      .studio-slider-row { margin-top: 1rem; }
+      .studio-slider-row:first-of-type { margin-top: .8rem; }
+      .studio-slider-top { display: flex; align-items: baseline; justify-content: space-between; gap: .75rem; }
+      .studio-slider-top .sl-label { font-size: .88rem; color: var(--foreground); }
+      .studio-slider-top .sl-value { font-size: .88rem; font-weight: 600; color: #7a5c1e; white-space: nowrap; }
+      .studio-slider-row input[type="range"] { width: 100%; margin-top: .35rem; accent-color: #c9a86a; height: 1.4rem; }
+      .studio-slider-sub { display: flex; justify-content: center; margin-top: -.1rem; font-size: .72rem; color: var(--muted-foreground); }
+      .studio-price-total { display: flex; align-items: baseline; justify-content: space-between; gap: .75rem; margin-top: .7rem; }
+      .studio-price-total .pt-label { font-size: .95rem; }
+      .studio-price-total .pt-value { font-family: var(--font-display); font-size: 1.45rem; font-weight: 600; color: #7a5c1e; white-space: nowrap; }
+      .studio-price-lines { margin-top: .45rem; display: grid; gap: .2rem; font-size: .8rem; color: var(--muted-foreground); }
+      .studio-price-lines .pl-row { display: flex; justify-content: space-between; gap: .75rem; }
+      .studio-add { width: 100%; margin-top: .95rem; padding: .85rem 1rem; border-radius: 10px; background: linear-gradient(180deg, #e8d5a4, #dcc288); color: #4c3d1c; font-size: .82rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; box-shadow: 0 8px 18px -8px oklch(0.45 0.09 75 / .55), inset 0 1px 0 rgba(255,255,255,.7); transition: filter .18s; }
+      .studio-add:hover { filter: brightness(1.05); }
+      .studio-added { margin-top: .8rem; border-radius: 10px; border: 1px solid color-mix(in oklab, var(--gold) 45%, transparent); background: color-mix(in oklab, var(--gold) 10%, rgba(255,255,255,.8)); padding: .7rem .85rem; font-size: .8rem; line-height: 1.55; }
+      .studio-added a { color: #7a5c1e; font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
+      .studio-est { margin-top: .6rem; font-size: .68rem; line-height: 1.55; color: var(--muted-foreground); }
+      .studio-alts { margin-top: 1.4rem; }
+      .studio-alts-head { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+      .studio-alts h2 { font-family: var(--font-sans); font-weight: 500; font-size: 1.05rem; }
+      .studio-alt-nav { display: inline-flex; gap: .5rem; }
+      .studio-alt-arrow { width: 2.4rem; height: 2.4rem; display: grid; place-items: center; border-radius: 999px; border: 1px solid color-mix(in oklab, var(--gold) 32%, transparent); background: color-mix(in oklab, var(--popover) 58%, transparent); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); box-shadow: 0 8px 24px oklch(0 0 0 / 5%); transition: border-color .2s, color .2s, opacity .25s; }
+      .studio-alt-arrow:hover { border-color: var(--gold); color: var(--gold); }
+      .studio-alt-arrow:disabled { opacity: .32; cursor: default; }
+      .studio-alt-rail { margin-top: .8rem; display: flex; gap: .9rem; overflow-x: auto; padding: .25rem .15rem .6rem; scrollbar-width: none; overscroll-behavior-x: contain; -webkit-overflow-scrolling: touch; cursor: grab; scroll-snap-type: x proximity; }
+      .studio-alt-rail::-webkit-scrollbar { display: none; }
+      .studio-alt-rail.dragging { cursor: grabbing; scroll-snap-type: none; }
+      /* R4 — a small card is the piece alone: its photo on the glass,
+         no price, no text on the card itself. */
+      .studio-alt { flex: 0 0 auto; width: 9.2rem; height: 9.2rem; scroll-snap-align: start; border-radius: 14px; border: 2px solid color-mix(in oklab, var(--gold) 22%, transparent); background: color-mix(in oklab, var(--popover) 42%, transparent); -webkit-backdrop-filter: blur(14px) saturate(115%); backdrop-filter: blur(14px) saturate(115%); box-shadow: 0 8px 24px oklch(0 0 0 / 5%); padding: .45rem; transition: border-color .18s; }
+      @media (min-width: 1024px) { .studio-alt { width: 10.6rem; height: 10.6rem; } }
+      .studio-alt:hover { border-color: color-mix(in oklab, var(--gold) 50%, transparent); }
+      .studio-alt.on { border-color: var(--gold); }
+      .studio-alt.focused { border-color: var(--gold); box-shadow: 0 10px 26px -10px oklch(0.45 0.09 75 / .45); }
+      .studio-alt img { width: 100%; height: 100%; object-fit: cover; border-radius: 10px; display: block; }
+      .studio-alt.bleed { padding: 0; overflow: hidden; }
+      .studio-alt.bleed img { border-radius: 12px; }
+      .studio-bar-line { display: none; }
+      @media (max-width: 1023px) {
+        .studio-bar-line { display: flex; justify-content: space-between; gap: .75rem; margin-top: .35rem; font-size: .72rem; color: var(--muted-foreground); }
+        .studio-bar-line .sbl-est { color: #7a5c1e; font-weight: 600; white-space: nowrap; }
+      }
+      /* R4 — the tapped card's details, beneath the rail */
+      .studio-alt-details { margin-top: .9rem; display: flex; flex-wrap: wrap; gap: 1rem 1.5rem; align-items: flex-start; }
+      .studio-alt-details .sad-main { flex: 1 1 16rem; min-width: 0; }
+      .studio-alt-details .sad-name { font-family: var(--font-display); font-size: 1.35rem; line-height: 1.2; }
+      .studio-alt-details .sad-price { margin-top: .25rem; font-size: 1rem; color: #7a5c1e; font-weight: 600; }
+      .studio-alt-details .sad-specs { margin-top: .6rem; display: grid; gap: .3rem; font-size: .8rem; }
+      .studio-alt-details .sad-spec { display: flex; gap: .6rem; }
+      .studio-alt-details .sad-spec dt { flex: 0 0 5.2rem; font-size: 9px; letter-spacing: .18em; text-transform: uppercase; color: var(--muted-foreground); padding-top: .22rem; }
+      .studio-alt-details .sad-spec dd { margin: 0; }
+      .studio-alt-details .sad-note { flex: 1 1 100%; font-size: .78rem; color: var(--gold); }
+      /* Bespoke step banner — the bench photograph at the top of the
+         flow changes with the step. Fixed-ratio frame (no layout
+         jump); the incoming photograph fades in gently on a step
+         change; reduced motion gets no fade. */
+      .bstep-banner { position: relative; margin-top: 1.75rem; border-radius: 14px; overflow: hidden; aspect-ratio: 16 / 10; background: #241a10; border: 1px solid color-mix(in oklab, var(--gold) 30%, transparent); box-shadow: 0 16px 36px -18px oklch(0.3 0.05 60 / .45); }
+      @media (min-width: 768px) { .bstep-banner { aspect-ratio: 16 / 6.2; } }
+      .bstep-banner img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; }
+      .bstep-banner img.on { opacity: 1; }
+      .bstep-banner img.swap { animation: bstepFade .6s ease both; }
+      @keyframes bstepFade { from { opacity: 0; } to { opacity: 1; } }
+      @media (prefers-reduced-motion: reduce) { .bstep-banner img.swap { animation: none; } }
+      .bstep-banner .bstep-cap { position: absolute; left: .8rem; bottom: .8rem; z-index: 2; padding: .38rem .7rem; border-radius: 999px; font-size: .68rem; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; color: #f5ecd9; background: rgba(30, 22, 10, .55); border: 1px solid rgba(245, 236, 217, .35); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); }
+      /* R1 — the custom-design chat, the last section on the page */
+      .studio-chat { margin-top: 2rem; scroll-margin-top: 6rem; }
+      @media (max-width: 1023px) { .studio-chat { margin-bottom: 6.5rem; } }
+      .studio-chat-log { margin-top: 1rem; display: flex; flex-direction: column; gap: .6rem; }
+      .studio-chat-log .m { max-width: 85%; border-radius: 12px; padding: .65rem .85rem; font-size: .85rem; line-height: 1.6; }
+      .studio-chat-log .m.d { align-self: flex-start; background: color-mix(in oklab, var(--popover) 62%, transparent); border: 1px solid color-mix(in oklab, var(--gold) 22%, transparent); }
+      .studio-chat-log .m.c { align-self: flex-end; background: color-mix(in oklab, var(--gold) 14%, transparent); border: 1px solid color-mix(in oklab, var(--gold) 32%, transparent); }
+      .studio-draft { margin-top: 1.1rem; display: flex; gap: .85rem; align-items: flex-start; border-top: 1px solid color-mix(in oklab, var(--gold) 25%, transparent); padding-top: 1.1rem; }
+      .studio-draft img { width: 3.6rem; height: 3.6rem; flex-shrink: 0; object-fit: cover; border-radius: 10px; border: 1px solid color-mix(in oklab, var(--gold) 35%, transparent); }
+      .studio-draft .sd-body { flex: 1; min-width: 0; display: grid; gap: .6rem; }
+      .studio-draft textarea { width: 100%; border: 1px solid var(--border); border-radius: 10px; padding: .7rem .85rem; font: inherit; font-size: .88rem; line-height: 1.55; background: color-mix(in oklab, var(--popover) 55%, transparent); color: var(--foreground); resize: vertical; }
+      .studio-draft textarea:focus { border-color: var(--gold); outline: none; }
+      .studio-draft .sd-label { font-size: 9px; letter-spacing: .22em; text-transform: uppercase; color: var(--gold); }
+      .studio-lightbox { position: fixed; inset: 0; z-index: 105; display: grid; place-items: center; padding: 1rem; background: rgba(30,24,12,.72); backdrop-filter: blur(6px); }
+      .studio-lightbox figure { margin: 0; width: min(44rem, 100%); max-height: calc(100dvh - 7rem); display: flex; flex-direction: column; gap: .75rem; }
+      .studio-lightbox img { width: 100%; max-height: calc(100dvh - 11rem); object-fit: contain; border-radius: 14px; background: #f7f1e5; }
+      .studio-lightbox figcaption { color: #f5ecd9; font-size: .85rem; line-height: 1.55; text-align: center; }
+      .studio-lightbox .sl-close { position: absolute; top: 1rem; right: 1rem; width: 2.6rem; height: 2.6rem; display: grid; place-items: center; border-radius: 999px; background: rgba(255,255,255,.92); color: #4c3d1c; }
+      .studio-lightbox .sl-nav { display: flex; justify-content: center; gap: .5rem; }
 
       /* Consultation */
       .day-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem; margin-top: 0.75rem; }
@@ -2305,7 +2489,12 @@ var PRODUCTS = [
         vipMember: false, ringProfile: null, liveRequests: []
       };
       function cartCount() { return S.cart.reduce(function (n, l) { return n + l.qty; }, 0); }
-      function cartTotal() { return S.cart.reduce(function (sum, l) { var p = findProduct(l.id); return sum + (p ? p.price * l.qty : 0); }, 0); }
+      /* A cart line's real price: custom-studio lines carry their own
+         estimated total (customPrice); ordinary lines use the piece's
+         listed price. Every total in the bag/checkout reads through
+         this one helper so a custom design prices correctly. */
+      function linePrice(l) { if (typeof l.customPrice === "number" && isFinite(l.customPrice)) return l.customPrice; var p = findProduct(l.id); return p ? p.price : 0; }
+      function cartTotal() { return S.cart.reduce(function (sum, l) { return sum + linePrice(l) * l.qty; }, 0); }
       function inCart(id) { return S.cart.some(function (l) { return l.id === id; }); }
       function isWished(id) { return S.wishlist.indexOf(id) >= 0; }
       function addToCart(id) {
@@ -2356,6 +2545,30 @@ var PRODUCTS = [
           if (b && BRAND_LOGOS[b.id]) logo = BRAND_LOGOS[b.id];
         }
         return '<span class="connect-house-avatar">' + (logo ? '<img src="' + logo + '" alt="' + esc(v.name) + ' logo" loading="lazy" />' : brandMarkHtml(v, "md")) + "</span>";
+      }
+      /* Chat image — the conversation's own picture, large enough to
+         actually see (owner direction: the chat must show an image,
+         not initials alone). The photo is the piece the thread is
+         about — every seeded atelier thread names its piece — with
+         the Elevate crown as a corner badge so the logo shows on
+         every row. A thread with no piece falls back to the
+         identity's own real logo file when one exists, and to the
+         Elevate crown image itself — never to another house's mark. */
+      function connectThreadImgHtml(t, v, size) {
+        var piece = t && t.productId ? findProduct(t.productId) : null;
+        var cls = "connect-chat-img" + (size === "lg" ? " lg" : "");
+        if (piece) {
+          return '<span class="' + cls + '"><img class="photo" src="' + piece.image + '" alt="' + esc(piece.name) + '" loading="lazy" /><span class="cci-badge"><img src="assets/crown.png" alt="" /></span></span>';
+        }
+        var logo = HOUSE_LOGOS[v.slug];
+        if (!logo) { var b = findBrand(v.slug, v.name); if (b && BRAND_LOGOS[b.id]) logo = BRAND_LOGOS[b.id]; }
+        return '<span class="' + cls + '"><img class="logo" src="' + (logo || "assets/crown.png") + '" alt="' + esc(v.name) + ' logo" loading="lazy" /></span>';
+      }
+      /* Top-of-section image for Messages — the Elevate crown logo,
+         large, over the atelier photograph: the first thing seen at
+         the top of the chat section. */
+      function connectTopBannerHtml() {
+        return '<div class="connect-top-banner"><img class="photo" src="assets/atelier.jpg" alt="" loading="lazy" /><span class="ctb-shade"></span><div class="ctb-inner"><img class="ctb-logo" src="assets/crown.png" alt="Elevate Jewels crown logo" /><p class="ctb-word">Elevate Connect</p></div></div>';
       }
       function brandLogoHTML(name, md) {
         return '<span class="brand-logo-box ' + (md ? "md" : "") + '"><span>' + esc(name) + "</span></span>";
@@ -3104,7 +3317,7 @@ var PRODUCTS = [
           var unread = teamUnreadCount();
           var dests = [
             { href: "#/", label: "Home", ic: "home", active: page === "home" },
-            { href: "#/shop", label: "Shop", ic: "diamond", active: page === "shop" || page === "category" || page === "item" },
+            { href: "#/shop", label: "Shop", ic: "diamond", active: page === "shop" || page === "category" || page === "item" || page === "studio" },
             { href: "#/connect?tab=ateliers", label: "Messages", ic: "msgCircle", active: page === "connect" },
             { href: "#/cart", label: "Bag", ic: "bag", active: page === "cart" || page === "checkout" }
           ];
@@ -3187,7 +3400,7 @@ var PRODUCTS = [
           if (root.innerHTML) { root.innerHTML = ""; return; }
           document.getElementById("acctPopRoot").innerHTML = "";
           var routes = [
-            ["Commission Bespoke", "#/bespoke"], ["Customize", "#/bespoke"], ["Book Appointment", "#/consultation"],
+            ["Commission Bespoke", "#/bespoke"], ["Customize", "#/studio"], ["Book Appointment", "#/consultation"],
             ["View Collections", "#/shop"], ["Heritage", "#/heritage"], ["Connect", "#/connect"],
             ["Your Portal", "#/portal"], ["Track an item or repair", "#/check"]
           ];
@@ -3199,6 +3412,7 @@ var PRODUCTS = [
             + '<a href="#/cart" onclick="EJ.closeOverlays()">' + icon("bag", 16) + "Shopping bag (" + cartCount() + ")</a>"
             + '<div class="sep"></div>'
             + '<a href="#/house" onclick="EJ.closeOverlays()">' + icon("boxes", 16) + "Store House</a>"
+            + '<a href="#/backend" onclick="EJ.closeOverlays()">' + icon("building", 16) + "Back End — Sales View</a>"
             + '<button type="button" class="mi" onclick="EJ.openVip()">' + icon("sparkles", 16) + "VIP Vault</button>"
             + '<button type="button" class="mi" onclick="EJ.openPrivate()">Private World ' + '<span style="margin-left:auto">' + icon("arrowUpRight", 16) + "</span></button>"
             + "</div>";
@@ -3625,7 +3839,7 @@ var PRODUCTS = [
         /* Scan banner */
         h += EJ._scanBannerHtml();
         /* Lab-grown card */
-        h += '<section class="wrap" style="padding-bottom:1.5rem"><a href="#/shop?origin=lab" class="lab-card" style="display:grid;overflow:hidden;border-radius:0.375rem;border:1px solid var(--border);background:var(--card)">'
+        h += '<section class="wrap" style="padding-top:2rem;padding-bottom:1.5rem"><a href="#/shop?origin=lab" class="lab-card" style="display:grid;overflow:hidden;border-radius:0.375rem;border:1px solid var(--border);background:var(--card)">'
           + '<div style="aspect-ratio:16/9;overflow:hidden" class="lab-img"><img src="' + IMAGES.emeraldRing + '" alt="Lab-grown diamond jewelry" loading="lazy" width="1200" height="675" style="width:100%;height:100%;object-fit:cover" /></div>'
           + '<div style="display:flex;flex-direction:column;justify-content:center;gap:1rem;padding:2rem"><p class="eyebrow">Lab-grown diamonds</p><h2 style="font-size:1.875rem;line-height:1.15">The same brilliance, a lighter price</h2><p style="font-size:0.875rem;line-height:1.65;color:var(--muted-foreground)">Same design and craftsmanship, with a laboratory-grown stone. Every piece shows its exact saving.</p><span style="display:inline-flex;align-items:center;gap:0.5rem;font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold)">Shop lab-grown ' + icon("arrowRight", 14) + "</span></div></a>"
           + "<style>@media(min-width:768px){.lab-card{grid-template-columns:1fr 1fr}.lab-card .lab-img{aspect-ratio:auto}}</style></section>";
@@ -3912,7 +4126,7 @@ var PRODUCTS = [
 
       /* The single scan button under the header (home page top). */
       EJ._qrStripHtml = function () {
-        return '<div class="wrap" style="padding-top:1rem"><div class="qr-strip">'
+        return '<div class="wrap" style="padding-top:1rem;padding-bottom:1rem"><div class="qr-strip">'
           + '<span class="qr-ico">' + icon("scan", 20) + "</span>"
           + '<p><strong>Have your piece&rsquo;s QR code?</strong> <span>Scan the tag, gift card or receipt to see its status — or type the code.</span></p>'
           + '<button type="button" class="btn-gold" onclick="EJ.qrScanCustomer()">' + icon("camera", 15) + "Scan QR code</button>"
@@ -3995,7 +4209,7 @@ var PRODUCTS = [
           + '<text x="34" y="262" fill="#cfe3ff" stroke="none" font-size="10.5" letter-spacing="1.5">DRAWN FOR YOU — No. 001</text>'
           + '<text x="34" y="282" fill="#cfe3ff" stroke="none" font-size="10.5" letter-spacing="1.5">OOO LLC · CUSTOM STUDIO</text>'
           + "</svg>";
-        return '<section class="wrap" style="padding-top:3.5rem" aria-labelledby="ooo-custom-title"><div class="bp-panel">'
+        return '<section class="wrap" style="padding-top:3.5rem;padding-bottom:2rem" aria-labelledby="ooo-custom-title"><div class="bp-panel">'
           + '<div class="bp-art">' + art + "</div>"
           + '<div class="bp-copy">'
           + '<img src="assets/brand-ooo.png" alt="OOO LLC — the LLG mark" class="bp-logo" width="722" height="310" loading="lazy" />'
@@ -4007,7 +4221,7 @@ var PRODUCTS = [
           + '<div class="bp-step"><p>Step 2 · The blueprint</p><p>Your piece is drawn to measure, like the sketch beside this — you approve the drawing first.</p></div>'
           + '<div class="bp-step"><p>Step 3 · The bench</p><p>OOO&rsquo;s jewelers make it by hand, and it arrives with its certificate and its own code.</p></div>'
           + "</div>"
-          + '<div style="display:flex;flex-wrap:wrap;gap:0.75rem"><a class="btn-gold" href="#/bespoke">Start your custom piece ' + icon("arrowRight", 14) + '</a><a class="bp-btn-light" href="#/our-world">Meet OOO in Our World</a></div>'
+          + '<div style="display:flex;flex-wrap:wrap;gap:0.75rem"><a class="btn-gold" href="#/studio">Start your custom piece ' + icon("arrowRight", 14) + '</a><a class="bp-btn-light" href="#/our-world">Meet OOO in Our World</a></div>'
           + '<p class="bp-note">This is OOO&rsquo;s own design desk — separate from the Custom Jewels rail below and from general commissions. If it is drawn here, it is an OOO piece.</p>'
           + "</div></div></section>";
       };
@@ -4109,7 +4323,7 @@ var PRODUCTS = [
           + '<p class="cj-live-badge">✦ In motion — colours from the pieces themselves</p>'
           + '<div style="display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:1.5rem">'
           + '<div class="sec-head" style="max-width:42rem"><p class="eyebrow">Custom Jewels</p><h2 id="cj-title">Begin with a piece you love</h2><div class="gold-rule rule"></div><p class="copy">Step into colour — bench pieces alive with gold, rose and stone, ready to be commissioned as your own custom jewel — your metal, your stone, your engraving.</p></div>'
-          + '<div style="display:flex;align-items:center;gap:0.9rem;flex-wrap:wrap"><button type="button" class="cj-motion-btn" data-cj-motion aria-pressed="false" onclick="EJ.cjToggleMotion(this)">Pause motion</button><a class="btn-ghost" style="padding:0.6rem 1.1rem" href="#/bespoke">Start customizing ' + icon("arrowUpRight", 14) + '</a><span class="cj-nav"><button type="button" class="cj-arrow" data-cj-prev aria-label="Slide to the previous pieces" onclick="EJ.cjScroll(this,-1)">' + icon("chevL", 18) + '</button><button type="button" class="cj-arrow" data-cj-next aria-label="Slide to the next pieces" onclick="EJ.cjScroll(this,1)">' + icon("chevR", 18) + "</button></span></div></div>"
+          + '<div style="display:flex;align-items:center;gap:0.9rem;flex-wrap:wrap"><button type="button" class="cj-motion-btn" data-cj-motion aria-pressed="false" onclick="EJ.cjToggleMotion(this)">Pause motion</button><a class="btn-ghost" style="padding:0.6rem 1.1rem" href="#/studio">Start customizing ' + icon("arrowUpRight", 14) + '</a><span class="cj-nav"><button type="button" class="cj-arrow" data-cj-prev aria-label="Slide to the previous pieces" onclick="EJ.cjScroll(this,-1)">' + icon("chevL", 18) + '</button><button type="button" class="cj-arrow" data-cj-next aria-label="Slide to the next pieces" onclick="EJ.cjScroll(this,1)">' + icon("chevR", 18) + "</button></span></div></div>"
           + '<p class="cj-hint">Tap a name to read its details — tap the photo to open the piece.</p>'
           + '<div class="cj-rail" id="cjRail" aria-label="Custom jewels — slide sideways through the pieces">' + pieces.map(card).join("") + "</div>"
           + "</div></section>";
@@ -4317,12 +4531,12 @@ var PRODUCTS = [
         return h;
       }
       EJ._bespokeLink = function (p) {
-        var cat = findCategory(p.category) || { name: p.category };
-        var subName = subcategoryName(p.category, p.subcategory);
-        var cm = p.carat && p.carat.match(/\d+(\.\d+)?/);
-        var params = "type=" + encodeURIComponent(subName || cat.name) + "&metal=" + encodeURIComponent(p.metal) + "&stone=" + encodeURIComponent(p.stone) + "&from=" + encodeURIComponent(p.name);
-        if (cm) params += "&carat=" + encodeURIComponent(cm[0]);
-        return "#/bespoke?" + params;
+        /* "Customize" everywhere — the Custom Jewels rail and the
+           piece pages — opens the Elevate Custom Studio with this
+           piece loaded as the design being customized. The classic
+           bespoke wizard stays at #/bespoke for full commissions
+           and repairs. */
+        return "#/studio?piece=" + encodeURIComponent(p.id);
       };
       EJ.gallerySet = function (i) {
         var gallery = EJ._gallery;
@@ -4745,6 +4959,32 @@ var PRODUCTS = [
           + '<p style="margin-top:0.75rem;max-width:42rem;font-size:0.9375rem;line-height:1.7;color:var(--muted-foreground)">' + (repair
             ? "Tell us what your piece needs — resizing, re-tipping, stone replacement or a full restoration."
             : "Work through the five steps at your own pace, talk to the designer as you go, and leave with a priced specification the bench can build from.") + "</p>";
+        /* Step banner — the photograph at the top of the flow follows
+           the step. Step 1 (Inspiration) carries its OWN different
+           image — the inspiration board with reference photos,
+           sketches and loose stones under the crown plaque — not the
+           bench scene (owner direction); steps 2–3 keep the owner's
+           bench images; steps 4–5 keep the atelier frame the bespoke
+           film opens with. All five layers render (preloaded); the
+           active one fades in on a step change. */
+        if (!repair) {
+          var stepImgs = ["assets/bespoke-step-inspiration-board.jpg", "assets/bespoke-step-metal.jpg", "assets/bespoke-step-stone.jpg", "assets/atelier.jpg", "assets/atelier.jpg"];
+          var stepAlts = [
+            "The inspiration board for a new commission — pinned reference photos of rings, hand sketches and loose diamonds beneath the Elevate crown plaque",
+            "A finished gold band on the block, with gold bars and metal on the bench",
+            "A black tray of loose diamonds in many shapes on the bench",
+            "The atelier bench under the lamp",
+            "The atelier bench under the lamp"
+          ];
+          var imgChanged = EJ._bImgStep !== b.step;
+          EJ._bImgStep = b.step;
+          h += '<div class="bstep-banner" role="img" aria-label="' + esc(stepAlts[b.step]) + '">'
+            + stepImgs.map(function (src, i) {
+              var active = i === b.step;
+              return '<img src="' + src + '" alt="" aria-hidden="' + !active + '" class="' + (active ? "on" + (imgChanged ? " swap" : "") : "") + '"' + (active ? ' fetchpriority="high"' : ' loading="lazy"') + " />";
+            }).join("")
+            + '<span class="bstep-cap">Step ' + (b.step + 1) + " · " + esc(B_STEPS[b.step]) + "</span></div>";
+        }
         /* Step nav */
         h += '<nav aria-label="Bespoke steps" style="margin-top:2rem;display:flex;flex-wrap:wrap;gap:0.5rem">' + B_STEPS.map(function (s, i) {
           return '<button type="button" aria-current="' + (b.step === i) + '" class="step-chip' + (b.step === i ? " active" : "") + '" onclick="EJ.bStep(' + i + ')">' + (i + 1) + ". " + s + "</button>";
@@ -4910,6 +5150,609 @@ var PRODUCTS = [
         EJ.route(true);
       };
 
+      /* ---------- Elevate Custom Studio ----------
+         The design studio the owner asked the Custom Jewels section
+         to open: Design Controls (left) · the piece (centre) ·
+         Gemstone sliders + Dynamic Pricing (right) · Alternative
+         Designs (bottom). Every photograph is the design's real
+         catalogue imagery — changing an option never swaps in an
+         invented render; the centre caption states the chosen
+         options instead. Pricing runs through the site's existing
+         bespoke logic (bespokeCalc: metal rate × grams, stone rate
+         × carat, setting, workshop hours) with quality factors for
+         cut / colour / clarity, a chain cost, and a base design fee
+         anchored to the chosen piece's listed price — and it is
+         labelled an estimate, exactly as the reference's asterisks
+         do. */
+      var ST_METALS = [
+        { name: "18K Yellow Gold", key: "yellow", karat: "18k", adj: 0, bg: "linear-gradient(180deg,#eedcae,#e2cb92)" },
+        { name: "Rose Gold", key: "rose", karat: "18k", adj: -1, bg: "linear-gradient(180deg,#f2ccbc,#e5b29e)" },
+        { name: "Platinum 950", key: "platinum", karat: "950", adj: 0, bg: "linear-gradient(180deg,#e2e6ec,#c6ccd5)" },
+        { name: "White Gold", key: "white", karat: "18k", adj: 6, bg: "linear-gradient(180deg,#f2f2ef,#dededa)" },
+        { name: "22K Champagne Gold", key: "champagne", karat: "22k", adj: 0, bg: "linear-gradient(180deg,#f2e0ac,#e0c07c)" },
+        { name: "Two-Tone Gold", key: "two", karat: "18k", adj: 4, bg: "linear-gradient(90deg,#ecd9a8 0 50%,#e8e8e3 50% 100%)" }
+      ];
+      /* Per-carat shape pricing: round brilliants carry the premium;
+         fancy shapes trade a little below them per carat — the trade's
+         usual relationship, applied to the stone line. Metal "adj" is
+         a per-gram alloy adjustment on top of bespokeCalc's karat
+         rates (palladium-alloyed white gold costs more per gram;
+         copper-alloyed rose a touch less; two-tone carries the second
+         alloy's bench work). */
+      var ST_SHAPE_F = { Round: 1, Cushion: 0.94, Oval: 0.96, Emerald: 0.92, Pear: 0.95, Princess: 0.93, Radiant: 0.94, Asscher: 0.92, Heart: 0.97, Marquise: 0.96 };
+      var ST_CHAINS = [
+        { name: "Cable Chain", cost: 0 },
+        { name: "Rope Chain", cost: 180 },
+        { name: "Figaro Chain", cost: 150 },
+        { name: "Box Chain", cost: 120 },
+        { name: "Singapore Chain", cost: 95 },
+        { name: "Curb Chain", cost: 165 },
+        { name: "No chain — piece only", cost: 0 }
+      ];
+      var ST_SHAPES = ["Round", "Cushion", "Oval", "Emerald", "Pear", "Princess", "Radiant", "Asscher", "Heart", "Marquise"];
+      var ST_CUTS = [
+        { label: "Fair", f: 0.84 }, { label: "Good", f: 0.92 }, { label: "Very Good", f: 1 },
+        { label: "Excellent", f: 1.12 }, { label: "Ideal", f: 1.24 }
+      ];
+      var ST_COLORS = [
+        { label: "J", f: 0.82 }, { label: "I", f: 0.88 }, { label: "H", f: 0.94 }, { label: "G", f: 1 },
+        { label: "F", f: 1.08 }, { label: "E", f: 1.16 }, { label: "D", f: 1.25 }
+      ];
+      var ST_CLARITIES = [
+        { label: "SI2", pct: 62, f: 0.80 }, { label: "SI1", pct: 68, f: 0.87 },
+        { label: "VS2", pct: 76, f: 0.94 }, { label: "VS1", pct: 82, f: 1 },
+        { label: "VVS2", pct: 88, f: 1.10 }, { label: "VVS1", pct: 93, f: 1.18 },
+        { label: "Internally Flawless", pct: 97, f: 1.28 }, { label: "Flawless", pct: 100, f: 1.38 }
+      ];
+      var ST_ALT_IDS = ["st-lariat", "st-ring", "st-bangle", "st-pendant", "vx-oval-pendant", "vx-solitaire-aurore", "ok-drop-ivo", "ok-tennis-linea", "vx-eternity-lumiere", "sf-muzo-emerald"];
+      /* Studio designs supplied by the owner (photographs in
+         assets/). They are DESIGNS, not catalogue pieces: no retail
+         price, house or specs are invented for them. Their studio
+         pricing flows through the same labelled estimate logic,
+         anchored on ST_DESIGN_BASE below — the single place to tune
+         each design's base estimate. The lariat carries REAL metal
+         variants: the metal named in `variants` swaps the centre
+         photograph to the owner's photo of that metal. */
+      var ST_DESIGN_BASE = { "st-lariat": 2600, "st-ring": 1900, "st-bangle": 2200, "st-pendant": 1600 };
+      var ST_DESIGNS = [
+        {
+          id: "st-lariat", studio: true, name: "Diamond Lariat Necklace", category: "necklaces",
+          image: "assets/studio-lariat-twotone.jpg",
+          gallery: ["assets/studio-lariat-twotone.jpg", "assets/studio-lariat-yellow.jpg"],
+          variants: { "Two-Tone Gold": "assets/studio-lariat-twotone.jpg", "Rose Gold": "assets/studio-lariat-twotone.jpg", "18K Yellow Gold": "assets/studio-lariat-yellow.jpg" },
+          defaultMetal: "Two-Tone Gold", defaultShape: "Round"
+        },
+        {
+          id: "st-ring", studio: true, name: "Five-Stone Diamond Ring", category: "rings",
+          image: "assets/studio-ring-fivestone.jpg", gallery: ["assets/studio-ring-fivestone.jpg"],
+          defaultMetal: "White Gold", defaultShape: "Round"
+        },
+        {
+          id: "st-bangle", studio: true, name: "Mixed-Shape Diamond Bangle", category: "bracelets",
+          image: "assets/studio-bangle-mixed.jpg", gallery: ["assets/studio-bangle-mixed.jpg"],
+          defaultMetal: "White Gold", defaultShape: "Pear"
+        },
+        {
+          id: "st-pendant", studio: true, name: "Oval Solitaire Pendant", category: "necklaces",
+          image: "assets/studio-pendant-oval.jpg", gallery: ["assets/studio-pendant-oval.jpg"],
+          defaultMetal: "18K Yellow Gold", defaultShape: "Oval"
+        }
+      ];
+      function studioDesignById(id) { return ST_DESIGNS.find(function (d) { return d.id === id; }) || null; }
+      function studioAnyById(id) { return studioDesignById(id) || findProduct(id); }
+      function studioGalleryOf(st) {
+        var any = studioAnyById(st.productId);
+        if (!any) return [];
+        if (any.studio) return any.gallery.slice();
+        return Array.from(new Set([any.image].concat(any.gallery || [])));
+      }
+      function studioCurrentImage(st) {
+        var g = studioGalleryOf(st);
+        if (!g.length) return "";
+        var i = Math.min(st.galleryIdx || 0, g.length - 1);
+        return g[i];
+      }
+      var ST_GRAMS = { necklaces: 5.2, rings: 4.2, earrings: 3.4, bracelets: 7.5, cufflinks: 3.0, brooches: 4.6, baby: 2.2, timepieces: 6.0 };
+      function studioShapeLabel(shape) { return shape === "Round" ? "Brilliant" : shape; }
+      function studioShapeIcon(shape) {
+        var paths = {
+          Round: '<circle cx="12" cy="12" r="7.2"/><path d="M4.8 12h14.4M12 4.8v14.4M7 7l10 10M17 7L7 17"/>',
+          Cushion: '<rect x="5" y="5" width="14" height="14" rx="4"/><rect x="8.6" y="8.6" width="6.8" height="6.8" rx="2"/>',
+          Oval: '<ellipse cx="12" cy="12" rx="6" ry="8.6"/><ellipse cx="12" cy="12" rx="2.8" ry="4.4"/>',
+          Emerald: '<rect x="6.4" y="4.6" width="11.2" height="14.8"/><rect x="9.2" y="7.4" width="5.6" height="9.2"/>',
+          Pear: '<path d="M12 3.2c2.8 4.4 6.8 8.3 6.8 12a6.8 6.8 0 1 1-13.6 0c0-3.7 4-7.6 6.8-12Z"/><circle cx="12" cy="15.4" r="2.6"/>',
+          Princess: '<rect x="5.4" y="5.4" width="13.2" height="13.2"/><path d="M5.4 5.4l13.2 13.2M18.6 5.4L5.4 18.6"/>',
+          Radiant: '<path d="M8 4.6h8l3.4 3.4v8L16 19.4H8L4.6 16V8Z"/><rect x="8.8" y="8.8" width="6.4" height="6.4"/>',
+          Asscher: '<path d="M8 4.6h8l3.4 3.4v8L16 19.4H8L4.6 16V8Z"/><path d="M8.6 8.6h6.8v6.8H8.6z"/>',
+          Heart: '<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>',
+          Marquise: '<path d="M12 3c3.8 4.6 3.8 13.4 0 18-3.8-4.6-3.8-13.4 0-18Z"/><path d="M12 7.4c1.8 2.8 1.8 6.4 0 9.2-1.8-2.8-1.8-6.4 0-9.2Z"/>'
+        };
+        return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (paths[shape] || paths.Round) + "</svg>";
+      }
+      function studioParseMetal(p) {
+        var m = (p.metal || "").toLowerCase();
+        if (m.indexOf("platinum") >= 0) return "Platinum 950";
+        if (m.indexOf("rose") >= 0) return "Rose Gold";
+        if (m.indexOf("white") >= 0) return "White Gold";
+        if (m.indexOf("champagne") >= 0) return "22K Champagne Gold";
+        if (m.indexOf("two") >= 0) return "Two-Tone Gold";
+        return "18K Yellow Gold";
+      }
+      function studioParseShape(p) {
+        var t = (p.name + " " + p.stone).toLowerCase();
+        if (t.indexOf("cushion") >= 0) return "Cushion";
+        if (t.indexOf("oval") >= 0) return "Oval";
+        if (t.indexOf("emerald-cut") >= 0 || t.indexOf("emerald cut") >= 0) return "Emerald";
+        if (t.indexOf("pear-cut") >= 0 || t.indexOf("pear cut") >= 0) return "Pear";
+        if (t.indexOf("princess") >= 0) return "Princess";
+        if (t.indexOf("radiant") >= 0) return "Radiant";
+        if (t.indexOf("asscher") >= 0) return "Asscher";
+        if (t.indexOf("heart") >= 0) return "Heart";
+        if (t.indexOf("marquise") >= 0) return "Marquise";
+        return "Round";
+      }
+      function studioParseCarat(p) {
+        var m = (p.carat || "").match(/\d+(\.\d+)?/);
+        if (!m) return null;
+        var v = parseFloat(m[0]);
+        return isNaN(v) ? null : Math.min(4, Math.max(0.3, v));
+      }
+      function studioStateFor(p, keepQuality) {
+        var prev = EJ._studio;
+        var st = {
+          productId: p.id,
+          metal: studioParseMetal(p),
+          chain: p.category === "necklaces" ? "Cable Chain" : "No chain — piece only",
+          shape: studioParseShape(p),
+          carat: studioParseCarat(p) || (keepQuality && prev ? prev.carat : 1.8),
+          cutIdx: 3, colorIdx: 6, clarityIdx: 7,
+          galleryIdx: 0, showMore: false, addedSummary: null,
+          gemOpen: false, altFocus: null, chat: [], draftTouched: false, draftText: null
+        };
+        var ct = (p.carat || "");
+        var cm = ct.match(/\b([DEFGHIJ])\s*(colour|color)/i);
+        if (cm) { var ci = ST_COLORS.findIndex(function (c) { return c.label === cm[1].toUpperCase(); }); if (ci >= 0) st.colorIdx = ci; }
+        var cu = ct.toUpperCase();
+        var clMap = [["FLAWLESS", 7], ["VVS1", 5], ["VVS2", 4], ["VS1", 3], ["VS2", 2], ["SI1", 1], ["SI2", 0]];
+        for (var i = 0; i < clMap.length; i++) { if (cu.indexOf(clMap[i][0]) >= 0) { st.clarityIdx = clMap[i][1]; break; } }
+        if (keepQuality && prev) { st.cutIdx = prev.cutIdx; st.colorIdx = prev.colorIdx; st.clarityIdx = prev.clarityIdx; }
+        /* R1 — the baseline is how the design arrived; the chat
+           draft below the studio is generated from what the visitor
+           changes against it. The chat itself carries over when the
+           design is switched from Alternative Designs. */
+        st.baseline = { metal: st.metal, chain: st.chain, shape: st.shape, carat: st.carat, cutIdx: st.cutIdx, colorIdx: st.colorIdx, clarityIdx: st.clarityIdx };
+        if (keepQuality && prev && prev.chat) st.chat = prev.chat;
+        return st;
+      }
+      function studioStateForDesign(d, keepQuality) {
+        var prev = EJ._studio;
+        var st = {
+          productId: d.id,
+          metal: d.defaultMetal || "18K Yellow Gold",
+          chain: d.category === "necklaces" ? "Cable Chain" : "No chain — piece only",
+          shape: d.defaultShape || "Round",
+          carat: keepQuality && prev ? prev.carat : 1.8,
+          cutIdx: 3, colorIdx: 6, clarityIdx: 7,
+          galleryIdx: 0, showMore: false, addedSummary: null,
+          gemOpen: false, altFocus: null, chat: [], draftTouched: false, draftText: null
+        };
+        if (keepQuality && prev) { st.cutIdx = prev.cutIdx; st.colorIdx = prev.colorIdx; st.clarityIdx = prev.clarityIdx; }
+        st.baseline = { metal: st.metal, chain: st.chain, shape: st.shape, carat: st.carat, cutIdx: st.cutIdx, colorIdx: st.colorIdx, clarityIdx: st.clarityIdx };
+        if (keepQuality && prev && prev.chat) st.chat = prev.chat;
+        return st;
+      }
+      function studioDraftText(st) {
+        var p = studioAnyById(st.productId) || PRODUCTS[0];
+        var b = st.baseline || {};
+        var calc = studioCalc(st);
+        var metalCh = st.metal !== b.metal, chainCh = st.chain !== b.chain, shapeCh = st.shape !== b.shape;
+        var caratCh = Math.abs(st.carat - (b.carat || st.carat)) > 0.001;
+        var cutCh = st.cutIdx !== b.cutIdx, colorCh = st.colorIdx !== b.colorIdx, clarityCh = st.clarityIdx !== b.clarityIdx;
+        var gemCh = caratCh || cutCh || colorCh || clarityCh;
+        if (!metalCh && !chainCh && !shapeCh && !gemCh) {
+          return "I love this design as it is — the " + p.name + " in " + st.metal + ", " + st.carat.toFixed(2) + " ct. Please make mine just like this.";
+        }
+        var parts = [];
+        if (metalCh) parts.push(st.metal);
+        if (chainCh) parts.push(st.chain);
+        if (shapeCh) parts.push(studioShapeLabel(st.shape) + " cut");
+        if (caratCh) parts.push(st.carat.toFixed(2) + " ct");
+        if (cutCh) parts.push(calc.cut.label + " cut");
+        if (colorCh) parts.push(calc.color.label + " colour");
+        if (clarityCh) parts.push(calc.clarity.label + " clarity");
+        if ((metalCh || gemCh) && !caratCh) parts.splice(metalCh ? 1 : 0, 0, st.carat.toFixed(2) + " ct");
+        if ((metalCh || gemCh) && !cutCh) parts.push(calc.cut.label + " cut");
+        return "I want to change this piece to " + parts.join(", ") + ".";
+      }
+      function studioCalc(st) {
+        var anyP = studioAnyById(st.productId) || PRODUCTS[0];
+        /* Studio designs price off their base-estimate anchor
+           (ST_DESIGN_BASE); catalogue pieces off their listed price. */
+        var p = anyP.studio ? { id: anyP.id, name: anyP.name, category: anyP.category, price: ST_DESIGN_BASE[anyP.id] || 1500, studio: true } : anyP;
+        var metal = ST_METALS.find(function (m) { return m.name === st.metal; }) || ST_METALS[0];
+        var grams = ST_GRAMS[p.category] || 4.2;
+        var bc = bespokeCalc({
+          karat: metal.karat, materialKey: metal.key, grams: grams,
+          stoneType: "Natural Diamond", priceNatural: 2600, priceLab: 1350,
+          carat: st.carat, setting: "Prong", hours: 12
+        });
+        var cut = ST_CUTS[st.cutIdx] || ST_CUTS[3];
+        var color = ST_COLORS[st.colorIdx] || ST_COLORS[6];
+        var clarity = ST_CLARITIES[st.clarityIdx] || ST_CLARITIES[7];
+        var shapeF = ST_SHAPE_F[st.shape] || 1;
+        var stoneCost = Math.round(bc.stoneCost * cut.f * color.f * clarity.f * shapeF);
+        var metalCost = Math.round(bc.metalCost + (metal.adj || 0) * grams);
+        var chain = ST_CHAINS.find(function (c) { return c.name === st.chain; }) || ST_CHAINS[0];
+        var baseDesign = Math.round(p.price * 0.2);
+        var total = baseDesign + metalCost + stoneCost + bc.settingCost + bc.workshopCost + chain.cost;
+        return {
+          product: p, metal: metal, grams: grams, baseDesign: baseDesign,
+          metalCost: metalCost, stoneBase: bc.stoneCost, stoneCost: stoneCost,
+          settingCost: bc.settingCost, workshopCost: bc.workshopCost,
+          chain: chain, chainCost: chain.cost, total: total,
+          cut: cut, color: color, clarity: clarity
+        };
+      }
+      function studioCaratLine(st) {
+        var c = studioCalc(st);
+        return "Carat: " + st.carat.toFixed(2) + " ct · " + studioShapeLabel(st.shape) + " · " + c.cut.label + " · " + c.color.label + " · " + c.clarity.label;
+      }
+      function studioSummaryLine(st) {
+        var calc = studioCalc(st);
+        return st.metal + " · " + st.chain + " · " + studioShapeLabel(st.shape) + " cut · " + st.carat.toFixed(2) + " ct · " + calc.cut.label + " cut · " + calc.color.label + " colour · " + calc.clarity.label;
+      }
+      function studioSummary(st) {
+        var calc = studioCalc(st);
+        return "Custom design — " + calc.product.name + " in " + st.metal + ", " + st.chain.toLowerCase() + ", " + studioShapeLabel(st.shape) + "-cut stone at " + st.carat.toFixed(2) + " ct, " + calc.cut.label + " cut, " + calc.color.label + " colour, " + calc.clarity.label + " clarity. Estimated total *" + fmt2(calc.total) + " (*estimated — the bench confirms the final price).";
+      }
+      function studioPriceLinesHtml(st) {
+        var c = studioCalc(st);
+        function row(label, val) { return '<div class="pl-row"><span>' + label + '</span><span>' + val + "</span></div>"; }
+        return row("Base design · " + esc(c.product.name), fmt2(c.baseDesign))
+          + row("Metal · " + esc(st.metal) + " " + c.grams.toFixed(1) + " g", fmt2(c.metalCost))
+          + row("Setting &amp; bench · Prong, 12 h", fmt2(c.settingCost + c.workshopCost))
+          + (c.chainCost ? row("Chain · " + esc(st.chain), fmt2(c.chainCost)) : "")
+          + row("Carat: " + st.carat.toFixed(2) + " ct · " + studioShapeLabel(st.shape) + " · " + c.cut.label + " · " + c.color.label + " · " + esc(c.clarity.label), "*" + fmt2(c.stoneCost))
+          + '<div class="pl-row" style="border-top:1px solid var(--border);padding-top:.35rem;margin-top:.15rem;font-weight:600;color:var(--foreground)"><span>Total total:</span><span>*' + fmt2(c.total) + "</span></div>";
+      }
+      function studioGemSummaryText(st) {
+        var calc = studioCalc(st);
+        return st.carat.toFixed(2) + " ct · " + calc.cut.label + " · " + calc.color.label + " · " + calc.clarity.label;
+      }
+      function studioAltDetailsHtml(st) {
+        var id = st.altFocus;
+        if (!id) return "";
+        var any = studioAnyById(id);
+        if (!any) return "";
+        var rows = "";
+        function spec(k, val) { return '<div class="sad-spec"><dt>' + k + "</dt><dd>" + esc(val) + "</dd></div>"; }
+        var priceHtml = "", noteHtml = "";
+        if (any.studio) {
+          /* Owner-supplied studio design: only what is true — the
+             name and the visitor's chosen options. No retail price. */
+          rows = spec("Your metal", st.metal)
+            + spec("Stone", studioShapeLabel(st.shape) + " cut · " + st.carat.toFixed(2) + " ct")
+            + spec("Quality", studioGemSummaryText(st).split("· ").slice(1).join(" · "));
+          noteHtml = '<p class="sad-note">A studio design — its price is the live estimate in Dynamic Pricing once loaded; the bench confirms the final figure.</p>';
+        } else {
+          priceHtml = '<p class="sad-price">' + fmt(any.price) + "</p>";
+          rows = (any.metal && any.metal !== "—" ? spec("Metal", any.metal) : "")
+            + (any.stone && any.stone !== "—" ? spec("Stone", any.stone) : "")
+            + (any.carat && any.carat !== "—" ? spec("Carat", any.carat) : "")
+            + (any.certification && any.certification !== "—" ? spec("Certification", any.certification) : "");
+        }
+        return '<div class="studio-alt-details" role="region" aria-label="Details — ' + esc(any.name) + '">'
+          + '<img src="' + any.image + '" alt="" width="200" height="200" style="width:5.5rem;height:5.5rem;object-fit:cover;border-radius:12px;border:1px solid color-mix(in oklab, var(--gold) 30%, transparent)" />'
+          + '<div class="sad-main"><p class="sad-name">' + esc(any.name) + "</p>" + priceHtml + '<dl class="sad-specs">' + rows + "</dl></div>"
+          + '<button type="button" class="btn-gold" onclick="EJ.studioAlt(\'' + any.id + '\')">Customize this design</button>'
+          + noteHtml
+          + "</div>";
+      }
+      function studioChatHtml(st) {
+        var p = studioAnyById(st.productId) || PRODUCTS[0];
+        var draft = st.draftTouched && st.draftText != null ? st.draftText : studioDraftText(st);
+        var log = '<div class="studio-chat-log">'
+          + '<div class="m d">Tell us what you would change — the draft below is written from the design on screen, and it updates as you design. Edit it, or send it as it is.</div>'
+          + st.chat.map(function (m) {
+            return '<div class="m ' + (m.from === "client" ? "c" : "d") + '">'
+              + (m.image ? '<img src="' + m.image + '" alt="" width="120" height="120" style="display:block;width:3.2rem;height:3.2rem;object-fit:cover;border-radius:8px;margin-bottom:.45rem" />' : "")
+              + esc(m.text) + "</div>";
+          }).join("") + "</div>";
+        return '<section class="studio-panel studio-chat" aria-label="Custom design chat"><h2>Talk it through with the designer</h2>'
+          + '<p style="margin-top:.45rem;font-size:.82rem;line-height:1.6;color:var(--muted-foreground)">Your note goes to the atelier desk with the design attached. Replies here are the studio&rsquo;s guide answers — a specialist confirms every detail before anything is made.</p>'
+          + log
+          + '<form class="studio-draft" onsubmit="return EJ.studioChatSend(event)">'
+          + '<img id="stChatImg" src="' + studioCurrentImage(st) + '" alt="' + esc(p.name) + '" width="120" height="120" />'
+          + '<div class="sd-body"><label class="sd-label" for="stChatDraft">Your draft — written from your selections</label>'
+          + '<textarea id="stChatDraft" rows="3" oninput="EJ.studioDraftInput()">' + esc(draft) + "</textarea></div>"
+          + '<button type="submit" class="btn-gold">Send</button></form>'
+          + "</section>";
+      }
+      function pageStudio(query) {
+        var sig = query.piece || "";
+        if (EJ._studioSig !== sig || !EJ._studio) {
+          EJ._studioSig = sig;
+          var any0 = (sig && studioAnyById(sig)) || studioDesignById("st-lariat") || PRODUCTS[0];
+          EJ._studio = any0.studio ? studioStateForDesign(any0, false) : studioStateFor(any0, false);
+        }
+        var st = EJ._studio;
+        var p = studioAnyById(st.productId) || PRODUCTS[0];
+        st.productId = p.id;
+        var calc = studioCalc(st);
+        var gallery = studioGalleryOf(st);
+        if (st.galleryIdx >= gallery.length) st.galleryIdx = 0;
+        var v = p.studio ? null : findVendor(p.vendor);
+        var photoNote = p.studio
+          ? (p.variants
+            ? "Photographed in the metals shown — choose a metal and the photograph follows. Your piece is made to order in the options you choose."
+            : "The studio&rsquo;s own photograph of this design — your piece is made to order in the options you choose.")
+          : "Catalogue photograph of this design — your piece is made to order in the options you choose.";
+        var shapesShown = st.showMore ? ST_SHAPES : ST_SHAPES.slice(0, 3);
+        var h = '<div class="wrap" style="padding-top:2rem;padding-bottom:3.5rem">'
+          + crumbsHtml([{ label: "Home", href: "#/" }, { label: "Custom Jewels", href: "#/" }, { label: "Custom Studio" }])
+          + '<div class="studio-shell" style="margin-top:1.25rem"><div class="studio-head">'
+          + '<p class="s-kicker">Elevate Custom Studio:</p><h1>Create Your Bespoke Piece</h1>'
+          + '<p class="s-sub">Begin with a piece you love, then make it yours — your metal, your chain, your stone. The estimate updates as you design; the bench confirms the final price.</p></div>'
+          + '<div class="studio-grid">'
+          /* LEFT — Design Controls */
+          + '<section class="studio-panel studio-controls" aria-label="Design controls"><h2>Design Controls</h2>'
+          + '<div>' + ST_METALS.map(function (m) {
+            var on = st.metal === m.name;
+            return '<button type="button" class="studio-metal' + (on ? " on" : "") + '" style="background:' + m.bg + '" aria-pressed="' + on + '" onclick="EJ.studioMetal(\'' + m.name + '\')">' + esc(m.name) + "</button>";
+          }).join("") + "</div>"
+          + '<p class="studio-group-label" id="studioChainLabel">Chain Type</p>'
+          + '<select class="studio-select" aria-labelledby="studioChainLabel" onchange="EJ.studioChain(this.value)">' + ST_CHAINS.map(function (c) {
+            return '<option value="' + esc(c.name) + '"' + (st.chain === c.name ? " selected" : "") + ">" + esc(c.name) + (c.cost ? " · +" + fmt(c.cost) : "") + "</option>";
+          }).join("") + "</select>"
+          + '<p class="studio-group-label">Stone Shape</p><div class="studio-shapes">' + shapesShown.map(function (s) {
+            var on = st.shape === s;
+            return '<button type="button" class="studio-shape' + (on ? " on" : "") + '" aria-pressed="' + on + '" aria-label="' + studioShapeLabel(s) + ' shape" onclick="EJ.studioShape(\'' + s + '\')">' + studioShapeIcon(s) + "<span>" + studioShapeLabel(s) + "</span></button>";
+          }).join("") + "</div>"
+          + '<button type="button" class="studio-more" aria-expanded="' + !!st.showMore + '" onclick="EJ.studioMore()">' + (st.showMore ? "Less" : "More") + "</button>"
+          + '<p style="margin-top:1rem;font-size:.75rem;line-height:1.6;color:var(--muted-foreground)">' + (p.studio ? "An Elevate Custom Studio design." : "Design from " + esc(v ? v.name : "the atelier") + (v ? " · " + esc(v.city) : "") + ".") + ' Prefer to start from a blank page instead? <a href="#/bespoke" style="color:#7a5c1e;text-decoration:underline;text-underline-offset:3px">Open the full bespoke commission</a>.</p>'
+          + "</section>"
+          /* CENTRE — the piece */
+          + '<section class="studio-center" aria-label="Your design"><div class="studio-stage" id="studioStage">'
+          + '<img id="studioMainImg" src="' + studioCurrentImage(st) + '" alt="' + esc(p.name) + '" width="1200" height="1200" />'
+          + '<button type="button" class="studio-expand" aria-label="View ' + esc(p.name) + ' full size" title="Full view" onclick="EJ.studioExpand()">' + icon("scan", 18) + "</button>"
+          + (gallery.length > 1 ? '<div class="studio-dots" role="group" aria-label="Piece views">' + gallery.map(function (src, i) {
+            return '<button type="button" class="studio-dot' + (i === st.galleryIdx ? " on" : "") + '" aria-label="View ' + (i + 1) + ' of ' + gallery.length + '" aria-pressed="' + (i === st.galleryIdx) + '" onclick="EJ.studioGallery(' + i + ')"></button>';
+          }).join("") + "</div>" : "")
+          + '</div><div class="studio-caption"><p class="sc-name">' + esc(p.name) + '</p>'
+          + '<p class="sc-line" id="studioSummaryLine">' + esc(studioSummaryLine(st)) + "</p>"
+          + '<p class="sc-note">' + photoNote + "</p></div></section>"
+          /* RIGHT — Gemstone (R2: starts collapsed behind its icon) */
+          + '<section class="studio-panel studio-gem' + (st.gemOpen ? " open" : "") + '" id="studioGemPanel" aria-label="Gemstone">'
+          + '<button type="button" class="studio-gem-head" aria-expanded="' + !!st.gemOpen + '" aria-controls="studioGemBody" onclick="EJ.studioGemToggle()">'
+          + '<span class="sg-ico">' + icon("sliders", 18) + '</span>'
+          + '<span><span class="sg-title">Gemstone</span><span class="sg-sum" id="stGemSummary">' + esc(studioGemSummaryText(st)) + "</span></span>"
+          + '<span class="sg-chev">' + icon("chevR", 16) + "</span></button>"
+          + (st.gemOpen ? '<div class="studio-gem-body" id="studioGemBody">'
+          + '<div class="studio-slider-row"><div class="studio-slider-top"><span class="sl-label">Carat Weight</span><span class="sl-value" id="stCaratVal">' + st.carat.toFixed(1) + 'ct</span></div>'
+          + '<input type="range" min="0.3" max="4" step="0.05" value="' + st.carat + '" aria-label="Carat weight" oninput="EJ.studioRange(\'carat\',this.value)" />'
+          + '<div class="studio-slider-sub" id="stCaratSub">' + st.carat.toFixed(2) + "ct</div></div>"
+          + '<div class="studio-slider-row"><div class="studio-slider-top"><span class="sl-label">Cut Quality</span><span class="sl-value" id="stCutVal">' + calc.cut.label + '</span></div>'
+          + '<input type="range" min="0" max="' + (ST_CUTS.length - 1) + '" step="1" value="' + st.cutIdx + '" aria-label="Cut quality" oninput="EJ.studioRange(\'cut\',this.value)" />'
+          + '<div class="studio-slider-sub" id="stCutSub">' + calc.cut.label + "</div></div>"
+          + '<div class="studio-slider-row"><div class="studio-slider-top"><span class="sl-label">Color</span><span class="sl-value" id="stColorVal">' + calc.color.label + '</span></div>'
+          + '<input type="range" min="0" max="' + (ST_COLORS.length - 1) + '" step="1" value="' + st.colorIdx + '" aria-label="Stone colour, J to D" oninput="EJ.studioRange(\'color\',this.value)" />'
+          + '<div class="studio-slider-sub" id="stColorSub">' + calc.color.label + "</div></div>"
+          + '<div class="studio-slider-row"><div class="studio-slider-top"><span class="sl-label">Clarity</span><span class="sl-value" id="stClarityVal">' + esc(calc.clarity.label) + '</span></div>'
+          + '<input type="range" min="0" max="' + (ST_CLARITIES.length - 1) + '" step="1" value="' + st.clarityIdx + '" aria-label="Clarity" oninput="EJ.studioRange(\'clarity\',this.value)" />'
+          + '<div class="studio-slider-sub" id="stClaritySub">' + calc.clarity.pct + "%</div></div>"
+          + "</div>" : "")
+          + "</section>"
+          /* RIGHT BOTTOM — Dynamic Pricing */
+          + '<section class="studio-panel studio-pricing" aria-label="Dynamic pricing"><h2>Dynamic Pricing</h2>'
+          + '<div class="studio-price-total"><span class="pt-label">Total:</span><span class="pt-value" id="stTotal">*' + fmt2(calc.total) + "</span></div>"
+          + '<div class="studio-price-lines" id="stPriceLines">' + studioPriceLinesHtml(st) + "</div>"
+          + '<p class="studio-bar-line"><span id="stBarCarat">' + esc(studioCaratLine(st)) + '</span><span class="sbl-est">*Estimated</span></p>'
+          + '<button type="button" class="studio-add" onclick="EJ.studioAdd()">Add to My Design</button>'
+          + (st.addedSummary ? '<div class="studio-added" id="studioAdded">' + icon("check", 14) + " Added to your bag — " + esc(st.addedSummary) + ' <a href="#/cart">View bag</a></div>' : "")
+          + '<p class="studio-est">*Estimated — guide pricing from today&rsquo;s indices (base design, metal, stone size &amp; quality, setting and bench time). ' + esc(PRICE_DISCLAIMER) + "</p>"
+          + "</section>"
+          + "</div>"
+          /* BOTTOM — Alternative Designs (R4: photo-only sliding cards) */
+          + '<section class="studio-alts" aria-label="Alternative designs"><div class="studio-alts-head"><h2>Alternative Designs</h2>'
+          + '<div class="studio-alt-nav"><button type="button" class="studio-alt-arrow" aria-label="Scroll alternative designs back" onclick="EJ.studioAltScroll(-1)">' + icon("chevL", 16) + '</button>'
+          + '<button type="button" class="studio-alt-arrow" aria-label="Scroll alternative designs forward" onclick="EJ.studioAltScroll(1)">' + icon("chevR", 16) + "</button></div></div>"
+          + '<div class="studio-alt-rail" id="studioAltRail">'
+          + ST_ALT_IDS.map(studioAnyById).filter(Boolean).map(function (alt) {
+            var cls = "studio-alt" + (alt.id === p.id ? " on" : "") + (st.altFocus === alt.id ? " focused" : "") + (alt.id === "st-pendant" ? " bleed" : "");
+            return '<button type="button" class="' + cls + '" aria-pressed="' + (st.altFocus === alt.id) + '" aria-label="See details of the ' + esc(alt.name) + '" onclick="EJ.studioAltTap(\'' + alt.id + '\')"><img src="' + alt.image + '" alt="" loading="lazy" width="800" height="800" /></button>';
+          }).join("") + "</div>"
+          + studioAltDetailsHtml(st)
+          + "</section>"
+          + "</div>"
+          /* R1 — the custom-design chat is the last section. */
+          + studioChatHtml(st)
+          + "</div>";
+        return h;
+      }
+      EJ.studioMetal = function (name) {
+        var st = EJ._studio;
+        st.metal = name;
+        st.addedSummary = null;
+        /* Real metal variants: when the owner's photograph exists
+           for this metal, the centre photo follows the metal. */
+        var d = studioDesignById(st.productId);
+        if (d && d.variants && d.variants[name]) {
+          var gi = d.gallery.indexOf(d.variants[name]);
+          if (gi >= 0) st.galleryIdx = gi;
+        }
+        EJ.route(true);
+      };
+      EJ.studioChain = function (v) { EJ._studio.chain = v; EJ._studio.addedSummary = null; EJ.route(true); };
+      EJ.studioShape = function (s) { EJ._studio.shape = s; EJ._studio.addedSummary = null; EJ.route(true); };
+      EJ.studioMore = function () { EJ._studio.showMore = !EJ._studio.showMore; EJ.route(true); };
+      EJ.studioGallery = function (i) { EJ._studio.galleryIdx = i; EJ.route(true); };
+      EJ.studioGemToggle = function () { EJ._studio.gemOpen = !EJ._studio.gemOpen; EJ.route(true); };
+      EJ.studioAltScroll = function (dir) {
+        var rail = document.getElementById("studioAltRail");
+        if (rail) rail.scrollBy({ left: dir * 330, behavior: "smooth" });
+      };
+      EJ.studioAltTap = function (id) {
+        var rail = document.getElementById("studioAltRail");
+        if (rail && rail.dataset.suppress) return;
+        var st = EJ._studio;
+        st.altFocus = st.altFocus === id ? null : id;
+        EJ.route(true);
+      };
+      EJ.studioAlt = function (id) {
+        var any = studioAnyById(id);
+        if (!any) return;
+        EJ._studio = any.studio ? studioStateForDesign(any, true) : studioStateFor(any, true);
+        EJ.route(true);
+      };
+      EJ.studioRange = function (kind, v) {
+        var st = EJ._studio;
+        if (!st) return;
+        if (kind === "carat") st.carat = Math.min(4, Math.max(0.3, parseFloat(v) || 1.8));
+        else if (kind === "cut") st.cutIdx = parseInt(v, 10) || 0;
+        else if (kind === "color") st.colorIdx = parseInt(v, 10) || 0;
+        else if (kind === "clarity") st.clarityIdx = parseInt(v, 10) || 0;
+        st.addedSummary = null;
+        EJ.studioSyncLive();
+      };
+      EJ.studioSyncLive = function () {
+        var st = EJ._studio;
+        if (!st) return;
+        var calc = studioCalc(st);
+        function set(id, txt) { var el = document.getElementById(id); if (el) el.textContent = txt; }
+        set("stCaratVal", st.carat.toFixed(1) + "ct");
+        set("stCaratSub", st.carat.toFixed(2) + "ct");
+        set("stCutVal", calc.cut.label);
+        set("stCutSub", calc.cut.label);
+        set("stColorVal", calc.color.label);
+        set("stColorSub", calc.color.label);
+        set("stClarityVal", calc.clarity.label);
+        set("stClaritySub", calc.clarity.pct + "%");
+        set("stTotal", "*" + fmt2(calc.total));
+        var lines = document.getElementById("stPriceLines");
+        if (lines) lines.innerHTML = studioPriceLinesHtml(st);
+        set("studioSummaryLine", studioSummaryLine(st));
+        set("stBarCarat", studioCaratLine(st));
+        set("stGemSummary", studioGemSummaryText(st));
+        /* R1 — the chat draft follows the sliders live, unless the
+           visitor has started editing it themselves. */
+        if (!st.draftTouched) {
+          var ta = document.getElementById("stChatDraft");
+          if (ta) ta.value = studioDraftText(st);
+        }
+        var added = document.getElementById("studioAdded");
+        if (added) added.remove();
+      };
+      EJ.studioDraftInput = function () {
+        var st = EJ._studio;
+        var ta = document.getElementById("stChatDraft");
+        if (st && ta) { st.draftTouched = true; st.draftText = ta.value; }
+      };
+      EJ.studioChatSend = function (ev) {
+        ev.preventDefault();
+        var st = EJ._studio;
+        if (!st) return false;
+        var ta = document.getElementById("stChatDraft");
+        var text = (ta ? ta.value : "").trim();
+        if (!text) return false;
+        var any = studioAnyById(st.productId);
+        var calc = studioCalc(st);
+        st.chat.push({ from: "client", text: text, image: studioCurrentImage(st) });
+        startThread({
+          vendor: any && any.vendor ? any.vendor : "maison-verreaux",
+          productId: any && !any.studio ? any.id : "",
+          subject: "Custom studio — " + (any ? any.name : "bespoke design"),
+          body: text + "\n\nDesign on screen: " + studioSummaryLine(st) + ". Estimated total *" + fmt2(calc.total) + ".",
+          audience: "atelier"
+        });
+        st.chat.push({ from: "vendor", text: "Thank you — your designer has your note on the " + (any ? any.name : "piece") + ": " + studioSummaryLine(st) + ". We will sketch from it and reply here with the bench-confirmed price — your estimate on screen is *" + fmt2(calc.total) + "." });
+        st.draftTouched = false;
+        st.draftText = null;
+        EJ.route(true);
+        toast("Message sent", "Your custom-design note is in the conversation — the designer replies here.");
+        return false;
+      };
+      EJ.studioExpand = function () {
+        var st = EJ._studio;
+        var p = studioAnyById(st.productId);
+        if (!p) return;
+        var gallery = studioGalleryOf(st);
+        var root = document.getElementById("overlayRoot");
+        root.innerHTML = '<div class="studio-lightbox" role="dialog" aria-modal="true" aria-label="Full view — ' + esc(p.name) + '">'
+          + '<button type="button" class="sl-close" aria-label="Close full view" onclick="EJ.studioCloseLight()">' + icon("x", 18) + "</button>"
+          + '<figure><img src="' + studioCurrentImage(st) + '" alt="' + esc(p.name) + '" />'
+          + '<figcaption>' + esc(p.name) + " — " + esc(studioSummaryLine(st)) + "<br/>Photograph of this design — your piece is made to order in the options you choose.</figcaption>"
+          + (gallery.length > 1 ? '<div class="sl-nav">' + gallery.map(function (src, i) {
+            return '<button type="button" class="studio-dot' + (i === st.galleryIdx ? " on" : "") + '" style="width:.8rem;height:.8rem" aria-label="View ' + (i + 1) + '" onclick="EJ.studioLightGallery(' + i + ')"></button>';
+          }).join("") + "</div>" : "")
+          + "</figure></div>";
+      };
+      EJ.studioLightGallery = function (i) { EJ._studio.galleryIdx = i; EJ.studioExpand(); };
+      EJ.studioCloseLight = function () { EJ.closeOverlays(); EJ.route(true); };
+      EJ.studioAdd = function () {
+        var st = EJ._studio;
+        if (!st) return;
+        var calc = studioCalc(st);
+        var summary = studioSummary(st);
+        var line = { id: calc.product.id, qty: 1, customPrice: calc.total, customSummary: summary };
+        if (calc.product.studio) {
+          /* Studio designs are not catalogue products — the bag line
+             carries its own name and photograph. */
+          line.customName = calc.product.name;
+          line.customImage = studioCurrentImage(st);
+        }
+        S.cart.push(line);
+        st.addedSummary = summary;
+        EJ.updateChrome();
+        toast("Added to your bag", "Custom design — " + calc.product.name + " · *" + fmt2(calc.total) + " estimated");
+        EJ.route(true);
+      };
+
+      /* R5/R6 touch behaviour: swipe the big card to cycle the
+         piece's views; on a phone, one clean tap on the card moves
+         to the next section (the Gemstone panel); the Alternative
+         Designs rail drags with click suppression. */
+      function initStudioTouch() {
+        var stage = document.getElementById("studioStage");
+        if (stage && !stage.dataset.wired) {
+          stage.dataset.wired = "1";
+          var sx = 0, sy = 0;
+          stage.addEventListener("pointerdown", function (e) { sx = e.clientX; sy = e.clientY; });
+          stage.addEventListener("pointerup", function (e) {
+            var st = EJ._studio;
+            if (!st) return;
+            var dx = e.clientX - sx, dy = e.clientY - sy;
+            if (Math.abs(dx) > 48 && Math.abs(dx) > Math.abs(dy)) {
+              var g = studioGalleryOf(st);
+              if (g.length > 1) {
+                st.galleryIdx = (st.galleryIdx + (dx < 0 ? 1 : -1) + g.length) % g.length;
+                EJ.route(true);
+              }
+            } else if (Math.abs(dx) < 8 && Math.abs(dy) < 8 && window.innerWidth < 1024 && !(e.target.closest && e.target.closest("button"))) {
+              var gem = document.getElementById("studioGemPanel");
+              if (gem) gem.scrollIntoView({ behavior: "smooth", block: "start" });
+            }
+          });
+        }
+        var rail = document.getElementById("studioAltRail");
+        if (rail && !rail.dataset.wired) {
+          rail.dataset.wired = "1";
+          var down = false, startX = 0, startL = 0, moved = false;
+          rail.addEventListener("pointerdown", function (e) { down = true; moved = false; startX = e.clientX; startL = rail.scrollLeft; });
+          rail.addEventListener("pointermove", function (e) {
+            if (!down) return;
+            var dx = e.clientX - startX;
+            if (Math.abs(dx) > 6) moved = true;
+            if (moved) rail.scrollLeft = startL - dx;
+          });
+          ["pointerup", "pointercancel"].forEach(function (t) {
+            rail.addEventListener(t, function () {
+              if (moved) { rail.dataset.suppress = "1"; setTimeout(function () { delete rail.dataset.suppress; }, 80); }
+              down = false;
+            });
+          });
+        }
+      }
+
       /* ---------- Consultation (src/routes/consultation.tsx) ---------- */
       var CONSULT_SLOTS = ["09:00", "10:30", "12:00", "14:00", "15:30", "17:00", "18:30", "20:00"];
       function pageConsultation() {
@@ -5074,11 +5917,18 @@ var PRODUCTS = [
         var byVendor = {};
         S.cart.forEach(function (l) {
           var p = findProduct(l.id);
-          if (!p) return;
+          if (!p) {
+            /* Custom Studio designs are not catalogue products; the
+               line carries its own name and photograph. */
+            if (l.customName) {
+              (byVendor["custom-studio"] = byVendor["custom-studio"] || []).push({ line: l, product: { id: l.id, name: l.customName, image: l.customImage || "", vendor: "custom-studio", metal: "", stone: "" } });
+            }
+            return;
+          }
           (byVendor[p.vendor] = byVendor[p.vendor] || []).push({ line: l, product: p });
         });
         var subtotal = 0;
-        S.cart.forEach(function (l) { var p = findProduct(l.id); if (p) subtotal += p.price * l.qty; });
+        S.cart.forEach(function (l) { subtotal += linePrice(l) * l.qty; });
         var houses = Object.keys(byVendor).length;
         var courier = houses * 45;
         var insurance = Math.round(subtotal * 0.008);
@@ -5099,14 +5949,16 @@ var PRODUCTS = [
         });
         h += '<div class="cart-cols" style="margin-top:2.5rem;display:grid;gap:2rem"><div style="display:flex;flex-direction:column;gap:2rem">'
           + Object.keys(t.byVendor).map(function (slug) {
-            var v = findVendor(slug) || VENDORS[0];
+            var v = slug === "custom-studio" ? { name: "Elevate Custom Studio", house: "Custom Studio", city: "New York", slug: "custom-studio" } : (findVendor(slug) || VENDORS[0]);
             var cityShort = v.city.split(",").pop().trim();
-            return '<section><div style="display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:0.5rem"><div><p class="eyebrow" style="letter-spacing:0.14em">' + esc(v.house) + '</p><a href="#/vendor/' + v.slug + '" style="display:inline-block;margin-top:0.25rem;font-family:var(--font-display);font-size:1.5rem">' + esc(v.name) + '</a></div><p style="font-size:0.75rem;color:var(--muted-foreground)">Ships from ' + esc(cityShort) + '</p></div>'
+            return '<section><div style="display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:0.5rem"><div><p class="eyebrow" style="letter-spacing:0.14em">' + esc(v.house) + '</p><a href="' + (slug === "custom-studio" ? "#/studio" : "#/vendor/" + v.slug) + '" style="display:inline-block;margin-top:0.25rem;font-family:var(--font-display);font-size:1.5rem">' + esc(v.name) + '</a></div><p style="font-size:0.75rem;color:var(--muted-foreground)">Ships from ' + esc(cityShort) + '</p></div>'
               + '<div style="margin-top:1rem;display:flex;flex-direction:column">' + t.byVendor[slug].map(function (row) {
                 var p = row.product, l = row.line;
-                return '<div style="display:grid;grid-template-columns:5rem 1fr auto;gap:1rem;border-top:1px solid var(--border);padding:1rem 0;align-items:start"><a href="#/item/' + p.id + '"><img src="' + p.image + '" alt="' + esc(p.name) + '" loading="lazy" style="width:5rem;height:5rem;object-fit:cover;border-radius:0.25rem;border:1px solid var(--border)" /></a>'
-                  + '<div style="min-width:0"><a href="#/item/' + p.id + '" style="font-size:0.9375rem;line-height:1.4;display:block">' + esc(p.name) + '</a><p style="margin-top:0.25rem;font-size:0.75rem;color:var(--muted-foreground)">' + esc(p.metal) + " · " + esc(p.stone) + '</p><div style="margin-top:0.75rem;display:flex;align-items:center;gap:0.5rem"><button type="button" class="icon-btn" style="width:2rem;height:2rem;border:1px solid var(--border)" aria-label="Decrease quantity" onclick="EJ.cartQty(\'' + p.id + "',-1)\">" + icon("minus", 14) + '</button><input aria-label="Quantity" value="' + l.qty + '" inputmode="numeric" onchange="EJ.cartQtySet(\'' + p.id + '\',this.value)" style="width:3rem;text-align:center;border:1px solid var(--border);border-radius:0.25rem;padding:0.375rem;font:inherit;background:transparent" /><button type="button" class="icon-btn" style="width:2rem;height:2rem;border:1px solid var(--border)" aria-label="Increase quantity" onclick="EJ.cartQty(\'' + p.id + "',1)\">" + icon("plus", 14) + "</button></div></div>"
-                  + '<div style="text-align:right"><p style="font-family:var(--font-display);font-size:1.125rem">' + fmt(p.price * l.qty) + '</p><p style="font-size:0.75rem;color:var(--muted-foreground)">' + fmt(p.price) + ' each</p><button type="button" onclick="EJ.cartRemove(\'' + p.id + '\')" style="margin-top:0.75rem;display:inline-flex;align-items:center;gap:0.375rem;font-size:0.75rem;color:var(--muted-foreground)">' + icon("trash", 14) + "Remove</button></div></div>";
+                var lp = linePrice(l);
+                var itemHref = l.customSummary ? "#/studio?piece=" + p.id : "#/item/" + p.id;
+                return '<div style="display:grid;grid-template-columns:5rem 1fr auto;gap:1rem;border-top:1px solid var(--border);padding:1rem 0;align-items:start"><a href="' + itemHref + '"><img src="' + p.image + '" alt="' + esc(p.name) + '" loading="lazy" style="width:5rem;height:5rem;object-fit:cover;border-radius:0.25rem;border:1px solid var(--border)" /></a>'
+                  + '<div style="min-width:0"><a href="' + itemHref + '" style="font-size:0.9375rem;line-height:1.4;display:block">' + esc(l.customSummary ? "Custom design — " + p.name : p.name) + '</a><p style="margin-top:0.25rem;font-size:0.75rem;color:var(--muted-foreground)">' + (l.customSummary ? esc(l.customSummary) : esc(p.metal) + " · " + esc(p.stone)) + '</p><div style="margin-top:0.75rem;display:flex;align-items:center;gap:0.5rem"><button type="button" class="icon-btn" style="width:2rem;height:2rem;border:1px solid var(--border)" aria-label="Decrease quantity" onclick="EJ.cartQty(\'' + p.id + "',-1)\">" + icon("minus", 14) + '</button><input aria-label="Quantity" value="' + l.qty + '" inputmode="numeric" onchange="EJ.cartQtySet(\'' + p.id + '\',this.value)" style="width:3rem;text-align:center;border:1px solid var(--border);border-radius:0.25rem;padding:0.375rem;font:inherit;background:transparent" /><button type="button" class="icon-btn" style="width:2rem;height:2rem;border:1px solid var(--border)" aria-label="Increase quantity" onclick="EJ.cartQty(\'' + p.id + "',1)\">" + icon("plus", 14) + "</button></div></div>"
+                  + '<div style="text-align:right"><p style="font-family:var(--font-display);font-size:1.125rem">' + fmt(lp * l.qty) + '</p><p style="font-size:0.75rem;color:var(--muted-foreground)">' + fmt(lp) + (l.customSummary ? ' estimated' : ' each') + '</p><button type="button" onclick="EJ.cartRemove(\'' + p.id + '\')" style="margin-top:0.75rem;display:inline-flex;align-items:center;gap:0.375rem;font-size:0.75rem;color:var(--muted-foreground)">' + icon("trash", 14) + "Remove</button></div></div>";
               }).join("") + "</div></section>";
           }).join("")
           + '</div><aside class="glass" style="border-radius:0.25rem;padding:1.5rem;align-self:start"><p class="eyebrow">Summary</p>'
@@ -5175,10 +6027,10 @@ var PRODUCTS = [
         } else {
           h += '<div style="margin-top:2rem;display:flex;flex-direction:column;gap:1rem">'
             + S.cart.map(function (l) {
-              var p = findProduct(l.id);
+              var p = findProduct(l.id) || (l.customName ? { id: l.id, name: l.customName, image: l.customImage || "", vendor: "" } : null);
               if (!p) return "";
-              var v = findVendor(p.vendor);
-              return '<div style="display:flex;align-items:center;gap:1rem;border-bottom:1px solid var(--border);padding-bottom:1rem"><img src="' + p.image + '" alt="' + esc(p.name) + '" loading="lazy" style="width:3.5rem;height:3.5rem;border-radius:0.25rem;object-fit:cover" /><div style="min-width:0;flex:1"><p style="font-size:0.875rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + esc(p.name) + '</p><p style="font-size:11px;color:var(--muted-foreground)">' + esc(v ? v.name : "") + '</p></div><span style="font-size:0.875rem;color:var(--gold)">' + fmt(p.price * l.qty) + "</span></div>";
+              var v = p.vendor ? findVendor(p.vendor) : null;
+              return '<div style="display:flex;align-items:center;gap:1rem;border-bottom:1px solid var(--border);padding-bottom:1rem"><img src="' + p.image + '" alt="' + esc(p.name) + '" loading="lazy" style="width:3.5rem;height:3.5rem;border-radius:0.25rem;object-fit:cover" /><div style="min-width:0;flex:1"><p style="font-size:0.875rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + esc(l.customSummary ? "Custom design — " + p.name : p.name) + '</p><p style="font-size:11px;color:var(--muted-foreground)">' + esc(l.customSummary || (v ? v.name : "")) + '</p></div><span style="font-size:0.875rem;color:var(--gold)">' + fmt(linePrice(l) * l.qty) + "</span></div>";
             }).join("")
             + '<p style="font-size:0.75rem;line-height:1.65;color:var(--muted-foreground)">Delivering to ' + esc(ck.name || "—") + ", " + esc(ck.address || "—") + ", " + esc(ck.city) + " " + esc(ck.postcode) + ", " + esc(ck.country) + ". Paying by " + (ck.method === "card" ? "card" : ck.method) + ".</p></div>";
         }
@@ -5266,15 +6118,36 @@ var PRODUCTS = [
       /* ---------- Store House gate (src/components/store-house-gate.tsx) ---------- */
       function pageHouse() {
         var msg = EJ._houseMsg || "";
+        var unlocked = !!(EJ._houseUnlocked || EJ._pwRole);
+        if (unlocked) {
+          var roleLabel = EJ._pwRole === "owner" ? "Owner" : EJ._pwRole === "ai" ? "AI — Add Products only" : EJ._housePreview ? "Sales Preview" : "Secretary";
+          return '<div class="wrap" style="max-width:56rem;padding-top:2.5rem;padding-bottom:0.5rem">'
+            + '<div style="display:flex;flex-wrap:wrap;align-items:flex-start;gap:1rem"><div style="flex:1;min-width:16rem"><p class="eyebrow">Store House · Staff desk</p>'
+            + '<h1 style="margin-top:0.5rem;font-family:var(--font-display);font-size:2.25rem">Store House</h1>'
+            + '<p style="margin-top:0.5rem;max-width:36rem;font-size:0.875rem;line-height:1.65;color:var(--muted-foreground)">The staff desk for the shop floor: the gift-card register, and the doors into Add Products and the Connect workspace.</p></div>'
+            + (EJ._houseUnlocked ? '<button type="button" class="btn-ghost" onclick="EJ.houseLock()">' + icon("key", 14) + "Lock Store House</button>" : '<a href="#/private" class="btn-ghost">Private World</a>')
+            + "</div>"
+            + '<div style="margin-top:1.25rem;display:flex;flex-wrap:wrap;gap:0.5rem"><span class="sub-chip">Signed in as: ' + esc(roleLabel) + '</span><span class="sub-chip">' + PRODUCTS.length + ' pieces in the catalog</span><span class="sub-chip">' + (EJ._pwPending || []).length + ' waiting for owner approval</span></div>'
+            + '<div style="margin-top:1.5rem;display:grid;gap:1rem" class="be-grid">'
+            + '<a href="#/private" class="glass-soft" style="border-radius:0.25rem;padding:1.25rem;display:block"><p style="display:flex;align-items:center;gap:0.5rem;font-weight:500">' + icon("key", 16) + 'Private World</p><p style="margin-top:0.5rem;font-size:0.875rem;line-height:1.65;color:var(--muted-foreground)">Add products and, on the owner PIN, approve them to go live.</p></a>'
+            + '<a href="#/connect?view=workspace" class="glass-soft" style="border-radius:0.25rem;padding:1.25rem;display:block"><p style="display:flex;align-items:center;gap:0.5rem;font-weight:500">' + icon("message", 16) + 'Connect workspace</p><p style="margin-top:0.5rem;font-size:0.875rem;line-height:1.65;color:var(--muted-foreground)">Calls, texts, WhatsApp and email in one staff console.</p></a>'
+            + '<a href="#/backend" class="glass-soft" style="border-radius:0.25rem;padding:1.25rem;display:block"><p style="display:flex;align-items:center;gap:0.5rem;font-weight:500">' + icon("building", 16) + 'Back End overview</p><p style="margin-top:0.5rem;font-size:0.875rem;line-height:1.65;color:var(--muted-foreground)">All three back rooms on one page — who gets what, and what is set up.</p></a>'
+            + "</div>"
+            + "<style>@media(min-width:900px){.be-grid{grid-template-columns:repeat(3,1fr)}}</style>"
+            + "</div>" + giftRegisterHtml();
+        }
         return '<div class="wrap" style="max-width:32rem;padding-top:3.5rem;padding-bottom:4rem"><div class="house-card">'
           + '<span style="display:inline-grid;place-items:center;width:3rem;height:3rem;border-radius:999px;border:1px solid var(--border);color:var(--gold)">' + icon("key", 20) + "</span>"
           + '<h1 style="margin-top:1rem;font-size:1.5rem">Store House security PIN</h1>'
-          + '<p style="margin-top:0.5rem;font-size:0.875rem;line-height:1.7;color:var(--muted-foreground)">Enter your 10-digit PIN. This device will be remembered, so you only do this once here.</p>'
+          + '<p style="margin-top:0.5rem;font-size:0.875rem;line-height:1.7;color:var(--muted-foreground)">Enter the same 10-digit PIN you use for Private World — owner, secretary or AI. The Store House opens on the same PINs.</p>'
           + '<form style="margin-top:1.5rem;display:grid;gap:1rem" onsubmit="return EJ.houseSubmit(event)"><input type="password" inputmode="numeric" maxlength="10" placeholder="••••••••••" aria-label="10-digit PIN" style="text-align:center;letter-spacing:0.5em;border:1px solid var(--border);border-radius:0.25rem;padding:0.875rem;font:inherit;background:transparent" /><button type="submit" class="btn-gold">Unlock Store House</button></form>'
           + (msg ? '<p role="alert" style="margin-top:1rem;font-size:0.875rem;color:var(--destructive)">' + esc(msg) + "</p>" : "")
           + '<a href="#/connect?view=workspace" style="display:inline-block;margin-top:1.5rem;font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold)">Elevate Connect</a>'
           + '<button type="button" class="btn-ghost" style="margin-top:1rem;margin-left:0.75rem" onclick="EJ.openPrivate()">Private World — add &amp; approve products</button>'
-          + "</div></div>" + giftRegisterHtml();
+          + '<div style="margin-top:1.5rem;border-top:1px solid var(--border);padding-top:1.25rem;text-align:left">'
+          + '<p style="font-size:0.875rem;line-height:1.65;color:var(--muted-foreground)"><strong style="color:var(--foreground)">Reviewing the back end?</strong> See the staff desk exactly as a salesperson gets it — no PIN needed for this look. The gift-card register inside runs on sample records until the connected back end is live.</p>'
+          + '<div style="margin-top:0.75rem;display:flex;flex-wrap:wrap;gap:0.5rem"><button type="button" class="btn-gold" onclick="EJ.housePreview()">Open Store House — Sales Preview</button><a href="#/backend" class="btn-ghost">See the whole back end</a></div></div>'
+          + "</div></div>";
       }
       /* Store House gift-card register — the staff desk for gift cards.
          Sample records only, in the site's own demo pattern (as with
@@ -5319,10 +6192,113 @@ var PRODUCTS = [
         ev.preventDefault();
         var input = ev.target.querySelector("input");
         var digits = (input.value || "").replace(/\D/g, "");
-        EJ._houseMsg = digits.length < 10 ? "Enter all 10 digits." : "Access could not be verified. Please try again.";
+        if (digits.length < 10) { EJ._houseMsg = "Enter all 10 digits."; EJ.route(true); return false; }
+        if (!EJ._pwOwnerPin && !EJ._pwSecPin && !EJ._pwAiPin) {
+          EJ._houseMsg = "No staff PINs have been set yet. The owner creates them in Private World — or open the Sales Preview below for a look at the desk.";
+          EJ.route(true);
+          return false;
+        }
+        if (digits === EJ._pwOwnerPin || (EJ._pwSecPin && digits === EJ._pwSecPin) || (EJ._pwAiPin && digits === EJ._pwAiPin)) {
+          EJ._houseUnlocked = true;
+          EJ._housePreview = false;
+          EJ._houseMsg = "";
+          toast("Store House is open", "The gift-card register and the staff shortcuts are on this page.");
+          EJ.route(true);
+          return false;
+        }
+        EJ._houseMsg = "That PIN does not match the owner, secretary or AI PIN. Try again.";
         EJ.route(true);
         return false;
       };
+      EJ.housePreview = function () {
+        EJ._houseUnlocked = true;
+        EJ._housePreview = true;
+        EJ._houseMsg = "";
+        toast("Store House — Sales Preview", "This is the staff desk your sales people get. The register runs on sample records.");
+        if (location.hash === "#/house") EJ.route(true);
+        else location.hash = "#/house";
+      };
+      EJ.houseLock = function () {
+        EJ._houseUnlocked = false;
+        EJ._housePreview = false;
+        EJ._houseMsg = "";
+        toast("Store House locked", "A staff PIN — or the Sales Preview — opens it again.");
+        EJ.route(true);
+      };
+
+      /* ---------- Back End overview — what the sales team gets ----------
+         One page that shows the whole back end for review and
+         screenshots: the three staff rooms, who each PIN opens, live
+         counts from this session, the salesperson screen, and the
+         owner setup order. Every button opens the real room — the
+         Sales Preview buttons enter Private World and the Store
+         House in the restricted secretary view, with no PIN needed
+         for the review look. */
+      function pageBackend() {
+        var cards = EJ._gcCards || (EJ._gcCards = [
+          { code: "GC-100101", balance: 250, status: "Active" },
+          { code: "GC-100102", balance: 500, status: "Active" },
+          { code: "GC-100103", balance: 75, status: "Active" },
+          { code: "GC-100104", balance: 0, status: "Redeemed" }
+        ]);
+        var activeCards = cards.filter(function (c) { return c.status === "Active"; });
+        var gcTotal = activeCards.reduce(function (a, c) { return a + c.balance; }, 0);
+        var pending = (EJ._pwPending || []).length;
+        var liveCount = (EJ._pwLiveIds || []).length;
+        function pinChip(set, label) { return '<span class="sub-chip">' + label + ": " + (set ? "set in this session" : "not set yet") + "</span>"; }
+        var h = '<div class="wrap" style="max-width:72rem;padding-top:2.5rem;padding-bottom:4rem">';
+        h += '<p class="eyebrow">Back End · Staff only</p>'
+          + '<h1 style="margin-top:0.5rem;font-family:var(--font-display);font-size:2.5rem">What your sales people get</h1>'
+          + '<p style="margin-top:0.75rem;max-width:40rem;font-size:0.9375rem;line-height:1.7;color:var(--muted-foreground)">Three rooms sit behind the shop front. This page is the map of all three — and every button on it opens the real room, so what you see here is what your team gets.</p>'
+          + '<div style="margin-top:1.25rem;display:flex;flex-wrap:wrap;gap:0.5rem">' + pinChip(!!EJ._pwOwnerPin, "Owner PIN") + pinChip(!!EJ._pwSecPin, "Secretary PIN") + pinChip(!!EJ._pwAiPin, "AI PIN") + '<span class="sub-chip">' + pending + ' waiting for approval</span><span class="sub-chip">' + PRODUCTS.length + ' pieces in the catalog</span></div>';
+        h += '<div class="be-grid" style="display:grid;gap:1rem;margin-top:2rem">'
+          + '<section class="glass-soft" style="border-radius:0.25rem;padding:1.5rem" aria-label="Private World">'
+          + '<p style="display:flex;align-items:center;gap:0.5rem;font-weight:500">' + icon("key", 16) + 'Private World — product studio</p>'
+          + '<ul class="care-list" style="margin-top:1rem"><li><span><b>Owner PIN</b> — the full studio: add products, approve them live, manage the PINs, piece QR desk.</span></li><li><span><b>Secretary PIN</b> — Add Products only. Everything waits as Pending Approval.</span></li><li><span><b>AI PIN</b> — Add Products only, the same restricted screen as the secretary.</span></li></ul>'
+          + '<p style="margin-top:1rem;font-size:0.875rem;color:var(--muted-foreground)">' + pending + ' waiting for approval · ' + liveCount + ' live from this studio</p>'
+          + '<div style="margin-top:1rem;display:flex;flex-wrap:wrap;gap:0.5rem"><button type="button" class="btn-gold" onclick="EJ.pwPreviewSales()">Sales Preview</button><a href="#/private" class="btn-ghost">Owner door</a></div></section>'
+          + '<section class="glass-soft" style="border-radius:0.25rem;padding:1.5rem" aria-label="Store House">'
+          + '<p style="display:flex;align-items:center;gap:0.5rem;font-weight:500">' + icon("boxes", 16) + 'Store House — staff desk</p>'
+          + '<ul class="care-list" style="margin-top:1rem"><li><span><b>Gift-card register</b> — check balances, mark a card redeemed or active again.</span></li><li><span><b>Staff shortcuts</b> into Add Products and the Connect workspace.</span></li><li><span><b>Same PINs as Private World</b> — the Store House door accepts the owner, secretary and AI PINs.</span></li></ul>'
+          + '<p style="margin-top:1rem;font-size:0.875rem;color:var(--muted-foreground)">' + cards.length + ' cards on the register · ' + activeCards.length + ' active · ' + fmt(gcTotal) + ' outstanding (sample records)</p>'
+          + '<div style="margin-top:1rem;display:flex;flex-wrap:wrap;gap:0.5rem"><button type="button" class="btn-gold" onclick="EJ.housePreview()">Sales Preview</button><a href="#/house" class="btn-ghost">PIN door</a></div></section>'
+          + '<section class="glass-soft" style="border-radius:0.25rem;padding:1.5rem" aria-label="Connect workspace">'
+          + '<p style="display:flex;align-items:center;gap:0.5rem;font-weight:500">' + icon("message", 16) + 'Connect — staff workspace</p>'
+          + '<ul class="care-list" style="margin-top:1rem"><li><span><b>Calls, Texts, WhatsApp, Email and Ateliers</b> in one console.</span></li><li><span><b>Compose, dialpad and privacy mode</b> for the shop floor.</span></li><li><span><b>Sample records</b> until the channels are connected.</span></li></ul>'
+          + '<p style="margin-top:1rem;font-size:0.875rem;color:var(--muted-foreground)">' + S.threads.length + ' atelier conversations in this session</p>'
+          + '<div style="margin-top:1rem;display:flex;flex-wrap:wrap;gap:0.5rem"><a href="#/connect?view=workspace" class="btn-gold">Open the workspace</a></div></section>'
+          + "</div>"
+          + "<style>@media(min-width:900px){.be-grid{grid-template-columns:repeat(3,1fr)}}</style>";
+        h += '<section class="glass-soft" style="margin-top:1.5rem;border-radius:0.25rem;padding:1.5rem" aria-label="The salesperson screen">'
+          + '<p class="eyebrow">The salesperson screen</p>'
+          + '<h2 style="margin-top:0.5rem;font-family:var(--font-display);font-size:1.75rem">Add Products — what opens on the secretary PIN</h2>'
+          + '<div style="margin-top:1.25rem;border:1px solid var(--border);border-radius:0.25rem;background:var(--popover);padding:1.25rem">'
+          + '<p style="font-size:10px;letter-spacing:0.24em;text-transform:uppercase;color:var(--gold)">Private World · Secretary — Add Products only</p>'
+          + '<p style="margin-top:0.5rem;font-family:var(--font-display);font-size:1.5rem">Add Products</p>'
+          + '<p style="margin-top:0.375rem;font-size:0.875rem;line-height:1.65;color:var(--muted-foreground)">Add products under any brand. Everything you add is saved as Pending Approval — only the owner can confirm it and send it live. Nothing else in Private World is open on this PIN.</p>'
+          + '<p style="margin-top:1rem;font-size:0.75rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted-foreground)">They fill in</p>'
+          + '<div style="margin-top:0.5rem;display:flex;flex-wrap:wrap;gap:0.5rem">' + ["Product name", "Brand", "Collection", "Type", "Price (USD)", "Metal", "Stone", "Carat &amp; colour", "Certification", "Photo — pick or upload", "Description", "One of one"].map(function (f) { return '<span class="sub-chip">' + f + "</span>"; }).join("") + "</div>"
+          + '<p style="margin-top:1rem;font-size:0.875rem;line-height:1.65;color:var(--muted-foreground)">Or they paste the details to the website secretary, who repeats them back before queueing. Their pieces then sit under <strong style="color:var(--foreground)">Your submissions</strong> as Pending Approval — no publish button, no approvals list, no PIN settings.</p>'
+          + "</div>"
+          + '<div style="margin-top:1rem;display:flex;flex-wrap:wrap;gap:0.5rem;align-items:center"><button type="button" class="btn-gold" onclick="EJ.pwPreviewSales()">Open this screen live — Sales Preview</button><span style="font-size:0.75rem;color:var(--muted-foreground)">The frame above is a preview; this button opens the working screen.</span></div>'
+          + "</section>";
+        h += '<section class="glass-soft" style="margin-top:1.5rem;border-radius:0.25rem;padding:1.5rem" aria-label="Owner setup">'
+          + '<p class="eyebrow">Owner setup</p>'
+          + '<h2 style="margin-top:0.5rem;font-family:var(--font-display);font-size:1.75rem">Three PINs, in this order</h2>'
+          + '<ul class="care-list" style="margin-top:1rem">'
+          + '<li><span><b>1 · Your owner PIN.</b> You create it first, at the Private World door — ' + (EJ._pwOwnerPin ? "set in this session." : "not set yet.") + '</span></li>'
+          + '<li><span><b>2 · The secretary PIN.</b> Inside the studio you create it and hand it to your sales people — ' + (EJ._pwSecPin ? "set in this session." : "not set yet.") + '</span></li>'
+          + '<li><span><b>3 · The AI PIN.</b> The same restricted Add Products screen, for the AI — ' + (EJ._pwAiPin ? "set in this session." : "not set yet.") + '</span></li>'
+          + '<li><span><b>Then approvals are yours alone.</b> Nothing a salesperson or the AI adds goes live until you approve it.</span></li></ul>'
+          + '<a href="#/private" class="btn-gold" style="margin-top:1.25rem">Go to Private World</a>'
+          + "</section>";
+        h += '<section style="margin-top:1.5rem;border:1px solid var(--border);border-radius:0.25rem;padding:1.5rem" aria-label="What the connected back end adds">'
+          + '<h2 style="font-family:var(--font-display);font-size:1.375rem">Why a salesperson on their own phone still starts empty</h2>'
+          + '<p style="margin-top:0.5rem;font-size:0.875rem;line-height:1.7;color:var(--muted-foreground)">In this build, PINs and queues live in this tab\'s memory — so the screens above are the real design, but nothing is shared between phones yet. The connected back end is the next step: PINs stored hashed on a server, one shared review queue for the whole team, and approvals that stay live for every visitor. That is the step that turns these rooms into your team\'s working back end.</p>'
+          + "</section>";
+        h += "</div>";
+        return h;
+      }
 
       /* ---------- Private World — owner product studio ----------
          The owner asked for: a 10-digit PIN at Private World; inside,
@@ -5364,6 +6340,10 @@ var PRODUCTS = [
           }
         }
         if (EJ._pwMsg) h += '<p class="pv-msg" role="alert" style="font-size:0.875rem;color:var(--destructive)">' + esc(EJ._pwMsg) + "</p>";
+        h += '<div style="border:1px solid color-mix(in oklab, var(--gold) 40%, transparent);border-radius:0.25rem;padding:1rem;background:color-mix(in oklab, var(--gold) 6%, transparent)">'
+          + '<p style="font-size:0.875rem;line-height:1.65"><strong style="color:var(--foreground)">Sales team — see your screen now.</strong><br/><span style="color:var(--muted-foreground)">Open Add Products in Sales Preview: the exact screen a salesperson gets on the secretary PIN. Pieces they add wait as Pending Approval; approvals and PIN settings stay owner-only. No PIN is needed for this review look.</span></p>'
+          + '<button type="button" class="btn-gold" style="margin-top:0.75rem;width:100%" onclick="EJ.pwPreviewSales()">Open Add Products — Sales Preview</button>'
+          + '<a href="#/backend" style="display:inline-block;margin-top:0.75rem;font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold)">Back End overview — all three rooms</a></div>';
         h += '<p style="font-size:0.75rem;line-height:1.65;color:var(--muted-foreground)">Preview PINs: in this front-end build the PINs are kept only in this tab\'s memory and are never written into the page code. On the real back end they will be stored hashed on a server.</p></div>';
         return h;
       }
@@ -5374,6 +6354,7 @@ var PRODUCTS = [
       }
       function pwGatePass(role) {
         EJ._pwMsg = "";
+        EJ._pwPreview = false;
         EJ._pwRole = role;
         EJ.closeOverlays();
         toast("Private World is open", role === "owner" ? "Owner access — add products and approve them to go live." : role === "ai" ? "AI access — Add Products only; everything waits for the owner." : "Secretary access — Add Products only; everything waits for the owner.");
@@ -5468,8 +6449,18 @@ var PRODUCTS = [
         input.value = v;
         input.focus();
       };
+      EJ.pwPreviewSales = function () {
+        EJ._pwMsg = "";
+        EJ._pwRole = "secretary";
+        EJ._pwPreview = true;
+        EJ.closeOverlays();
+        toast("Add Products — Sales Preview", "This is the salesperson screen. Everything added waits as Pending Approval for the owner.");
+        if (location.hash === "#/private") EJ.route();
+        else location.hash = "#/private";
+      };
       EJ.pwLock = function () {
         EJ._pwRole = null;
+        EJ._pwPreview = false;
         EJ._pwMsg = "";
         EJ._pwSecReveal = null;
         EJ._pwAiReveal = null;
@@ -5844,6 +6835,7 @@ var PRODUCTS = [
             + '<p style="margin-top:0.5rem;font-size:0.875rem;line-height:1.7;color:var(--muted-foreground)">Three 10-digit PINs open this studio: the owner PIN for the full studio and approvals, and the secretary PIN and the AI PIN for Add Products only — everything added on them waits as Pending Approval.</p>'
             + '<div style="margin-top:1.5rem">' + pwGateHtml(true) + "</div>"
             + '<a href="#/house" style="display:inline-block;margin-top:1.5rem;font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold)">Store House</a>'
+            + '<a href="#/backend" style="display:inline-block;margin-top:1.5rem;margin-left:1rem;font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold)">Back End overview</a>'
             + "</div></div>";
         }
         var pending = EJ._pwPending, liveIds = EJ._pwLiveIds;
@@ -5865,6 +6857,7 @@ var PRODUCTS = [
             ? '<span class="sub-chip">' + PRODUCTS.length + ' pieces in the catalog</span><span class="sub-chip">' + pending.length + ' waiting for your approval</span><span class="sub-chip">' + liveIds.length + ' live from this studio</span>'
             : '<span class="sub-chip">' + myPending.length + ' waiting for owner approval</span>')
           + "</div>";
+        if (EJ._pwPreview) h += '<p role="status" style="margin-top:1rem;border:1px solid color-mix(in oklab, var(--gold) 45%, transparent);border-radius:0.25rem;background:color-mix(in oklab, var(--gold) 7%, transparent);padding:0.75rem 1rem;font-size:0.875rem;line-height:1.65">Sales Preview — you are seeing the salesperson screen without a PIN, for review. It works in full: add a piece and it waits below as Pending Approval. Approvals, PIN settings and the QR desk stay owner-only.</p>';
         if (isOwner) h += pwPinsCardHtml();
         if (isOwner) h += pwQrDeskHtml();
         var smsBody = encodeURIComponent("Hello, this is the owner of Elevate Jewels. Please begin as my website secretary: say you are ready to upload details on the website, ask me for the details, repeat them back to me, and add them as Pending Approval only.");
@@ -6045,10 +7038,10 @@ var PRODUCTS = [
           ? '<div style="display:flex;flex-direction:column;gap:0.75rem">' + threads.map(function (t) {
             var v = findVendor(t.vendor) || VENDORS[0];
             var last = t.messages[t.messages.length - 1];
-            return '<button type="button" class="frost-row" style="text-align:left;border-radius:0.25rem;padding:1rem;width:100%" onclick="EJ.cwOpenThread(\'' + t.id + '\')"><span style="display:flex;gap:0.75rem;align-items:flex-start"><span style="flex-shrink:0">' + connectAvatarHtml(v) + '</span><span style="min-width:0"><span style="display:block;font-weight:500">' + esc(v.name) + '</span><span style="display:block;font-size:0.875rem">' + esc(t.subject) + '</span><span style="display:block;font-size:0.75rem;color:var(--muted-foreground);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + esc(last ? last.body : "") + "</span></span></span></button>";
+            return '<button type="button" class="frost-row" style="text-align:left;border-radius:0.25rem;padding:1rem;width:100%" onclick="EJ.cwOpenThread(\'' + t.id + '\')"><span style="display:flex;gap:0.75rem;align-items:flex-start"><span style="flex-shrink:0">' + connectThreadImgHtml(t, v) + '</span><span style="min-width:0"><span style="display:block;font-weight:500">' + esc(v.name) + '</span><span style="display:block;font-size:0.875rem">' + esc(t.subject) + '</span><span style="display:block;font-size:0.75rem;color:var(--muted-foreground);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + esc(last ? last.body : "") + "</span></span></span></button>";
           }).join("") + "</div>"
           : '<p style="font-size:0.875rem;color:var(--muted-foreground)">No atelier conversations yet. Message a house from any piece page.</p>';
-        return '<div class="wrap" style="padding-top:2rem;padding-bottom:3rem;max-width:48rem"><div style="display:flex;align-items:center;gap:0.75rem"><span class="connect-house-avatar"><img src="assets/crown.png" alt="" /></span><div><p class="eyebrow">Elevate Connect</p><h1 style="margin-top:0.25rem;font-family:var(--font-display);font-size:1.875rem">Messages</h1></div></div><div style="margin-top:1.25rem">' + list + '</div><p style="margin-top:1.5rem;font-size:0.75rem;color:var(--muted-foreground)">Browser-only conversation preview · messages are not delivered to ateliers.</p></div>';
+        return '<div class="wrap" style="padding-top:2rem;padding-bottom:3rem;max-width:48rem">' + connectTopBannerHtml() + '<h1 style="margin-top:1.25rem;font-family:var(--font-display);font-size:1.875rem">Messages</h1><div style="margin-top:1.25rem">' + list + '</div><p style="margin-top:1.5rem;font-size:0.75rem;color:var(--muted-foreground)">Browser-only conversation preview · messages are not delivered to ateliers.</p></div>';
       }
       function pageConnectWorkspace(cw, query) {
         var tab = query.tab || "calls";
@@ -6111,10 +7104,10 @@ var PRODUCTS = [
             ? '<div style="display:flex;flex-direction:column;gap:0.75rem">' + threads.map(function (t) {
               var v = findVendor(t.vendor) || VENDORS[0];
               var last = t.messages[t.messages.length - 1];
-              return '<button type="button" class="frost-row" style="text-align:left;border-radius:0.25rem;padding:1rem;width:100%" onclick="EJ.cwOpenThread(\'' + t.id + '\')"><span style="display:flex;gap:0.75rem;align-items:flex-start"><span style="flex-shrink:0">' + connectAvatarHtml(v) + '</span><span style="min-width:0"><span style="display:block;font-weight:500">' + esc(v.name) + '</span><span style="display:block;font-size:0.875rem">' + esc(t.subject) + '</span><span style="display:block;font-size:0.75rem;color:var(--muted-foreground);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + esc(last ? last.body : "") + "</span></span></span></button>";
+              return '<button type="button" class="frost-row" style="text-align:left;border-radius:0.25rem;padding:1rem;width:100%" onclick="EJ.cwOpenThread(\'' + t.id + '\')"><span style="display:flex;gap:0.75rem;align-items:flex-start"><span style="flex-shrink:0">' + connectThreadImgHtml(t, v) + '</span><span style="min-width:0"><span style="display:block;font-weight:500">' + esc(v.name) + '</span><span style="display:block;font-size:0.875rem">' + esc(t.subject) + '</span><span style="display:block;font-size:0.75rem;color:var(--muted-foreground);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + esc(last ? last.body : "") + "</span></span></span></button>";
             }).join("") + "</div>"
             : '<p style="font-size:0.875rem;color:var(--muted-foreground)">No atelier conversations yet. Message a house from any piece page.</p>';
-          return '<h1 style="font-family:var(--font-display);font-size:1.875rem">Ateliers</h1><div style="margin-top:1.25rem">' + list + '</div><p style="margin-top:1.5rem;font-size:0.75rem;color:var(--muted-foreground)">Browser-only conversation preview · messages are not delivered to ateliers.</p>';
+          return connectTopBannerHtml() + '<h1 style="margin-top:1.25rem;font-family:var(--font-display);font-size:1.875rem">Ateliers</h1><div style="margin-top:1.25rem">' + list + '</div><p style="margin-top:1.5rem;font-size:0.75rem;color:var(--muted-foreground)">Browser-only conversation preview · messages are not delivered to ateliers.</p>';
         }
         if (tab === "calls") {
           var chanLinks = [["texts", "Text"], ["whatsapp", "WhatsApp"], ["email", "Email"]].map(function (l) {
@@ -6152,7 +7145,7 @@ var PRODUCTS = [
         var v = findVendor(t.vendor) || VENDORS[0];
         var piece = t.productId ? findProduct(t.productId) : null;
         return '<button type="button" style="display:inline-flex;align-items:center;gap:0.375rem;font-size:0.875rem;color:var(--muted-foreground)" onclick="EJ.cwBack()">' + icon("arrowLeft", 16) + "All ateliers</button>"
-          + '<div style="margin-top:0.75rem;display:flex;align-items:center;gap:0.75rem">' + connectAvatarHtml(v) + '<div style="min-width:0"><h1 style="font-family:var(--font-display);font-size:1.5rem">' + esc(t.subject) + '</h1>'
+          + '<div style="margin-top:0.75rem;display:flex;align-items:center;gap:0.75rem">' + connectThreadImgHtml(t, v, "lg") + '<div style="min-width:0"><h1 style="font-family:var(--font-display);font-size:1.5rem">' + esc(t.subject) + '</h1>'
           + '<p style="margin-top:0.25rem;font-size:0.75rem;color:var(--muted-foreground)">' + esc(v.name) + " · Browser-only conversation preview</p></div></div>"
           + (piece ? '<a href="#/item/' + piece.id + '" style="margin-top:1rem;display:flex;align-items:center;gap:0.75rem;border:1px solid var(--border);border-radius:0.25rem;padding:0.625rem"><img src="' + piece.image + '" alt="" style="width:2.5rem;height:2.5rem;border-radius:0.25rem;object-fit:cover" /><span style="font-size:0.875rem">' + esc(piece.name) + " · " + fmt(piece.price) + "</span></a>" : "")
           + '<div style="margin-top:1.25rem;display:flex;flex-direction:column;gap:0.75rem">' + t.messages.map(function (m) {
@@ -6292,6 +7285,7 @@ var PRODUCTS = [
         else if (seg[0] === "heritage") { name = "heritage"; html = pageHeritage(); }
         else if (seg[0] === "our-world") { name = "our-world"; html = pageOurWorld(); }
         else if (seg[0] === "bespoke") { name = "bespoke"; html = pageBespoke(query); }
+        else if (seg[0] === "studio") { name = "studio"; html = pageStudio(query); }
         else if (seg[0] === "consultation") { name = "consultation"; html = pageConsultation(); }
         else if (seg[0] === "portal") { name = "portal"; html = pagePortal(); }
         else if (seg[0] === "check") { name = "check"; html = pageCheck(query); }
@@ -6301,6 +7295,7 @@ var PRODUCTS = [
         else if (seg[0] === "auth") { name = "auth"; html = pageAuth(query); }
         else if (seg[0] === "account") { name = "account"; html = pageAccount(); }
         else if (seg[0] === "house") { name = "house"; html = pageHouse(); }
+        else if (seg[0] === "backend") { name = "backend"; html = pageBackend(); }
         else if (seg[0] === "private") { name = "private"; html = pagePrivate(); }
         else if (seg[0] === "tag" && seg.length === 2) { name = "tag"; param = seg[1]; html = pageTag(seg[1]); }
         else { name = "404"; html = page404(); }
@@ -6311,6 +7306,9 @@ var PRODUCTS = [
         var showIntro = !!(introSrc && !keepScroll && !(EJ._introPlayed && EJ._introPlayed[introKey]));
         if (showIntro) html = sectionIntroHtml(introKey, introSrc) + '<div class="intro-content" id="introContent">' + html + "</div>";
         EJ._route = { name: name, param: param, query: query };
+        /* Leaving the studio clears its entry signature, so the next
+           visit loads the piece named in that link afresh. */
+        if (name !== "studio") EJ._studioSig = null;
         document.getElementById("app").innerHTML = html;
         if (showIntro) EJ._introInit(introKey);
         if (name === "connect") {
@@ -6321,6 +7319,7 @@ var PRODUCTS = [
         EJ.updateChrome();
         EJ.renderConcierge();
         if (!keepScroll) window.scrollTo(0, 0);
+        if (name === "studio") initStudioTouch();
         /* Trending rail auto-scroll */
         var rail = document.getElementById("trendingRail");
         if (rail) startTrending(rail);
