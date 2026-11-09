@@ -2921,6 +2921,162 @@ var PRODUCTS = [
       }
 
 
+      /* ================= Human lady voice — ONE shared speech engine =================
+         Every spoken feature on the site (Aaliyah, the piece-page AI Audio
+         Guide, the bespoke ticket reader) speaks through speakHumanVoice()
+         below, so the voice is always the same person: the most natural
+         female voice the visitor's own device offers, delivered sentence
+         by sentence at a calm human pace instead of one robotic block. */
+      /* EJ-VOICE-PICK:START — pure picker + sentence splitter (no DOM, unit-testable) */
+      var EJ_HQ_FEMALE = ["samantha", "microsoft aria", "microsoft jenny", "google uk english female", "google us english", "karen", "moira", "tessa", "fiona", "veena", "zira"];
+      var EJ_FEMALE_NAMES = EJ_HQ_FEMALE.concat(["female", "susan", "catherine", "allison", "ava", "serena", "nicky", "joanna", "salli", "kimberly", "kendra", "ivy", "amy", "emma", "victoria", "kate", "stephanie", "alice", "milena", "paulina", "luciana", "conchita", "penelope", "helena", "priya", "aditi", "raveena", "lekha", "heera", "yuna", "kyoko", "ting-ting", "mei-jia", "sin-ji"]);
+      function ejLangScore(lang) {
+        lang = String(lang || "").toLowerCase().replace("_", "-");
+        if (lang === "en-us") return 0;
+        if (lang === "en-gb") return 1;
+        if (lang.indexOf("en") === 0) return 2;
+        return 3;
+      }
+      function ejRankIn(list, name) {
+        for (var i = 0; i < list.length; i++) { if (name.indexOf(list[i]) !== -1) return i; }
+        return -1;
+      }
+      function ejIsFemaleName(name) { return ejRankIn(EJ_FEMALE_NAMES, name) !== -1; }
+      /* Preference order: (a) Natural/Neural/Premium/Enhanced + known female,
+         (b) known high-quality female voices, (c) any en-US/en-GB female,
+         (d) the best remaining English voice. Returns {voice, tier} or null. */
+      function pickLadyVoice(voices) {
+        if (!voices || !voices.length) return null;
+        var items = [];
+        for (var i = 0; i < voices.length; i++) {
+          var v = voices[i];
+          items.push({ v: v, i: i, name: String(v.name || "").toLowerCase(), lang: ejLangScore(v.lang) });
+        }
+        function best(cands, rankFn) {
+          if (!cands.length) return null;
+          cands.sort(function (a, b) {
+            var ra = rankFn(a), rb = rankFn(b);
+            if (ra !== rb) return ra - rb;
+            if (a.lang !== b.lang) return a.lang - b.lang;
+            return a.i - b.i;
+          });
+          return cands[0].v;
+        }
+        var tierA = items.filter(function (it) { return /natural|neural|premium|enhanced/.test(it.name) && ejIsFemaleName(it.name); });
+        var hit = best(tierA, function (it) { var r = ejRankIn(EJ_FEMALE_NAMES, it.name); return r === -1 ? 999 : r; });
+        if (hit) return { voice: hit, tier: 1 };
+        var tierB = items.filter(function (it) { return ejRankIn(EJ_HQ_FEMALE, it.name) !== -1; });
+        hit = best(tierB, function (it) { return ejRankIn(EJ_HQ_FEMALE, it.name); });
+        if (hit) return { voice: hit, tier: 2 };
+        var tierC = items.filter(function (it) { return it.lang <= 1 && ejIsFemaleName(it.name); });
+        hit = best(tierC, function (it) { var r = ejRankIn(EJ_FEMALE_NAMES, it.name); return r === -1 ? 999 : r; });
+        if (hit) return { voice: hit, tier: 3 };
+        var tierD = items.filter(function (it) { return it.lang <= 2; });
+        hit = best(tierD, function (it) { return it.v.default ? 0 : 1; });
+        if (hit) return { voice: hit, tier: 4 };
+        var def = items.filter(function (it) { return it.v.default; });
+        if (def.length) return { voice: def[0].v, tier: 4 };
+        return { voice: items[0].v, tier: 4 };
+      }
+      function splitSentences(text) {
+        if (!text) return [];
+        var t = String(text).replace(/\s+/g, " ").trim();
+        if (!t) return [];
+        /* Protect decimals (0.62) and common abbreviations from splitting. */
+        t = t.replace(/(\d)\.(\d)/g, "$1\u0001$2")
+          .replace(/\b(e\.g|i\.e|mr|mrs|ms|dr|st|vs|approx)\./gi, "$1\u0001");
+        var parts = t.match(/[^.!?…]+[.!?…]+["'”’)\]]*\s*|[^.!?…]+$/g) || [t];
+        var out = [];
+        for (var i = 0; i < parts.length; i++) {
+          var s = parts[i].replace(/\u0001/g, ".").trim();
+          if (s) out.push(s);
+        }
+        return out;
+      }
+      /* EJ-VOICE-PICK:END */
+      var ladyVoiceState = { voice: null, tier: 0, gen: 0, settled: false };
+      function refreshLadyVoice() {
+        if (!("speechSynthesis" in window)) return null;
+        try {
+          var vs = speechSynthesis.getVoices();
+          if (vs && vs.length) {
+            var picked = pickLadyVoice(vs);
+            ladyVoiceState.voice = picked ? picked.voice : null;
+            ladyVoiceState.tier = picked ? picked.tier : 0;
+          }
+        } catch (e) {}
+        return ladyVoiceState.voice;
+      }
+      /* If no good female voice is ready yet (voices often load async),
+         wait briefly for voiceschanged so an early tap never speaks with
+         the robot default when a lady is about to arrive. */
+      function ensureLadyVoice(cb) {
+        if (!("speechSynthesis" in window)) { cb(null); return; }
+        refreshLadyVoice();
+        if (ladyVoiceState.voice && ladyVoiceState.tier <= 3) { cb(ladyVoiceState.voice); return; }
+        if (ladyVoiceState.settled) { cb(ladyVoiceState.voice); return; }
+        var done = false;
+        function finish() {
+          if (done) return;
+          done = true;
+          ladyVoiceState.settled = true;
+          try { speechSynthesis.removeEventListener("voiceschanged", onChange); } catch (e) {}
+          refreshLadyVoice();
+          cb(ladyVoiceState.voice);
+        }
+        function onChange() {
+          refreshLadyVoice();
+          if (ladyVoiceState.voice && ladyVoiceState.tier <= 3) finish();
+        }
+        try { speechSynthesis.addEventListener("voiceschanged", onChange); } catch (e) {}
+        setTimeout(finish, 1200);
+      }
+      function stopHumanVoice() {
+        ladyVoiceState.gen++;
+        if ("speechSynthesis" in window) { try { speechSynthesis.cancel(); } catch (e) {} }
+      }
+      /* The shared speak: sentence-by-sentence queue, rate 0.97, pitch 1.0.
+         opts.onend / opts.onerror fire once, after the last sentence. */
+      function speakHumanVoice(text, opts) {
+        opts = opts || {};
+        if (!("speechSynthesis" in window) || !text) { if (opts.onerror) opts.onerror(); return false; }
+        var sentences = splitSentences(text);
+        if (!sentences.length) { if (opts.onerror) opts.onerror(); return false; }
+        stopHumanVoice();
+        var gen = ladyVoiceState.gen;
+        ensureLadyVoice(function (voice) {
+          if (gen !== ladyVoiceState.gen) return; /* stopped while waiting */
+          var remaining = sentences.length;
+          var finished = false;
+          function step(err) {
+            if (finished) return;
+            if (err) { finished = true; if (gen === ladyVoiceState.gen && opts.onerror) opts.onerror(); return; }
+            remaining--;
+            if (remaining <= 0) { finished = true; if (gen === ladyVoiceState.gen && opts.onend) opts.onend(); }
+          }
+          sentences.forEach(function (s) {
+            var u;
+            try { u = new SpeechSynthesisUtterance(s); } catch (e) { step(true); return; }
+            if (voice) { u.voice = voice; u.lang = voice.lang || "en-US"; } else { u.lang = "en-US"; }
+            u.rate = 0.97;
+            u.pitch = 1.0;
+            u.onend = function () { step(false); };
+            u.onerror = function (e) {
+              if (e && (e.error === "canceled" || e.error === "interrupted")) return;
+              step(false);
+            };
+            try { speechSynthesis.speak(u); } catch (e) { step(true); }
+          });
+        });
+        return true;
+      }
+      if ("speechSynthesis" in window) {
+        refreshLadyVoice();
+        var ejOnVoicesChanged = function () { ladyVoiceState.settled = true; refreshLadyVoice(); };
+        try { speechSynthesis.addEventListener("voiceschanged", ejOnVoicesChanged); } catch (e) {}
+        try { if ("onvoiceschanged" in speechSynthesis) speechSynthesis.onvoiceschanged = ejOnVoicesChanged; } catch (e) {}
+      }
+
       /* ================= EJ — chrome, overlays, widgets ================= */
       var EJ = {
         _grids: {},
@@ -3091,21 +3247,16 @@ var PRODUCTS = [
           EJ.speak(EJ._voiceLine);
         },
         closeVoice: function () {
-          if (window.speechSynthesis) speechSynthesis.cancel();
+          stopHumanVoice();
           if (EJ._recog) { try { EJ._recog.stop(); } catch (e) {} EJ._recog = null; }
           EJ.closeOverlays();
         },
-        speak: function (text) {
-          if (!("speechSynthesis" in window)) return;
-          try {
-            speechSynthesis.cancel();
-            var u = new SpeechSynthesisUtterance(text);
-            u.lang = "en-US"; u.rate = 1;
-            var voices = speechSynthesis.getVoices();
-            var f = voices.find(function (v) { return /female|zira|samantha|google uk english female/i.test(v.name); }) || voices.find(function (v) { return /^en/i.test(v.lang); });
-            if (f) u.voice = f;
-            speechSynthesis.speak(u);
-          } catch (e) {}
+        /* Aaliyah speaks through the shared human-lady engine. */
+        speak: function (text, opts) {
+          return speakHumanVoice(text, opts);
+        },
+        stopSpeaking: function () {
+          stopHumanVoice();
         },
         voiceAnswer: function (text) {
           var lineEl = document.getElementById("voiceLine");
@@ -3394,6 +3545,11 @@ var PRODUCTS = [
         }
       };
       window.EJ = EJ;
+      /* Shared-voice hooks (also used by the voice-picker verification). */
+      EJ._pickLadyVoice = pickLadyVoice;
+      EJ._splitSentences = splitSentences;
+      EJ._refreshLadyVoice = refreshLadyVoice;
+      EJ._ladyVoiceState = ladyVoiceState;
 
 
       /* ================= Pages ================= */
@@ -4238,7 +4394,6 @@ var PRODUCTS = [
           });
           return;
         }
-        var synth = window.speechSynthesis;
         if (EJ._narr && EJ._narr.active) { EJ.narrStop(); return; }
         var state = EJ._narr = { active: true, raf: 0 };
         btn.innerHTML = icon("square", 16) + "Stop";
@@ -4277,15 +4432,12 @@ var PRODUCTS = [
           spans.forEach(function (s) { s.style.opacity = "1"; });
           btn.innerHTML = icon("volume", 16) + "AI Audio Guide";
         }
-        var utter = new SpeechSynthesisUtterance(fullText);
-        utter.rate = 0.9;
-        utter.onend = onEnd;
-        utter.onerror = onEnd;
-        synth.cancel();
-        synth.speak(utter);
+        /* The guide speaks through the shared human-lady engine:
+           best natural female voice, sentence by sentence, rate 0.97. */
+        EJ.speak(fullText, { onend: onEnd, onerror: onEnd });
       };
       EJ.narrStop = function () {
-        if ("speechSynthesis" in window) window.speechSynthesis.cancel();
+        stopHumanVoice();
         if (EJ._narr) { EJ._narr.active = false; cancelAnimationFrame(EJ._narr.raf); }
         var btn = document.getElementById("narrBtn");
         var textEl = document.getElementById("narrText");
@@ -4748,10 +4900,7 @@ var PRODUCTS = [
         if (!("speechSynthesis" in window)) { toast("Voice isn't available on this device"); return; }
         var b = EJ._b;
         var calc = bespokeCalc(b);
-        var utter = new SpeechSynthesisUtterance(bespokeSummary(b, calc));
-        utter.rate = 0.95;
-        window.speechSynthesis.cancel();
-        window.speechSynthesis.speak(utter);
+        EJ.speak(bespokeSummary(b, calc));
       };
       EJ.bSaveDraft = function () {
         var b = EJ._b;
@@ -6123,7 +6272,7 @@ var PRODUCTS = [
         return { seg: seg, query: query, path: path };
       }
       EJ.route = function (keepScroll) {
-        if (!keepScroll) EJ.closeOverlays();
+        if (!keepScroll) { EJ.closeOverlays(); stopHumanVoice(); }
         var r = parseHash();
         var seg = r.seg, query = r.query;
         var name = "home", param = null;
