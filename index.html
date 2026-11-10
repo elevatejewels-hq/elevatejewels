@@ -2467,6 +2467,20 @@ var PRODUCTS = [
           "An oval diamond turned on its side — east-west — and hung from the house's fine chain. The setting disappears; the stone appears to float."
       });
 
+      /* src/data/brands.ts — the six Our World brands (logo files are CDN pointers in the
+         codebase, so the name is shown in the brand's own card, as the code's fallback does).
+         Defined BEFORE the PAVÉ catalogue block below: pwEnsureBrandVendor("pave")
+         runs at load and reads BRANDS, so BRANDS must already be assigned here —
+         defining it later leaves it undefined at that call and kills the page. */
+      var BRANDS = [
+        { id: "apex", name: "APEX Fine Gems", tagline: "Fine watches & high-end statement jewelry" },
+        { id: "schon-stone", name: "SCHON STONE", tagline: "Lab-grown diamonds & specialty stones" },
+        { id: "pave", name: "PAVÉ Jewelry & Watches", tagline: "Fine jewelry & timepieces" },
+        { id: "exclusive", name: "EXCLUSIVE", tagline: "Designer pieces & website-only collections" },
+        { id: "llg", name: "LLG", tagline: "Custom fine jewelry & bespoke orders" },
+        { id: "elevate", name: "Elevate Jewels Crown Marketplace", tagline: "The full marketplace, every house in one place" }
+      ];
+
       /* ============ PAVÉ watch houses — Bulova & Michele (verified catalogues, 2026-11-10) ============
          Every product from bulova.com and michele.com, filed under PAVÉ Jewelry
          & Watches as TESTING inventory at the regular LIST price — never the
@@ -2505,17 +2519,6 @@ var PRODUCTS = [
         emeraldRing: "assets/emerald-ring.jpg", atelier: "assets/atelier.jpg", catCufflinks: "assets/cat-cufflinks.jpg",
         catBrooches: "assets/cat-brooches.jpg", catBaby: "assets/cat-baby.jpg"
       };
-
-      /* src/data/brands.ts — the six Our World brands (logo files are CDN pointers in the
-         codebase, so the name is shown in the brand's own card, as the code's fallback does). */
-      var BRANDS = [
-        { id: "apex", name: "APEX Fine Gems", tagline: "Fine watches & high-end statement jewelry" },
-        { id: "schon-stone", name: "SCHON STONE", tagline: "Lab-grown diamonds & specialty stones" },
-        { id: "pave", name: "PAVÉ Jewelry & Watches", tagline: "Fine jewelry & timepieces" },
-        { id: "exclusive", name: "EXCLUSIVE", tagline: "Designer pieces & website-only collections" },
-        { id: "llg", name: "LLG", tagline: "Custom fine jewelry & bespoke orders" },
-        { id: "elevate", name: "Elevate Jewels Crown Marketplace", tagline: "The full marketplace, every house in one place" }
-      ];
 
       /* Real brand logo files supplied by the owner, keyed by BRANDS id.
          (brand-ooo.png is the LLG mark — interlocked rings with "LLG".)
@@ -3276,7 +3279,7 @@ var PRODUCTS = [
         var x = vp.clientWidth / 2 - (slide.offsetLeft + slide.offsetWidth / 2);
         track.style.transform = "translateX(" + x + "px)";
       }
-      EJ.scSet = function (id, idx) {
+      function scSet(id, idx) {
         var st = EJ._sc && EJ._sc[id];
         var vp = document.getElementById(id);
         if (!st || !vp) return;
@@ -3288,12 +3291,12 @@ var PRODUCTS = [
         scLayout(id);
         scArmTimer(id);
       };
-      EJ.scGo = function (id, dir) { var st = EJ._sc && EJ._sc[id]; if (st) EJ.scSet(id, st.idx + dir); };
-      EJ.scTap = function (el, id, idx, pid) {
+      function scGo(id, dir) { var st = EJ._sc && EJ._sc[id]; if (st) scSet(id, st.idx + dir); }
+      function scTap(el, id, idx, pid) {
         var st = EJ._sc && EJ._sc[id];
-        if (st && st.idx !== idx) { EJ.scSet(id, idx); return; }
+        if (st && st.idx !== idx) { scSet(id, idx); return; }
         location.hash = "#/item/" + pid;
-      };
+      }
       function scArmTimer(id) {
         var st = EJ._sc && EJ._sc[id];
         if (!st) return;
@@ -4052,6 +4055,12 @@ var PRODUCTS = [
         }
       };
       window.EJ = EJ;
+      /* Showcase carousel handlers — defined as plain functions earlier
+         (before EJ exists); attached here, once EJ is created. Assigning
+         them to EJ at their definition site crashed the whole script. */
+      EJ.scSet = scSet;
+      EJ.scGo = scGo;
+      EJ.scTap = scTap;
       /* Shared-voice hooks (also used by the voice-picker verification). */
       EJ._pickLadyVoice = pickLadyVoice;
       EJ._splitSentences = splitSentences;
@@ -6915,7 +6924,8 @@ var PRODUCTS = [
       function pwEnsureBrandVendor(brandId) {
         var slug = "brand-" + brandId;
         if (findVendor(slug)) return slug;
-        var b = BRANDS.find(function (x) { return x.id === brandId; }) || BRANDS[BRANDS.length - 1];
+        var brandList = typeof BRANDS !== "undefined" && BRANDS ? BRANDS : [];
+        var b = brandList.find(function (x) { return x.id === brandId; }) || brandList[brandList.length - 1] || { name: "Elevate Jewels", tagline: "" };
         VENDORS.push({
           slug: slug, name: b.name, house: "Private World brand", city: "Elevate Jewels", founded: 2026,
           accent: "45 70% 55%",
@@ -8428,6 +8438,3 @@ var PRODUCTS = [
   </script>
 </body>
 </html>
-
-
-<!-- Trigger Pages redeploy -->
