@@ -6827,6 +6827,7 @@ var PRODUCTS = [
         var unlocked = !!(EJ._houseUnlocked || EJ._pwRole);
         if (unlocked) {
           var roleLabel = EJ._pwRole === "owner" ? "Owner" : EJ._pwRole === "ai" ? "AI — Add Products only" : EJ._pwRole === "secretary" ? "Secretary" : EJ._housePreview ? "Sales Preview" : EJ._houseRole === "owner" ? "Owner" : EJ._houseRole === "ai" ? "AI — Add Products only" : "Secretary";
+          var isHouseOwner = EJ._pwRole === "owner" || (EJ._houseUnlocked && EJ._houseRole === "owner");
           return '<div class="wrap" style="max-width:56rem;padding-top:2.5rem;padding-bottom:0.5rem">'
             + '<div style="display:flex;flex-wrap:wrap;align-items:flex-start;gap:1rem"><div style="flex:1;min-width:16rem"><p class="eyebrow">Store House · Staff desk</p>'
             + '<h1 style="margin-top:0.5rem;font-family:var(--font-display);font-size:2.25rem">Store House</h1>'
@@ -6840,7 +6841,7 @@ var PRODUCTS = [
             + '<a href="#/backend" class="glass-soft" style="border-radius:0.25rem;padding:1.25rem;display:block"><p style="display:flex;align-items:center;gap:0.5rem;font-weight:500">' + icon("building", 16) + 'Back End overview</p><p style="margin-top:0.5rem;font-size:0.875rem;line-height:1.65;color:var(--muted-foreground)">All three back rooms on one page — who gets what, and what is set up.</p></a>'
             + "</div>"
             + "<style>@media(min-width:900px){.be-grid{grid-template-columns:repeat(3,1fr)}}</style>"
-            + "</div>" + giftRegisterHtml();
+            + "</div>" + (isHouseOwner ? houseSettingsHtml() : "") + giftRegisterHtml();
         }
         return '<div class="wrap" style="max-width:32rem;padding-top:3.5rem;padding-bottom:4rem"><div class="house-card">'
           + '<span style="display:inline-grid;place-items:center;width:3rem;height:3rem;border-radius:999px;border:1px solid var(--border);color:var(--gold)">' + icon("key", 20) + "</span>"
@@ -6908,6 +6909,8 @@ var PRODUCTS = [
         if (houseRole) {
           EJ._houseUnlocked = true;
           EJ._houseRole = houseRole;
+          EJ._pwRole = houseRole;
+          EJ._pwPreview = false;
           EJ._housePreview = false;
           EJ._houseMsg = "";
           toast("Store House is open", "The gift-card register and the staff shortcuts are on this page.");
@@ -6930,10 +6933,82 @@ var PRODUCTS = [
       EJ.houseLock = function () {
         EJ._houseUnlocked = false;
         EJ._houseRole = null;
+        EJ._pwRole = null;
         EJ._housePreview = false;
         EJ._houseMsg = "";
         toast("Store House locked", "A staff PIN — or the Sales Preview — opens it again.");
         EJ.route(true);
+      };
+      /* ---------- Store House Settings — PIN management (owner only) ----------
+         Signed in as OWNER, the Store House shows a Settings area with
+         a PINs section: one row per role (Owner, Secretary, AI), each
+         with a Change control. A new PIN is typed twice, must be
+         exactly 10 digits and different from the other two PINs, and
+         takes effect immediately on this device — the unlock accepts
+         the new value and rejects the old one — stored with the rest
+         of the front-end state (this session, on this device). PIN
+         values are never listed in full: rows show them masked except
+         the last two digits. Secretary and AI roles never see this. */
+      function houseSettingsHtml() {
+        var SET_IN = "width:100%;border:1px solid var(--border);border-radius:0.25rem;padding:0.625rem 0.75rem;font:inherit;font-size:0.875rem;background:transparent;text-align:center;letter-spacing:0.5em";
+        function mask(pin) { return pin ? "••••••••" + String(pin).slice(-2) : "Not set yet"; }
+        function row(role, label, pin, note) {
+          var open = EJ._setOpen === role;
+          var h = '<div style="border-top:1px solid var(--border);padding-top:1.25rem;margin-top:1.25rem">'
+            + '<div style="display:flex;flex-wrap:wrap;align-items:center;gap:0.75rem 1rem"><div style="flex:1;min-width:12rem">'
+            + '<p style="font-weight:500">' + label + ' PIN</p>'
+            + '<p style="margin-top:0.25rem;font-size:0.875rem;color:var(--muted-foreground)"><span style="letter-spacing:0.18em">' + mask(pin) + '</span> · ' + note + '</p></div>'
+            + '<button type="button" class="' + (open ? "btn-gold" : "btn-ghost") + '" aria-expanded="' + open + '" onclick="EJ.houseSettingsToggle(\'' + role + '\')">' + (open ? "Close" : pin ? "Change" : "Set PIN") + '</button></div>';
+          if (open) {
+            h += '<form style="margin-top:1rem;display:grid;gap:0.75rem;max-width:28rem" onsubmit="return EJ.houseSetPin(event,\'' + role + '\')">'
+              + '<input required name="setpin1" type="password" inputmode="numeric" autocomplete="off" maxlength="10" placeholder="New ' + label + ' PIN (10 digits)" aria-label="New ' + label + ' PIN, 10 digits" style="' + SET_IN + '" />'
+              + '<input required name="setpin2" type="password" inputmode="numeric" autocomplete="off" maxlength="10" placeholder="Type it again to confirm" aria-label="Confirm new ' + label + ' PIN" style="' + SET_IN + '" />'
+              + '<div><button type="submit" class="btn-gold">Save new PIN</button></div></form>';
+          }
+          return h + "</div>";
+        }
+        var h = '<div class="wrap" style="max-width:56rem;padding-bottom:0"><section class="glass-soft" style="border-radius:0.25rem;padding:1.5rem" aria-label="Settings">'
+          + '<p style="display:flex;align-items:center;gap:0.5rem;font-weight:500">' + icon("key", 16) + 'Settings</p>'
+          + '<p style="margin-top:0.5rem;font-size:0.875rem;line-height:1.65;color:var(--muted-foreground)">Owner only. Changes take effect immediately on this device — the new PIN unlocks the Store House and Private World, and the old one stops working.</p>'
+          + '<h2 style="margin-top:1.5rem;font-family:var(--font-display);font-size:1.375rem">PINs</h2>'
+          + '<p style="margin-top:0.375rem;font-size:0.875rem;line-height:1.65;color:var(--muted-foreground)">The three 10-digit PINs that open the Store House and Private World. PINs are shown masked — only the last two digits are visible.</p>';
+        if (EJ._setMsg) h += '<p role="alert" style="margin-top:1rem;font-size:0.875rem;color:var(--destructive)">' + esc(EJ._setMsg) + "</p>";
+        if (EJ._setDone) h += '<p role="status" style="margin-top:1rem;border:1px solid color-mix(in oklab, var(--gold) 45%, transparent);border-radius:0.25rem;background:color-mix(in oklab, var(--gold) 7%, transparent);padding:0.75rem 1rem;font-size:0.875rem;line-height:1.65">' + esc(EJ._setDone) + "</p>";
+        h += row("owner", "Owner", EJ._pwOwnerPin, "opens the full studio, approvals and these settings")
+          + row("secretary", "Secretary", EJ._pwSecPin, "opens Add Products only")
+          + row("ai", "AI", EJ._pwAiPin, "opens Add Products only — everything it adds waits for your approval")
+          + "</section></div>";
+        return h;
+      }
+      EJ.houseSettingsToggle = function (role) {
+        EJ._setOpen = EJ._setOpen === role ? null : role;
+        EJ._setMsg = "";
+        EJ._setDone = "";
+        EJ.route(true);
+      };
+      EJ.houseSetPin = function (ev, role) {
+        ev.preventDefault();
+        var isOwner = EJ._pwRole === "owner" || (EJ._houseUnlocked && EJ._houseRole === "owner");
+        if (!isOwner) return false;
+        var f = ev.target;
+        var a = (f.elements.setpin1.value || "").replace(/\D/g, "");
+        var b = (f.elements.setpin2.value || "").replace(/\D/g, "");
+        var label = role === "owner" ? "owner" : role === "secretary" ? "secretary" : "AI";
+        function fail(m) { EJ._setMsg = m; EJ._setDone = ""; EJ._setOpen = role; EJ.route(true); }
+        if (a.length !== 10) { fail("The new " + label + " PIN needs exactly 10 digits."); return false; }
+        if (a !== b) { fail("The two new PINs do not match — type the same 10 digits twice."); return false; }
+        if (role !== "owner" && a === EJ._pwOwnerPin) { fail("The " + label + " PIN must be different from the owner PIN."); return false; }
+        if (role !== "secretary" && EJ._pwSecPin && a === EJ._pwSecPin) { fail("The " + label + " PIN must be different from the secretary PIN."); return false; }
+        if (role !== "ai" && EJ._pwAiPin && a === EJ._pwAiPin) { fail("The " + label + " PIN must be different from the AI PIN."); return false; }
+        if (role === "owner") EJ._pwOwnerPin = a;
+        else if (role === "secretary") EJ._pwSecPin = a;
+        else EJ._pwAiPin = a;
+        EJ._setMsg = "";
+        EJ._setDone = "The " + label + " PIN has been changed. The new PIN works from the next unlock; the old one no longer opens the door.";
+        EJ._setOpen = null;
+        toast((role === "ai" ? "AI" : role === "owner" ? "Owner" : "Secretary") + " PIN changed", "The new PIN takes effect immediately on this device.");
+        EJ.route(true);
+        return false;
       };
 
       /* ---------- Back End overview — what the sales team gets ----------
@@ -7086,6 +7161,13 @@ var PRODUCTS = [
       EJ._pwStaged = EJ._pwStaged || null;
       EJ._pwRole = EJ._pwRole || null;
       EJ._pwLast = EJ._pwLast || { brandId: "elevate", category: "rings" };
+      /* AI role PIN — created at the owner's direction (2026-11-11)
+         so the AI can sign in to Store House / Private World and add
+         products as Pending Approval. The owner can change it at any
+         time in Store House → Settings → PINs (owner only); a change
+         made there replaces this value for the rest of the session,
+         on this device, like the rest of the front-end state. */
+      EJ._pwAiPin = EJ._pwAiPin || "9438929221";
 
       function pwGateHtml(withPad) {
         var h = '<div data-pwgate="1" style="display:flex;flex-direction:column;gap:1rem">';
