@@ -4364,18 +4364,44 @@ var PRODUCTS = [
             + '<button type="button" class="trending-save"' + (isClone ? ' tabindex="-1"' : "") + ' aria-label="' + (wished ? "Unsave" : "Save") + " " + esc(p.name) + '" aria-pressed="' + wished + '" onclick="EJ.trendingSave(this,\'' + p.id + '\')">' + icon("heart", 16) + "</button></article>";
         }
         EJ._trendingCard = card;
-        /* The rail carries the FULL curated / trending set — not just
-           the first screenful — followed by one identical copy of the
-           same set. startTrending drifts the rail slowly and, the
-           moment one full set has passed, steps the scroll back by
-           exactly one set width: the copy standing there is identical,
-           so the rotation loops seamlessly and never ends. Rail
-           photos load eagerly (the same image each piece uses
-           everywhere else on the site) so no card — Obsidian Halo
-           included — can sit blank waiting on a lazy load inside a
-           sideways scroller. */
-        var railCards = mixed.map(function (p) { return card(p); }).join("");
-        var railClones = mixed.map(function (p) { return card(p, true); }).join("");
+        /* The rail rotates a BOUNDED selection of the curated /
+           trending set — the visitor's own saved and in-bag pieces
+           and the featured & one-of-a-kind pieces first, then an
+           even spread across the rest of the catalogue so jewels
+           and watches both appear — followed by one identical copy
+           of that same selection. startTrending drifts the rail
+           slowly and, the moment one full set has passed, steps the
+           scroll back by exactly one set width: the copy standing
+           there is identical, so the rotation loops seamlessly and
+           never ends. The FULL curated set stays one tap away in
+           "View All" (EJ.trendingAll renders every piece in
+           EJ._trendingMixed). Rail photos load eagerly (the same
+           image each piece uses everywhere else on the site) so no
+           card — Obsidian Halo included — can sit blank waiting on
+           a lazy load inside a sideways scroller.
+           Why bounded: the rail once carried all 644 pieces twice —
+           1,288 cards in a single scroller ~317,000px wide, every
+           photo decoding eagerly. Mobile Safari killed the page for
+           the memory that cost and reloaded it in a loop ("A
+           problem repeatedly occurred"). A 30-piece rotation (60
+           cards) keeps the endless drift and the never-blank photos
+           at a weight any phone can hold. */
+        var RAIL_MAX = 30;
+        var railSet = [];
+        var railSeen = {};
+        mixed.forEach(function (p) {
+          if (railSet.length < RAIL_MAX && (active[p.id] || p.featured || p.oneOfOne)) { railSet.push(p); railSeen[p.id] = 1; }
+        });
+        if (railSet.length < RAIL_MAX) {
+          var railRest = mixed.filter(function (p) { return !railSeen[p.id]; });
+          var railNeed = Math.min(RAIL_MAX - railSet.length, railRest.length);
+          if (railNeed > 0) {
+            var railStep = railRest.length / railNeed;
+            for (var ri = 0; ri < railNeed; ri++) railSet.push(railRest[Math.floor(ri * railStep)]);
+          }
+        }
+        var railCards = railSet.map(function (p) { return card(p); }).join("");
+        var railClones = railSet.map(function (p) { return card(p, true); }).join("");
         return '<section class="wrap" style="padding-top:2rem" aria-labelledby="trending-title"><div style="margin-bottom:1.25rem;display:flex;align-items:center;justify-content:space-between;gap:1rem"><h2 id="trending-title" style="font-size:1.5rem;font-family:var(--font-sans)">Curated &amp; Trending Today</h2><button type="button" style="display:inline-flex;align-items:center;gap:0.5rem;font-size:0.875rem" onclick="EJ.trendingAll()">View All ' + icon("arrowRight", 16) + '</button></div>'
           + '<div class="trending-rail" id="trendingRail" aria-label="Curated and trending pieces — scrolls slowly on its own; swipe or scroll to browse">' + railCards + railClones + "</div></section>";
       };
