@@ -1535,6 +1535,77 @@
       @media (max-width: 639px) { .house-card { padding: 1.5rem 1.25rem; } }
       .house-input { border: 1px solid var(--border); border-radius: 8px; background: var(--popover); color: var(--foreground); padding: 8px 10px; font-size: 13px; width: 100%; margin-top: 8px; font-family: inherit; }
 
+      /* ===== Store House workspace — Lovable house-preview layout =====
+         Ported from the original Lovable styles.css (.house-* rules,
+         scoped to .house-workspace so the PIN-gate cards keep their
+         own .house-card) and house-workspace.tsx structure. */
+      .house-workspace { display: grid; grid-template-columns: 230px minmax(0, 1fr); letter-spacing: 0; --inventory-selected: oklch(0.89 0.065 88); }
+      .house-workspace.connect-material { --connect-bg: var(--background); --connect-surface: var(--popover); --connect-ink: var(--foreground); --connect-muted: var(--muted-foreground); --connect-line: var(--border); --connect-hover: var(--accent); --connect-selected: var(--secondary); background: var(--connect-bg); }
+      .house-rail { display: flex; flex-direction: column; min-height: 100vh; background: var(--connect-bg); }
+      .house-main { max-width: 1600px; width: 100%; min-width: 0; }
+      .hw-rail-brand { display: flex; align-items: center; gap: 12px; padding: 24px; color: inherit; text-decoration: none; }
+      .hw-rail-house { margin: 0 20px; border-bottom: 1px solid var(--connect-line); padding-bottom: 16px; }
+      .hw-nav { display: flex; flex-direction: column; gap: 2px; padding: 12px; }
+      .hw-nav .connect-nav-item { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 8px; color: inherit; text-decoration: none; font-size: 14px; }
+      .hw-rail-foot { margin-top: auto; padding: 24px; display: flex; flex-direction: column; gap: 12px; }
+      .house-topbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 72px; padding: 8px 24px; }
+      .house-search { margin: 0 auto; }
+      .house-sample { font-size: 11px; color: var(--connect-muted); border: 1px solid var(--connect-line); border-radius: 999px; padding: 4px 10px; white-space: nowrap; }
+      .house-select { border: 1px solid var(--connect-line); border-radius: 8px; background: var(--connect-surface); color: var(--connect-ink); padding: 8px 10px; font-size: 13px; max-width: 12rem; font-family: inherit; }
+      .house-workspace .house-input { display: block; width: 100%; max-width: none; margin-top: 8px; }
+      .house-surface { margin: 0 20px 20px 0; padding: 24px; min-height: calc(100vh - 92px); background: var(--connect-surface); border-radius: 16px; }
+      .house-workspace .house-card { border: 1px solid var(--connect-line); border-radius: 12px; background: var(--connect-surface); box-shadow: 0 1px 2px color-mix(in oklab, var(--foreground) 8%, transparent); }
+      .house-chip { display: inline-flex; align-items: center; gap: 6px; min-height: 32px; padding: 0 12px; border: 1px solid var(--connect-line); border-radius: 8px; font-size: 13px; background: var(--connect-surface); color: var(--connect-ink); cursor: pointer; font-family: inherit; }
+      .house-chip.is-active { background: var(--connect-selected); border-color: transparent; }
+      .house-table { border: 1px solid var(--connect-line); border-radius: 12px; overflow: hidden; background: var(--connect-surface); box-shadow: 0 1px 2px color-mix(in oklab, var(--foreground) 10%, transparent), 0 2px 6px color-mix(in oklab, var(--foreground) 6%, transparent); }
+      .house-row { display: grid; grid-template-columns: 40px minmax(0, 1fr) 130px 44px auto; align-items: center; gap: 16px; min-height: 56px; padding: 6px 16px; border-bottom: 1px solid var(--connect-line); position: relative; }
+      .house-row:last-child { border-bottom: 0; }
+      .house-row:not(.house-row-head):hover { background: var(--connect-hover); }
+      .house-row-head { min-height: 40px; font-size: 12px; color: var(--connect-muted); }
+      .house-row-select { position: relative; width: 40px; height: 40px; cursor: pointer; display: block; }
+      .house-row-select input { position: absolute; z-index: 1; left: -8px; top: -3px; width: 20px; height: 20px; accent-color: var(--gold); cursor: pointer; }
+      .house-row.is-selected { background: var(--connect-selected); box-shadow: inset 3px 0 var(--inventory-selected); }
+      .house-batch-bar { position: sticky; top: 80px; z-index: 20; display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px; padding: 12px; border: 1px solid var(--connect-line); border-radius: 8px; background: var(--connect-bg); box-shadow: var(--shadow-lux); }
+      .house-batch-bar [aria-pressed="true"] { border-color: var(--gold); background: var(--connect-selected); }
+      .house-qr { background: none; border: none; padding: 0; cursor: pointer; display: grid; place-items: center; color: var(--connect-muted); border-radius: 4px; }
+      .house-qr:hover { outline: 2px solid var(--connect-selected); }
+      .house-visibility { position: relative; width: 36px; min-width: 36px; height: 20px; padding: 0; border-radius: 999px; border: 1px solid var(--connect-muted); background: color-mix(in oklab, var(--foreground) 22%, transparent); flex-shrink: 0; cursor: pointer; }
+      .house-visibility > span { position: absolute; top: 1px; left: 1px; width: 16px; height: 16px; border-radius: 999px; background: var(--foreground); box-shadow: 0 1px 2px color-mix(in oklab, var(--foreground) 30%, transparent); transition: transform 160ms ease; }
+      .house-visibility[data-on="true"] { background: var(--inventory-selected); }
+      .house-visibility[data-on="true"] > span { transform: translateX(16px); }
+      .house-banner-stage { position: relative; height: 180px; overflow: hidden; border-radius: 8px; background: var(--secondary); color: var(--foreground); }
+      .house-banner-slide { position: absolute; inset: 0; display: grid; place-items: center; opacity: 0; transition: opacity 0.9s ease; padding: 16px; text-align: center; }
+      .house-banner-slide.is-on { opacity: 1; }
+      .house-banner-slide img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+      .house-banner-slide span { position: relative; font-family: var(--font-display); font-size: 1.5rem; letter-spacing: 0.12em; }
+      .hw-stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+      @media (min-width: 1280px) { .hw-stats { grid-template-columns: repeat(4, minmax(0, 1fr)); } .hw-overview-cols { grid-template-columns: 1.7fr 1fr !important; } }
+      .hw-form-grid { display: grid; gap: 20px; }
+      @media (min-width: 640px) { .hw-form-grid { grid-template-columns: 1fr 1fr; } }
+      .hw-in { margin-top: 8px; width: 100%; border: 1px solid var(--border); border-radius: 4px; background: var(--popover); padding: 10px 12px; font-size: 14px; color: var(--foreground); font-family: inherit; }
+      .hw-dialog { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 101; max-height: 90dvh; width: calc(100% - 2rem); max-width: 36rem; overflow-y: auto; border-radius: 12px; border: 1px solid var(--border); background: var(--popover); color: var(--foreground); padding: 24px; box-shadow: 0 24px 60px oklch(0 0 0 / 20%); }
+      .hw-dialog-lg { max-width: 48rem; }
+      .hw-menu { position: absolute; right: 0; top: calc(100% + 4px); z-index: 30; min-width: 180px; background: var(--popover); border: 1px solid var(--border); border-radius: 8px; box-shadow: var(--shadow-lux); padding: 4px; display: flex; flex-direction: column; }
+      .hw-menu button { display: flex; align-items: center; gap: 8px; width: 100%; text-align: left; background: none; border: none; padding: 8px 10px; font-size: 14px; font-family: inherit; color: inherit; cursor: pointer; border-radius: 6px; }
+      .hw-menu button:hover { background: var(--accent); }
+      @media (max-width: 1000px) { .house-workspace { grid-template-columns: 180px minmax(0, 1fr); } .hw-crumb { display: none; } }
+      @media (max-width: 700px) {
+        .house-workspace { display: block; }
+        .house-rail { min-height: 0; border-bottom: 1px solid var(--connect-line); }
+        .hw-rail-brand { padding: 16px 20px; }
+        .hw-rail-house, .hw-rail-foot { display: none; }
+        .hw-nav { flex-direction: row; overflow-x: auto; margin-top: 0; padding: 0 12px 12px; }
+        .hw-nav .connect-nav-item { width: auto; flex-shrink: 0; }
+        .house-topbar { flex-wrap: wrap; padding: 8px 16px; }
+        .house-batch-bar { position: relative; top: 0; }
+        .house-surface { margin: 0; border-radius: 0; padding: 16px; }
+        .house-row { grid-template-columns: 40px minmax(0, 1fr) 44px; }
+        .house-row > div:nth-child(3) { grid-column: 2; }
+        .house-row > button.house-qr { grid-column: 3; grid-row: 1; }
+        .house-row > div:last-child { grid-column: 1 / -1; }
+        .house-row-head { display: none; }
+      }
+
       .google-signin-logo { width: 20px; height: 20px; flex-shrink: 0; }
       .btn-outline-full { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; width: 100%; background: var(--popover); color: var(--foreground); border: 1px solid var(--border); box-shadow: var(--shadow-lux); padding: 0.625rem 1rem; font-size: 0.875rem; border-radius: 0.5rem; }
       .btn-outline-full:hover { background: var(--card); }
@@ -1743,7 +1814,19 @@
         card: '<rect width="20" height="14" x="2" y="5" rx="2"/><path d="M2 10h20"/>',
         wand: '<path d="m21.64 3.64-1.28-1.28a1.21 1.21 0 0 0-1.72 0L2.36 18.64a1.21 1.21 0 0 0 1.72 1.72l1.28-1.28a1.2 1.2 0 0 1 1.72 0l1.28 1.28a1.21 1.21 0 0 0 1.72 0L21.64 5.36a1.2 1.2 0 0 0 0-1.72Z"/><path d="m14 7 3 3"/><path d="M5 6v4"/><path d="M19 14v4"/><path d="M10 2v2"/><path d="M7 8H3"/><path d="M21 16h-4"/><path d="M11 3H9"/>',
         imagePlus: '<path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7"/><path d="m21 15-5-5L5 21"/><circle cx="9" cy="9" r="2"/><path d="M19 2v6"/><path d="M22 5h-6"/>',
-        scroll: '<path d="M15 12h-5"/><path d="M15 8h-5"/><path d="M19 17V5a2 2 0 0 0-2-2H4"/><path d="M8 21h12a2 2 0 0 0 2-2v-1a1 1 0 0 0-1-1H11a1 1 0 0 0-1 1v1a2 2 0 1 1-4 0V5a2 2 0 1 0-4 0v2a1 1 0 0 0 1 1h3"/>'
+        scroll: '<path d="M15 12h-5"/><path d="M15 8h-5"/><path d="M19 17V5a2 2 0 0 0-2-2H4"/><path d="M8 21h12a2 2 0 0 0 2-2v-1a1 1 0 0 0-1-1H11a1 1 0 0 0-1 1v1a2 2 0 1 1-4 0V5a2 2 0 1 0-4 0v2a1 1 0 0 0 1 1h3"/>',
+        crown: '<path d="m2 4 3 12h14l3-12-6 7-4-7-4 7-6-7z"/><path d="M5 20h14"/>',
+        settings: '<path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/>',
+        fileText: '<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/>',
+        megaphone: '<path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/>',
+        copy: '<rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>',
+        moreHorizontal: '<circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/>',
+        printer: '<path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 9V2h12v7"/><rect x="6" y="14" width="12" height="8" rx="1"/>',
+        clock: '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',
+        arrowUp: '<path d="m5 12 7-7 7 7"/><path d="M12 19V5"/>',
+        arrowDown: '<path d="M12 5v14"/><path d="m19 12-7 7-7-7"/>',
+        save: '<path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7"/><path d="M7 3v4a1 1 0 0 0 1 1h7"/>',
+        truck: '<path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M15 18h-5"/><path d="M15 8h4l3 5v4a1 1 0 0 1-1 1h-2"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/>'
       };
       function icon(name, size) {
         size = size || 16;
@@ -3946,6 +4029,10 @@ var PRODUCTS = [
           var root = document.getElementById("acctPopRoot");
           if (root.innerHTML) { root.innerHTML = ""; return; }
           document.getElementById("menuPopRoot").innerHTML = "";
+          if (EJ._user) {
+            root.innerHTML = '<div class="acct-pop"><p style="margin-bottom:0.25rem">Signed in as <strong>' + esc(EJ._user.name) + '</strong></p><p style="margin-bottom:0.75rem;font-size:0.8125rem;color:var(--muted-foreground)">' + esc(EJ._user.email) + '</p><a class="btn-solid-full" href="#/account" onclick="EJ.closeOverlays()">Your account</a><button type="button" style="margin-top:0.75rem;font-size:0.875rem;color:var(--muted-foreground);text-decoration:underline;text-underline-offset:4px" onclick="EJ.authSignOut()">Sign out</button></div>';
+            return;
+          }
           root.innerHTML = '<div class="acct-pop"><p style="margin-bottom:0.75rem">Add your account today.</p><a class="btn-solid-full" href="#/auth" onclick="EJ.closeOverlays()">Sign in / Create account</a></div>';
         },
         toggleMenuPop: function () {
@@ -6778,10 +6865,32 @@ var PRODUCTS = [
         EJ.route(true);
       };
 
-      /* ---------- Auth (src/routes/auth.tsx, front-end demo) ---------- */
+      /* ---------- Auth (src/routes/auth.tsx) ----------
+         Customer accounts, working end to end inside the page:
+         Create account registers the email + password in this
+         session's account register, Sign in checks against it, and
+         the signed-in state (EJ._user) drives the account page and
+         the header account menu. Forgot password sets a new password
+         for an account in the register and signs in with it. As with
+         the staff PINs and the gift-card register, accounts live in
+         this session until the connected back end is live. */
+      function authAccounts() {
+        if (!EJ._accounts) EJ._accounts = ejStore("ej-accounts") || {};
+        return EJ._accounts;
+      }
+      function authFirstName(name) { return (name || "").trim().split(/\s+/)[0] || "there"; }
       function pageAuth(query) {
+        if (EJ._user) {
+          return '<div class="wrap" style="max-width:32rem;padding-top:3rem;padding-bottom:4rem">'
+            + '<p class="eyebrow">Elevate professional</p><h1 style="margin-top:0.75rem;font-size:2.25rem;font-family:var(--font-display)">You are signed in</h1>'
+            + '<p style="margin-top:1rem;font-size:0.875rem;line-height:1.7;color:var(--muted-foreground)">Signed in as <strong style="color:var(--foreground)">' + esc(EJ._user.name) + '</strong> · ' + esc(EJ._user.email) + "</p>"
+            + '<div style="margin-top:1.5rem;display:flex;flex-wrap:wrap;gap:0.75rem"><a class="btn-gold" href="#/account">Go to your account</a><button type="button" class="btn-ghost" onclick="EJ.authSignOut()">Sign out</button></div>'
+            + '<div><a href="#/" style="display:inline-block;margin-top:2rem;font-size:0.875rem;color:var(--muted-foreground)">← Return to the collections</a></div></div>';
+        }
         var mode = EJ._authMode || "login";
         var msg = EJ._authMsg || "";
+        var err = EJ._authErr || "";
+        var inputCss = "margin-top:0.375rem;width:100%;border:1px solid var(--border);border-radius:0.25rem;padding:0.75rem;font:inherit;background:transparent";
         var h = '<div class="wrap" style="max-width:32rem;padding-top:3rem;padding-bottom:4rem">'
           + '<p class="eyebrow">Elevate professional</p>'
           + '<h1 style="margin-top:0.75rem;font-size:2.25rem;font-family:var(--font-display)">' + (mode === "signup" ? "Join our world" : mode === "forgot" ? "Reset your password" : "Welcome back") + "</h1>"
@@ -6790,31 +6899,80 @@ var PRODUCTS = [
           h += '<button type="button" class="btn-ghost" style="width:100%;margin-top:1.5rem" onclick="EJ.authGoogle()">' + googleLogo() + "Continue with Google</button>"
             + '<div style="margin:1rem 0;display:flex;align-items:center;gap:1rem"><span style="flex:1;border-top:1px solid var(--border)"></span><span style="font-size:0.75rem;color:var(--muted-foreground)">or</span><span style="flex:1;border-top:1px solid var(--border)"></span></div>';
         }
-        h += '<form style="display:grid;gap:1rem" onsubmit="return EJ.authSubmit(event)">'
-          + '<label style="font-size:0.875rem">Email<input type="email" required placeholder="you@example.com" style="margin-top:0.375rem;width:100%;border:1px solid var(--border);border-radius:0.25rem;padding:0.75rem;font:inherit;background:transparent" /></label>';
-        if (mode !== "forgot") h += '<label style="font-size:0.875rem">Password<input type="password" required minlength="8" placeholder="At least 8 characters" style="margin-top:0.375rem;width:100%;border:1px solid var(--border);border-radius:0.25rem;padding:0.75rem;font:inherit;background:transparent" /></label>';
-        h += '<button type="submit" class="btn-gold">' + (mode === "signup" ? "Create account" : mode === "forgot" ? "Send reset link" : "Sign in") + "</button></form>";
-        if (msg) h += '<p role="status" style="margin-top:1rem;font-size:0.875rem;color:var(--gold)">' + esc(msg) + "</p>";
+        h += '<form style="display:grid;gap:1rem" onsubmit="return EJ.authSubmit(event)">';
+        if (mode === "signup") h += '<label style="font-size:0.875rem">Full name<input id="authName" type="text" required autocomplete="name" placeholder="Your name" style="' + inputCss + '" /></label>';
+        h += '<label style="font-size:0.875rem">Email<input id="authEmail" type="email" required autocomplete="email" placeholder="you@example.com" value="' + esc(EJ._authEmail || "") + '" style="' + inputCss + '" /></label>'
+          + '<label style="font-size:0.875rem">' + (mode === "forgot" ? "New password" : "Password") + '<input id="authPass" type="password" required minlength="8" autocomplete="' + (mode === "login" ? "current-password" : "new-password") + '" placeholder="At least 8 characters" style="' + inputCss + '" /></label>'
+          + '<button type="submit" class="btn-gold">' + (mode === "signup" ? "Create account" : mode === "forgot" ? "Set new password & sign in" : "Sign in") + "</button></form>";
+        if (err) h += '<p role="alert" style="margin-top:1rem;font-size:0.875rem;line-height:1.6;color:var(--destructive)">' + esc(err) + "</p>";
+        if (msg) h += '<p role="status" style="margin-top:1rem;font-size:0.875rem;line-height:1.6;color:var(--gold)">' + esc(msg) + "</p>";
         if (mode === "login") h += '<button type="button" style="margin-top:1.25rem;font-size:0.875rem;color:var(--muted-foreground);text-decoration:underline;text-underline-offset:4px" onclick="EJ.authMode(\'forgot\')">Forgot password?</button>';
-        h += '<div><a href="#/" style="display:inline-block;margin-top:2rem;font-size:0.875rem;color:var(--muted-foreground)">← Return to the collections</a></div></div>';
+        if (mode === "forgot") h += '<button type="button" style="margin-top:1.25rem;font-size:0.875rem;color:var(--muted-foreground);text-decoration:underline;text-underline-offset:4px" onclick="EJ.authMode(\'login\')">Back to sign in</button>';
+        h += '<p style="margin-top:1.5rem;font-size:0.75rem;line-height:1.65;color:var(--muted-foreground)">New here? Create your account first — then sign in with the same email and password whenever you come back. Accounts are kept on this device until the connected back end is live.</p>'
+          + '<div><a href="#/" style="display:inline-block;margin-top:1rem;font-size:0.875rem;color:var(--muted-foreground)">← Return to the collections</a></div></div>';
         return h;
       }
-      EJ.authMode = function (m) { EJ._authMode = m; EJ._authMsg = ""; EJ.route(true); };
-      EJ.authGoogle = function () { EJ._authMsg = "Google sign-in could not be completed. Please try again."; EJ.route(true); };
+      EJ.authMode = function (m) { EJ._authMode = m; EJ._authMsg = ""; EJ._authErr = ""; EJ.route(true); };
+      EJ.authGoogle = function () { EJ._authMsg = ""; EJ._authErr = ""; EJ._authMsg = "Google sign-in is not connected yet — please use your email and password below."; EJ.route(true); };
+      EJ.authSignOut = function () {
+        EJ._user = null;
+        EJ._authMode = "login";
+        EJ._authMsg = "";
+        EJ._authErr = "";
+        EJ.closeOverlays();
+        toast("Signed out", "Your account stays saved on this device — sign in again any time.");
+        if (location.hash !== "#/auth") location.hash = "#/auth"; else EJ.route(true);
+      };
       EJ.authSubmit = function (ev) {
         ev.preventDefault();
         var mode = EJ._authMode || "login";
-        EJ._authMsg = mode === "signup"
-          ? "Check your email to confirm your account, then sign in to finish onboarding."
-          : mode === "forgot"
-            ? "Check your email for a password reset link."
-            : "Sign-in was not accepted. Check your email and password, or create an account.";
-        EJ.route(true);
-        return false;
+        var email = (document.getElementById("authEmail").value || "").trim().toLowerCase();
+        var pass = document.getElementById("authPass").value || "";
+        var accounts = authAccounts();
+        EJ._authEmail = email;
+        EJ._authMsg = "";
+        EJ._authErr = "";
+        function fail(m) { EJ._authErr = m; EJ.route(true); return false; }
+        function signedIn(acct, title, sub) {
+          EJ._user = { name: acct.name, email: acct.email };
+          EJ._authMode = "login";
+          EJ._authEmail = "";
+          toast(title, sub);
+          location.hash = "#/account";
+          return false;
+        }
+        if (mode === "signup") {
+          var name = (document.getElementById("authName").value || "").trim();
+          if (!name) return fail("Please add your name so the houses know how to greet you.");
+          if (accounts[email]) { EJ._authMode = "login"; return fail("An account with this email already exists — sign in with your password below."); }
+          accounts[email] = { name: name, email: email, pass: pass };
+          ejStoreSet("ej-accounts", accounts);
+          return signedIn(accounts[email], "Welcome to Elevate, " + authFirstName(name), "Your account is created and you are signed in.");
+        }
+        if (mode === "forgot") {
+          var fa = accounts[email];
+          if (!fa) return fail("No account with that email yet — create your account first, then sign in.");
+          fa.pass = pass;
+          ejStoreSet("ej-accounts", accounts);
+          return signedIn(fa, "Password updated", "You are signed in with your new password.");
+        }
+        var acct = accounts[email];
+        if (!acct) return fail("No account with that email yet. Create your account first — it takes a moment — then sign in.");
+        if (acct.pass !== pass) return fail("That password does not match the account for this email. Check it and try again, or reset it with Forgot password.");
+        return signedIn(acct, "Welcome back, " + authFirstName(acct.name), "You are signed in.");
       };
 
-      /* ---------- Account (src/routes/account.tsx — signed-out state) ---------- */
+      /* ---------- Account (src/routes/account.tsx) ---------- */
       function pageAccount() {
+        if (EJ._user) {
+          return '<div class="wrap" style="max-width:32rem;padding-top:3rem;padding-bottom:4rem">'
+            + '<p class="eyebrow">Elevate professional</p><h1 style="margin-top:0.75rem;font-size:2.25rem;font-family:var(--font-display)">Hello, ' + esc(authFirstName(EJ._user.name)) + "</h1>"
+            + '<p style="margin-top:1rem;font-size:0.875rem;line-height:1.7;color:var(--muted-foreground)">Signed in as <strong style="color:var(--foreground)">' + esc(EJ._user.name) + "</strong> · " + esc(EJ._user.email) + ". Manage your profile, your pieces and your conversations with the houses from your portal.</p>"
+            + '<div style="margin-top:1.25rem;display:flex;flex-wrap:wrap;gap:0.5rem"><span class="sub-chip">' + S.wishlist.length + ' set aside</span><span class="sub-chip">' + cartCount() + ' in your bag</span><span class="sub-chip">' + S.bookings.length + ' appointments</span></div>'
+            + '<div style="margin-top:1.5rem;display:flex;flex-wrap:wrap;gap:0.75rem"><a class="btn-gold" href="#/portal">Open your portal</a><a class="btn-ghost" href="#/check">Track an item or repair</a></div>'
+            + '<div style="margin-top:1rem"><button type="button" class="btn-ghost" onclick="EJ.authSignOut()">Sign out</button></div>'
+            + '<p style="margin-top:1.5rem;font-size:0.75rem;line-height:1.65;color:var(--muted-foreground)">Your account is kept on this device until the connected back end is live.</p></div>';
+        }
         return '<div class="wrap" style="max-width:32rem;padding-top:3rem;padding-bottom:4rem">'
           + '<p class="eyebrow">Elevate professional</p><h1 style="margin-top:0.75rem;font-size:2.25rem;font-family:var(--font-display)">Your account</h1>'
           + '<p style="margin-top:1rem;font-size:0.875rem;line-height:1.7;color:var(--muted-foreground)">Sign in to manage your profile, your pieces and your conversations with the houses.</p>'
@@ -6875,7 +7033,7 @@ var PRODUCTS = [
         function chip(val, label) {
           return '<button type="button" class="chip' + (f === val ? " on" : "") + '" aria-pressed="' + (f === val) + '" onclick="EJ.gcFilter(\'' + val + '\')">' + label + "</button>";
         }
-        return '<div class="wrap" style="max-width:56rem;padding-bottom:4rem"><section class="glass-soft" style="border-radius:0.25rem;padding:1.5rem">'
+        return '<section class="glass-soft" style="border-radius:0.25rem;padding:1.5rem">'
           + '<p style="display:flex;align-items:center;gap:0.5rem;font-weight:500">' + icon("gift", 16) + "Gift cards</p>"
           + '<p style="margin-top:0.5rem;font-size:0.875rem;line-height:1.65;color:var(--muted-foreground)">' + cards.length + " cards on the register · " + active.length + " active · " + fmt(total) + " in outstanding balances</p>"
           + '<div style="margin-top:1rem;display:flex;flex-wrap:wrap;gap:0.5rem">' + chip("all", "All") + chip("active", "Active") + chip("redeemed", "Redeemed") + "</div>"
@@ -6886,7 +7044,7 @@ var PRODUCTS = [
           }).join("") : '<p style="font-size:0.875rem;color:var(--muted-foreground)">No cards with this status.</p>')
           + "</div>"
           + '<p style="margin-top:1rem;font-size:0.75rem;line-height:1.65;color:var(--muted-foreground)">Sample records only — gift cards are not connected, and statuses change on this device only.</p>'
-          + "</section></div>";
+          + "</section>";
       }
       EJ.gcFilter = function (f) { EJ._gcFilter = f; EJ.route(true); };
       EJ.gcToggle = function (i) {
@@ -6900,8 +7058,9 @@ var PRODUCTS = [
         var input = ev.target.querySelector("input");
         var digits = (input.value || "").replace(/\D/g, "");
         if (digits.length < 10) { EJ._houseMsg = "Enter all 10 digits."; EJ.route(true); return false; }
+        ejPinsLoad();
         if (!EJ._pwOwnerPin && !EJ._pwSecPin && !EJ._pwAiPin) {
-          EJ._houseMsg = "No staff PINs have been set yet. The owner creates them in Private World — or open the Sales Preview below for a look at the desk.";
+          EJ._houseMsg = "No staff PINs have been set on this device yet. The owner creates them at the Private World door — or open the Sales Preview below for a look at the desk.";
           EJ.route(true);
           return false;
         }
@@ -6967,7 +7126,7 @@ var PRODUCTS = [
           }
           return h + "</div>";
         }
-        var h = '<div class="wrap" style="max-width:56rem;padding-bottom:0"><section class="glass-soft" style="border-radius:0.25rem;padding:1.5rem" aria-label="Settings">'
+        var h = '<section class="glass-soft" style="border-radius:0.25rem;padding:1.5rem" aria-label="Settings">'
           + '<p style="display:flex;align-items:center;gap:0.5rem;font-weight:500">' + icon("key", 16) + 'Settings</p>'
           + '<p style="margin-top:0.5rem;font-size:0.875rem;line-height:1.65;color:var(--muted-foreground)">Owner only. Changes take effect immediately on this device — the new PIN unlocks the Store House and Private World, and the old one stops working.</p>'
           + '<h2 style="margin-top:1.5rem;font-family:var(--font-display);font-size:1.375rem">PINs</h2>'
@@ -6977,7 +7136,7 @@ var PRODUCTS = [
         h += row("owner", "Owner", EJ._pwOwnerPin, "opens the full studio, approvals and these settings")
           + row("secretary", "Secretary", EJ._pwSecPin, "opens Add Products only")
           + row("ai", "AI", EJ._pwAiPin, "opens Add Products only — everything it adds waits for your approval")
-          + "</section></div>";
+          + "</section>";
         return h;
       }
       EJ.houseSettingsToggle = function (role) {
@@ -7003,11 +7162,1015 @@ var PRODUCTS = [
         if (role === "owner") EJ._pwOwnerPin = a;
         else if (role === "secretary") EJ._pwSecPin = a;
         else EJ._pwAiPin = a;
+        ejPinsSave();
         EJ._setMsg = "";
         EJ._setDone = "The " + label + " PIN has been changed. The new PIN works from the next unlock; the old one no longer opens the door.";
         EJ._setOpen = null;
         toast((role === "ai" ? "AI" : role === "owner" ? "Owner" : "Secretary") + " PIN changed", "The new PIN takes effect immediately on this device.");
         EJ.route(true);
+        return false;
+      };
+
+      /* ---------- Store House workspace — Lovable house-preview restored ----------
+         The back end behind the PIN door, rebuilt from the original
+         Lovable code (src/components/site/house-workspace.tsx +
+         src/lib/house-preview.ts + house-batch.ts + house-banners.tsx):
+         the same light workspace, left rail, screens, wording, stat
+         cards, table columns and controls — but running on this site's
+         REAL catalogue (PRODUCTS: the atelier houses, the PAVÉ watches
+         and the live LLG seller piece) and its real houses, never the
+         Lovable sample house. Roles stay exactly as the PIN door set
+         them: owner full access; secretary and AI are limited to Add
+         Products, and everything they add waits in the existing
+         Pending approvals queue (EJ._pwPending) until the owner
+         approves it in Private World or right here. Workspace
+         settings, invoices and banners persist on this device with
+         the same session store the PINs and accounts already use. */
+      var HW_NAV = [
+        { view: "overview", name: "Overview", icon: "grid", path: "" },
+        { view: "inventory", name: "Inventory", icon: "boxes", path: "/inventory" },
+        { view: "invoices", name: "Invoices", icon: "fileText", path: "/invoices" },
+        { view: "ads", name: "Ad & Hero Banners", icon: "megaphone", path: "/ads" },
+        { view: "messages", name: "Messages", icon: "msgSquare", path: "/messages" },
+        { view: "settings", name: "Settings", icon: "settings", path: "/settings" }
+      ];
+      var HW_TITLES = { overview: "Your house, at a glance", inventory: "The collection", invoices: "Invoices & billing", ads: "Ad & hero banners", messages: "Messages", settings: "Workspace settings" };
+      EJ._hw = EJ._hw || { house: "all", search: "", category: "all", status: "all", limit: 60, selected: {}, batch: {}, menuFor: null };
+      EJ._hwStash = EJ._hwStash || {};
+      EJ._hwDrafts = EJ._hwDrafts || [];
+      EJ._hwCosts = EJ._hwCosts || {};
+      EJ._hwSkus = EJ._hwSkus || {};
+      EJ._hwTags = EJ._hwTags || {};
+      function hwSettings() {
+        if (!EJ._hwSettings) {
+          var saved = ejStore("ej-house-settings") || {};
+          EJ._hwSettings = { invoiceNote: "Thank you for choosing Elevate Jewels.", showCosts: true, qrSize: 100, saleRhythm: 2, saleAmount: 50 };
+          Object.keys(saved).forEach(function (k) { EJ._hwSettings[k] = saved[k]; });
+        }
+        return EJ._hwSettings;
+      }
+      function hwSettingsSave() { ejStoreSet("ej-house-settings", EJ._hwSettings); }
+      function hwRole() {
+        if (EJ._housePreview) return "preview";
+        if (EJ._pwRole) return EJ._pwRole;
+        if (EJ._houseUnlocked && EJ._houseRole) return EJ._houseRole;
+        return null;
+      }
+      function hwRoleLabel() {
+        var r = hwRole();
+        return r === "owner" ? "Owner" : r === "ai" ? "AI — Add Products only" : r === "secretary" ? "Secretary" : r === "preview" ? "Sales Preview" : "Staff";
+      }
+      function hwIsOwner() { return hwRole() === "owner"; }
+      function hwLimited() { var r = hwRole(); return r === "secretary" || r === "ai"; }
+      function hwCanPublish() { return hwIsOwner(); }
+      function hwShowCosts() { return !hwLimited() && hwSettings().showCosts; }
+      function hwEnsureCodes() {
+        if (EJ._hwCodesReady) return;
+        EJ._hwCodesReady = true;
+        PRODUCTS.forEach(function (p) { EJ.qrNumFor(p); });
+        Object.keys(EJ._hwStash).forEach(function (id) { EJ.qrNumFor(EJ._hwStash[id].p); });
+      }
+      function hwSku(p) { return EJ._hwSkus[p.id] || p.model || p.id; }
+      function hwCost(p) { return EJ._hwCosts[p.id] != null ? EJ._hwCosts[p.id] : Math.round((p.price || 0) * 0.56); }
+      function hwTags(p) { return EJ._hwTags[p.id] || {}; }
+      function hwSaleLabel(p) {
+        var t = hwTags(p);
+        if (t.saleTag === "regular_sale") return "Regular Sale";
+        if (t.saleTag === "one_day_sale" && t.saleEndsAt && Date.parse(t.saleEndsAt) > Date.now()) return "1-Day Sale";
+        return "";
+      }
+      function hwDraftVendor(d) { return d.brandId === "pave" ? PAVE_VENDOR : "brand-" + d.brandId; }
+      function hwHouses() {
+        var list = [{ slug: "all", name: "All houses", city: "Elevate Jewels" }];
+        var seen = { all: 1 };
+        function add(slug) {
+          if (!slug || seen[slug]) return;
+          seen[slug] = 1;
+          var v = findVendor(slug);
+          list.push({ slug: slug, name: v ? v.name : vendorName(slug), city: v && v.city ? v.city : "Elevate Jewels" });
+        }
+        VENDORS.forEach(function (v) { add(v.slug); });
+        add(PAVE_VENDOR);
+        PRODUCTS.forEach(function (p) { add(p.vendor); });
+        Object.keys(EJ._hwStash).forEach(function (id) { add(EJ._hwStash[id].p.vendor); });
+        EJ._hwDrafts.forEach(function (d) { add(hwDraftVendor(d)); });
+        (EJ._pwPending || []).forEach(function (d) { add(hwDraftVendor(d)); });
+        return list;
+      }
+      function hwHouse() {
+        var list = hwHouses();
+        for (var i = 0; i < list.length; i++) if (list[i].slug === EJ._hw.house) return list[i];
+        return list[0];
+      }
+      function hwFindPiece(id) {
+        var p = findProduct(id);
+        if (p) return p;
+        var s = EJ._hwStash[id];
+        return s ? s.p : null;
+      }
+      function hwRows() {
+        hwEnsureCodes();
+        var house = EJ._hw.house;
+        var rows = [];
+        PRODUCTS.forEach(function (p) {
+          if (house === "all" || p.vendor === house) rows.push({ kind: "live", p: p, id: p.id, name: p.name, image: p.image, price: p.price, status: "Active", code: EJ.qrNumFor(p) });
+        });
+        Object.keys(EJ._hwStash).forEach(function (id) {
+          var s = EJ._hwStash[id];
+          if (s.archived) return;
+          var p = s.p;
+          if (house === "all" || p.vendor === house) rows.push({ kind: "hidden", p: p, id: p.id, name: p.name, image: p.image, price: p.price, status: "Draft", code: EJ.qrNumFor(p) });
+        });
+        EJ._hwDrafts.forEach(function (d, i) {
+          if (house === "all" || hwDraftVendor(d) === house) rows.push({ kind: "draft", d: d, idx: i, id: "draft-" + d.key, name: d.name, image: d.image, price: d.price, status: "Draft", code: "" });
+        });
+        (EJ._pwPending || []).forEach(function (d, i) {
+          if (house === "all" || hwDraftVendor(d) === house) rows.push({ kind: "pending", d: d, idx: i, id: "pending-" + d.key, name: d.name, image: d.image, price: d.price, status: "Pending", code: "" });
+        });
+        return rows;
+      }
+      function hwRowHay(r) {
+        if (r.p) return (r.name + " " + hwSku(r.p) + " " + r.code + " " + (r.p.metal || "") + " " + (r.p.stone || "")).toLowerCase();
+        return (r.name + " " + (r.d.metal || "") + " " + (r.d.stone || "") + " " + pwBrandName(r.d.brandId)).toLowerCase();
+      }
+      function hwRowIncomplete(r) {
+        var s = r.p || r.d;
+        return !(s.metal && s.stone && s.carat && s.description);
+      }
+      function hwFiltered(rows) {
+        var q = EJ._hw.search.trim().toLowerCase();
+        return rows.filter(function (r) {
+          if (EJ._hw.category !== "all") {
+            var cat = r.p ? r.p.category : r.d.category;
+            if (cat !== EJ._hw.category) return false;
+          }
+          var st = EJ._hw.status;
+          if (st === "Missing photos") { if (r.image) return false; }
+          else if (st === "Incomplete") { if (!hwRowIncomplete(r)) return false; }
+          else if (st !== "all") { if (r.status !== st) return false; }
+          if (q && hwRowHay(r).indexOf(q) < 0) return false;
+          return true;
+        });
+      }
+      function hwInvoices() {
+        if (!EJ._hwInvoices) EJ._hwInvoices = ejStore("ej-house-invoices") || [];
+        return EJ._hwInvoices;
+      }
+      function hwInvoicesSave() { ejStoreSet("ej-house-invoices", EJ._hwInvoices); }
+      function hwMoney(n) { return fmt(n || 0); }
+      function hwRerenderMain() {
+        var m = document.getElementById("hwMain");
+        if (m) { m.innerHTML = hwMainHtml(); hwAfterRender(); }
+      }
+      function hwAfterRender() {
+        hwPaintQrs();
+        hwInitAds();
+        var q = EJ._route && EJ._route.query;
+        if (q && q.piece && EJ._hwPieceOpened !== q.piece) {
+          EJ._hwPieceOpened = q.piece;
+          var p = EJ.pwFindByQr ? EJ.pwFindByQr(q.piece) : null;
+          if (p) EJ.hwOpenDetail(p.id);
+        }
+        if (EJ._hwFocusSearch) {
+          EJ._hwFocusSearch = false;
+          var inp = document.getElementById("hwSearch");
+          if (inp) { inp.focus(); try { inp.setSelectionRange(inp.value.length, inp.value.length); } catch (e) {} }
+        }
+      }
+      /* QR codes — rendered with the established qrcode-generator
+         library, embedded in this page above (CDN fallback below);
+         the payload carries only the piece's EJ tracking code,
+         never a price or cost. */
+      EJ._hwLoadQrLib = function () {
+        if (typeof window.qrcode === "function") return Promise.resolve(true);
+        if (EJ._hwQrPromise) return EJ._hwQrPromise;
+        EJ._hwQrPromise = new Promise(function (resolve) {
+          var s = document.createElement("script");
+          s.src = "https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js";
+          s.onload = function () { resolve(typeof window.qrcode === "function"); };
+          s.onerror = function () { EJ._hwQrPromise = null; resolve(false); };
+          document.head.appendChild(s);
+        });
+        return EJ._hwQrPromise;
+      };
+      function hwQrPayload(code) { return code; }
+      function hwPaintQrs() {
+        var els = document.querySelectorAll("[data-hw-qr]");
+        if (!els.length) return;
+        EJ._hwQrCache = EJ._hwQrCache || {};
+        EJ._hwLoadQrLib().then(function (ok) {
+          els.forEach(function (el) {
+            var code = el.getAttribute("data-hw-qr");
+            var size = parseInt(el.getAttribute("data-hw-qrsize") || "100", 10);
+            var disp = el.getAttribute("data-hw-display") || "44";
+            var key = code + "@" + size;
+            function put(url) { el.innerHTML = '<img src="' + url + '" alt="QR ' + esc(code) + '" style="width:' + disp + 'px;height:' + disp + 'px;border-radius:4px" />'; }
+            if (!ok) { el.innerHTML = icon("qr", parseInt(disp, 10)); return; }
+            if (EJ._hwQrCache[key]) { put(EJ._hwQrCache[key]); return; }
+            try {
+              var qrObj = window.qrcode(0, "M");
+              qrObj.addData(hwQrPayload(code));
+              qrObj.make();
+              var cell = Math.max(2, Math.round(Math.max(size, 100) / qrObj.getModuleCount()));
+              var dataUrl = qrObj.createDataURL(cell, 2);
+              if (dataUrl) { EJ._hwQrCache[key] = dataUrl; put(dataUrl); }
+            } catch (e) { el.innerHTML = icon("qr", parseInt(disp, 10)); }
+          });
+        });
+      }
+      function pageHouseWorkspace(view, query) {
+        var unlocked = !!(EJ._houseUnlocked || EJ._pwRole);
+        if (!unlocked) return pageHouse();
+        var valid = { overview: 1, inventory: 1, invoices: 1, ads: 1, messages: 1, settings: 1 };
+        view = valid[view] ? view : "overview";
+        EJ._hw.view = view;
+        hwEnsureCodes();
+        return '<div class="house-workspace connect-material">'
+          + hwRailHtml(view)
+          + '<div class="house-main">' + hwTopbarHtml(view)
+          + '<main class="house-surface" id="hwMain">' + hwMainHtml() + "</main></div></div>";
+      }
+      function hwMainHtml() {
+        var house = hwHouse();
+        var h = '<div style="margin-bottom:24px"><p style="font-size:12px;color:var(--connect-muted)">' + esc(house.city) + ' · atelier workspace</p>'
+          + '<h1 style="margin-top:4px;font-size:24px;font-weight:400">' + HW_TITLES[EJ._hw.view] + "</h1></div>";
+        if (hwLimited()) return h + hwLimitedHtml();
+        if (EJ._hw.view === "inventory") return h + hwInventoryHtml();
+        if (EJ._hw.view === "invoices") return h + hwInvoicesHtml();
+        if (EJ._hw.view === "ads") return h + hwAdsHtml();
+        if (EJ._hw.view === "messages") return h + hwMessagesHtml();
+        if (EJ._hw.view === "settings") return h + hwSettingsHtml();
+        return h + hwOverviewHtml();
+      }
+      function hwRailHtml(view) {
+        var house = hwHouse();
+        var limited = hwLimited();
+        var invCount = hwRows().length;
+        var invBadge = hwInvoices().length;
+        var h = '<aside class="house-rail">'
+          + '<a href="#/" class="hw-rail-brand">' + icon("crown", 24) + '<span style="font-size:1.25rem">Elevate Jewels</span></a>'
+          + '<div class="hw-rail-house"><p style="font-size:11px;color:var(--connect-muted)">Private atelier</p><p style="margin-top:4px;font-size:1rem;font-weight:500">The House</p><p style="margin-top:2px;font-size:12px;color:var(--connect-muted)">' + esc(house.name) + "</p></div>"
+          + '<button type="button" class="connect-compose" style="margin:16px 12px 0" onclick="EJ.hwOpenEditor(null)">' + icon("plus", 16) + "Add new product</button>";
+        if (!limited) {
+          h += '<nav aria-label="House navigation" class="hw-nav">' + HW_NAV.map(function (n) {
+            var badge = n.view === "inventory" ? '<span style="margin-left:auto;font-size:12px">' + invCount + "</span>"
+              : n.view === "invoices" && invBadge ? '<span style="margin-left:auto;font-size:12px">' + invBadge + "</span>" : "";
+            return '<a href="#/house' + n.path + '" class="connect-nav-item' + (view === n.view ? " is-active" : "") + '">' + icon(n.icon, 18) + "<span>" + n.name + "</span>" + badge + "</a>";
+          }).join("") + "</nav>";
+        }
+        h += '<div class="hw-rail-foot">'
+          + '<a href="#/backend" style="display:inline-flex;align-items:center;gap:8px;font-size:14px;color:inherit;text-decoration:none">' + icon("arrowLeft", 16) + "Vendor suite</a>"
+          + '<button type="button" onclick="EJ.houseLock()" style="display:inline-flex;align-items:center;gap:8px;font-size:14px;background:none;border:none;cursor:pointer;color:inherit;padding:0;font-family:inherit;text-align:left">' + icon("key", 16) + "Lock Store House</button>"
+          + '<p style="display:flex;gap:8px;font-size:12px;color:var(--connect-muted)">' + icon("shieldCheck", 16) + "<span>" + (hwRole() === "preview" ? "Sales Preview" : "Private staff inventory") + " · Signed in as: " + esc(hwRoleLabel()) + "</span></p></div></aside>";
+        return h;
+      }
+      function hwTopbarHtml(view) {
+        var st = hwSettings();
+        var navItem = HW_NAV.filter(function (n) { return n.view === view; })[0] || HW_NAV[0];
+        var h = '<header class="house-topbar">'
+          + '<div class="hw-crumb" style="font-size:14px;color:var(--connect-muted);white-space:nowrap">The House <span aria-hidden="true">›</span> <span style="color:var(--connect-ink)">' + navItem.name + "</span></div>"
+          + '<label class="connect-search house-search">' + icon("search", 20)
+          + '<input id="hwSearch" value="' + esc(EJ._hw.search) + '" oninput="EJ.hwSearchInput(this)" aria-label="Search inventory" placeholder="Search pieces, SKU or EJ-PROD code" style="background:none;border:none;outline:none;flex:1;min-width:0;font:inherit" /></label>'
+          + '<div style="display:flex;align-items:center;gap:8px">'
+          + (!hwLimited() ? '<button type="button" class="icon-btn" aria-label="' + (st.showCosts ? "Hide private costs" : "Show private costs") + '" title="' + (st.showCosts ? "Hide private costs" : "Show private costs") + '" onclick="EJ.hwToggleCosts()">' + icon(st.showCosts ? "eyeOff" : "eye", 18) + "</button>" : "")
+          + '<span class="house-sample">' + (hwRole() === "preview" ? "Sales Preview" : "Private inventory") + "</span>"
+          + '<select aria-label="House" class="house-select" onchange="EJ.hwSetHouse(this.value)">'
+          + hwHouses().map(function (hs) { return '<option value="' + esc(hs.slug) + '"' + (EJ._hw.house === hs.slug ? " selected" : "") + ">" + esc(hs.name) + "</option>"; }).join("")
+          + "</select></div></header>";
+        return h;
+      }
+      EJ.hwSetHouse = function (slug) {
+        EJ._hw.house = slug;
+        EJ._hw.limit = 60;
+        EJ._hw.selected = {};
+        EJ._hw.batch = {};
+        EJ._hw.menuFor = null;
+        EJ.route(true);
+      };
+      EJ.hwSearchInput = function (inp) {
+        EJ._hw.search = inp.value;
+        EJ._hw.limit = 60;
+        if (EJ._hw.view !== "inventory") { EJ._hwFocusSearch = true; location.hash = "#/house/inventory"; }
+        else hwRerenderMain();
+      };
+      EJ.hwToggleCosts = function () {
+        var st = hwSettings();
+        st.showCosts = !st.showCosts;
+        hwSettingsSave();
+        EJ.route(true);
+      };
+      /* ----- Overview (house-preview.index) ----- */
+      function hwOverviewHtml() {
+        var rows = hwRows();
+        var showC = hwShowCosts();
+        var active = rows.filter(function (r) { return r.status === "Active"; });
+        var drafts = rows.filter(function (r) { return r.status === "Draft"; }).length;
+        var retail = active.reduce(function (s, r) { return s + (r.price || 0); }, 0);
+        var invested = rows.reduce(function (s, r) { return s + (r.p ? hwCost(r.p) : Math.round((r.price || 0) * 0.56)); }, 0);
+        var inv = hwInvoices();
+        var paid = inv.filter(function (i) { return i.status === "Paid"; }).reduce(function (s, i) { return s + i.amount; }, 0);
+        var pendingInv = inv.filter(function (i) { return i.status === "Draft"; }).length;
+        var stats = [
+          { label: "Active inventory", value: String(active.length).padStart(2, "0"), detail: drafts + (drafts === 1 ? " draft" : " drafts"), icon: "boxes" },
+          { label: "Retail value", value: hwMoney(retail), detail: "Active collection", icon: "crown" },
+          { label: "Investment", value: showC ? hwMoney(invested) : "Hidden", detail: showC ? "Estimated internal costs" : "Private values hidden", icon: "grid" },
+          { label: "Total sales", value: hwMoney(paid), detail: pendingInv + " pending invoices", icon: "fileText" }
+        ];
+        var h = '<div class="hw-stats">' + stats.map(function (s) {
+          return '<div class="house-card" style="padding:16px"><div style="display:flex;align-items:center;justify-content:space-between;gap:8px"><p style="font-size:12px;color:var(--connect-muted)">' + s.label + "</p>" + icon(s.icon, 16) + '</div><p style="margin-top:12px;font-size:24px;word-break:break-word">' + s.value + '</p><p style="margin-top:4px;font-size:12px;color:var(--connect-muted)">' + s.detail + "</p></div>";
+        }).join("") + "</div>";
+        h += '<section class="hw-overview-cols" style="margin-top:32px;display:grid;gap:32px">'
+          + '<div style="min-width:0"><div style="margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:8px"><h2 style="font-size:18px;font-weight:400">Collection highlights</h2><a class="house-chip" style="text-decoration:none" href="#/house/inventory">View inventory' + icon("arrowUpRight", 14) + "</a></div>"
+          + '<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px">'
+          + active.slice(0, 2).map(function (r) {
+            return '<button type="button" onclick="EJ.hwOpenDetail(\'' + r.id + '\')" class="house-card" style="overflow:hidden;text-align:left;padding:0;cursor:pointer;font-family:inherit;color:inherit">'
+              + '<span style="display:block;background:#fff;border-bottom:1px solid var(--connect-line)"><img src="' + r.image + '" alt="' + esc(r.name) + '" loading="lazy" style="display:block;width:100%;aspect-ratio:4/3;object-fit:contain;padding:12px" /></span>'
+              + '<span style="display:block;padding:12px"><span style="display:block;font-size:11px;color:var(--connect-muted)">' + r.code + " · " + r.status + '</span><span style="display:block;margin-top:4px;font-size:16px;font-weight:500">' + esc(r.name) + '</span><span style="display:block;margin-top:4px;font-size:14px;color:var(--connect-muted)">' + priceLabel(r.p) + "</span></span></button>";
+          }).join("") + "</div></div>"
+          + '<div style="min-width:0"><h2 style="margin-bottom:12px;font-size:18px;font-weight:400">Recent client messages</h2>'
+          + (S.threads.slice(0, 2).map(function (t) {
+            var last = t.messages[t.messages.length - 1];
+            var vn = vendorName(t.vendor);
+            var initials = vn.replace(/^(maison|atelier|house of)\s+/i, "").split(/\s+/).slice(0, 2).map(function (w) { return (w[0] || "").toUpperCase(); }).join("");
+            return '<div style="border-bottom:1px solid var(--connect-line);padding:12px 0"><div style="display:flex;align-items:center;gap:12px"><span class="connect-avatar">' + esc(initials) + '</span><div style="min-width:0"><p style="font-size:14px;font-weight:500">' + esc(t.subject) + '</p><p style="font-size:12px;color:var(--connect-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + esc(vn) + " · " + esc(last ? last.body : "") + "</p></div></div></div>";
+          }).join("") || '<p style="font-size:14px;color:var(--connect-muted)">No client messages yet.</p>')
+          + '<a class="house-chip" style="margin-top:16px;width:100%;justify-content:center;text-decoration:none" href="#/connect?view=workspace">' + icon("msgSquare", 14) + "Open Elevate Connect</a>"
+          + '<div style="margin-top:24px;border-top:1px solid var(--connect-line);padding-top:16px"><h2 style="font-size:18px;font-weight:400">Pending invoices</h2><p style="margin-top:4px;font-size:14px;color:var(--connect-muted)">' + (pendingInv ? pendingInv + (pendingInv === 1 ? " draft awaiting review" : " drafts awaiting review") : "No invoices awaiting review") + "</p></div>"
+          + "</div></section>";
+        if (hwIsOwner() && (EJ._pwPending || []).length) {
+          h += '<section style="margin-top:32px" aria-label="Pending approvals"><div style="display:flex;flex-wrap:wrap;align-items:center;gap:12px"><h2 style="font-size:18px;font-weight:400">Pending approvals (' + EJ._pwPending.length + ')</h2>'
+            + '<a class="house-chip" style="text-decoration:none" href="#/private">Review in Private World' + icon("arrowUpRight", 14) + "</a></div>"
+            + '<p style="margin-top:4px;font-size:14px;color:var(--connect-muted)">Pieces added by the secretary or the AI wait here. Only you can send a piece live.</p>'
+            + '<div style="margin-top:12px;display:flex;flex-direction:column;gap:12px">'
+            + EJ._pwPending.slice(0, 3).map(function (d, i) {
+              return pwDraftRow(d, '<span style="margin-top:12px;display:flex;flex-wrap:wrap;gap:8px"><button type="button" class="btn-gold" style="padding:8px 16px" onclick="EJ.pwApprove(' + i + ')">Approve &amp; publish</button><button type="button" class="btn-ghost" style="padding:8px 16px" onclick="EJ.pwRemovePending(' + i + ')">Remove</button></span>');
+            }).join("") + "</div></section>";
+        }
+        h += '<div style="margin-top:32px">' + giftRegisterHtml() + "</div>";
+        return h;
+      }
+      /* ----- Inventory (house-preview.inventory) ----- */
+      function hwChip(active, onclick, label, pressed) {
+        return '<button type="button" aria-pressed="' + !!active + '" class="house-chip' + (active ? " is-active" : "") + '" onclick="' + onclick + '">' + (active ? icon("check", 14) : "") + label + "</button>";
+      }
+      function hwInventoryHtml() {
+        var all = hwRows();
+        var rows = hwFiltered(all);
+        var shown = rows.slice(0, EJ._hw.limit);
+        var showC = hwShowCosts();
+        var selCount = Object.keys(EJ._hw.selected).length;
+        var selectableShown = shown.filter(function (r) { return r.kind === "live" || r.kind === "hidden"; });
+        var allSel = selectableShown.length > 0 && selectableShown.every(function (r) { return EJ._hw.selected[r.id]; });
+        var h = "";
+        if (selCount) h += hwBatchBarHtml(selCount, allSel);
+        h += '<div style="margin-bottom:12px;display:flex;align-items:center;gap:8px"><input type="checkbox" aria-label="Select all visible pieces"' + (allSel ? " checked" : "") + ' onchange="EJ.hwSelectVisible()" style="width:18px;height:18px;accent-color:var(--gold)" /><span style="font-size:12px;color:var(--connect-muted)">Select visible pieces</span>'
+          + '<span style="margin-left:auto;font-size:12px;color:var(--connect-muted)">' + rows.length + (rows.length === 1 ? " piece" : " pieces") + "</span></div>";
+        h += '<div style="margin-bottom:16px;display:flex;flex-wrap:wrap;gap:8px" role="group" aria-label="Quick filters">'
+          + ["all", "Active", "Draft", "Missing photos", "Incomplete"].map(function (s) {
+            return hwChip(EJ._hw.status === s, "EJ.hwSetStatus('" + s + "')", s === "all" ? "All pieces" : s);
+          }).join("")
+          + '<span style="margin:0 4px;width:1px;align-self:stretch;background:var(--connect-line)" aria-hidden="true"></span>'
+          + [{ slug: "all", name: "All categories" }].concat(CATEGORIES).map(function (c) {
+            return hwChip(EJ._hw.category === c.slug, "EJ.hwSetCategory('" + c.slug + "')", c.name);
+          }).join("") + "</div>";
+        h += '<div class="house-table" role="table" aria-label="Inventory">'
+          + '<div class="house-row house-row-head" role="row"><span></span><span>Piece</span><span>Retail' + (showC ? " · cost" : "") + ' · site</span><span>QR</span><span style="text-align:right">Actions</span></div>'
+          + shown.map(function (r) { return hwRowHtml(r, showC); }).join("")
+          + "</div>";
+        if (!rows.length) h += '<p style="padding:48px 0;text-align:center;color:var(--connect-muted)">No pieces match this search.</p>';
+        if (rows.length > shown.length) h += '<div style="margin-top:16px;text-align:center"><button type="button" class="house-chip" onclick="EJ.hwShowMore()">Show more pieces — ' + shown.length + " of " + rows.length + "</button></div>";
+        return h;
+      }
+      function hwRowHtml(r, showC) {
+        var selectable = r.kind === "live" || r.kind === "hidden";
+        var sel = !!EJ._hw.selected[r.id];
+        var menuOpen = EJ._hw.menuFor === r.id;
+        var sub = "";
+        if (r.p) sub = r.code + " · " + hwSku(r.p) + " · " + (r.p.metal || "") + " · " + r.status;
+        else sub = pwBrandName(r.d.brandId) + " · " + ((findCategory(r.d.category) || {}).name || r.d.category) + " · " + r.status;
+        var saleNote = r.p ? [hwSaleLabel(r.p), hwTags(r.p).shippingNotice].filter(Boolean).join(" · ") : "";
+        var h = '<div class="house-row' + (sel ? " is-selected" : "") + '" role="row">'
+          + '<label class="house-row-select">'
+          + (selectable ? '<input type="checkbox" aria-label="Select ' + esc(r.name) + '"' + (sel ? " checked" : "") + ' onchange="EJ.hwToggleSelect(\'' + r.id + '\')" />' : "")
+          + '<img src="' + r.image + '" alt="" width="40" height="40" loading="lazy" style="width:40px;height:40px;border-radius:4px;object-fit:contain;background:#fff;padding:2px;border:1px solid var(--connect-line)" /></label>'
+          + '<button type="button" style="min-width:0;text-align:left;background:none;border:none;cursor:pointer;font-family:inherit;color:inherit;padding:0" onclick="' + (selectable ? "EJ.hwToggleSelect('" + r.id + "')" : r.kind === "pending" ? "EJ.hwOpenPending(" + r.idx + ")" : "EJ.hwOpenEditor({kind:'draft',idx:" + r.idx + "})") + '">'
+          + '<p style="font-size:14px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + esc(r.name) + "</p>"
+          + '<p style="font-size:12px;color:var(--connect-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + esc(sub) + "</p>"
+          + (saleNote ? '<p style="font-size:12px;color:var(--gold)">' + esc(saleNote) + "</p>" : "")
+          + (r.status === "Pending" ? '<p style="font-size:12px;color:var(--connect-muted)">Waiting for owner approval</p>' : "")
+          + "</button>"
+          + '<div style="font-size:14px"><p>' + (r.p ? priceLabel(r.p) : r.price > 0 ? fmt(r.price) : "Price to confirm") + "</p>"
+          + (showC && r.p ? '<p style="font-size:12px;color:var(--connect-muted)">Cost ' + hwMoney(hwCost(r.p)) + "</p>" : "")
+          + (selectable ? '<label style="margin-top:4px;display:inline-flex;align-items:center;gap:8px;font-size:12px;color:var(--connect-muted)"><button type="button" role="switch" aria-checked="' + (r.status === "Active") + '" aria-label="' + esc(r.name) + ": " + (r.status === "Active" ? "Active, shown on site" : "Inactive, hidden from site") + '" class="house-visibility" data-on="' + (r.status === "Active") + '" onclick="EJ.hwToggleVisible(\'' + r.id + '\')"><span></span></button>' + (r.status === "Active" ? "Active" : "Inactive") + "</label>" : '<p style="margin-top:4px;font-size:12px;color:var(--connect-muted)">' + r.status + "</p>")
+          + "</div>"
+          + (r.code
+            ? '<button type="button" class="house-qr" data-hw-qr="' + r.code + '" data-hw-qrsize="' + hwSettings().qrSize + '" onclick="EJ.hwOpenDetail(\'' + r.id + '\')" aria-label="Open details for ' + r.code + '" title="' + r.code + '">' + icon("qr", 44) + "</button>"
+            : '<span class="house-qr" title="' + (r.status === "Pending" ? "QR code is issued on approval" : "QR code is issued when the piece goes live") + '">' + icon("qr", 44) + "</span>")
+          + '<div style="display:flex;justify-content:flex-end;position:relative">'
+          + '<button type="button" class="icon-btn" aria-label="Actions for ' + esc(r.name) + '" aria-expanded="' + menuOpen + '" onclick="EJ.hwMenu(\'' + r.id + '\')">' + icon("moreHorizontal", 18) + "</button>"
+          + (menuOpen ? '<div class="hw-menu" role="menu">' + hwMenuItems(r) + "</div>" : "")
+          + "</div></div>";
+        return h;
+      }
+      function hwMenuItems(r) {
+        if (r.kind === "pending") return '<button type="button" role="menuitem" onclick="EJ.hwOpenPending(' + r.idx + ')">' + icon("qr", 16) + "Review submission</button>";
+        if (r.kind === "draft") return '<button type="button" role="menuitem" onclick="EJ.hwOpenEditor({kind:\'draft\',idx:' + r.idx + '})">' + icon("fileText", 16) + "Edit</button>"
+          + '<button type="button" role="menuitem" onclick="EJ.hwDeleteDraft(' + r.idx + ')">' + icon("trash", 16) + "Delete draft</button>";
+        return '<button type="button" role="menuitem" onclick="EJ.hwOpenEditor({kind:\'' + r.kind + '\',id:\'' + r.id + '\'})">' + icon("fileText", 16) + "Edit</button>"
+          + '<button type="button" role="menuitem" onclick="EJ.hwOpenEditor({kind:\'' + r.kind + '\',id:\'' + r.id + '\',similar:true})">' + icon("copy", 16) + "Upload similar</button>"
+          + '<button type="button" role="menuitem" onclick="EJ.hwOpenDetail(\'' + r.id + '\')">' + icon("qr", 16) + "QR &amp; details</button>"
+          + '<button type="button" role="menuitem" onclick="EJ.hwCreateInvoice(\'' + r.id + '\')">' + icon("plus", 16) + "Create invoice</button>";
+      }
+      function hwBatchBarHtml(count, allSel) {
+        var b = EJ._hw.batch;
+        function tBtn(key, value, ic, label) {
+          var on = b[key] === value;
+          return '<button type="button" class="house-chip" aria-pressed="' + on + '" onclick="EJ.hwBatchToggle(\'' + key + '\',\'' + value + '\')">' + icon(ic, 14) + label + "</button>";
+        }
+        var has = Object.keys(b).some(function (k) { return b[k] !== undefined; });
+        return '<div class="house-batch-bar" aria-label="Batch inventory actions">'
+          + '<div style="display:flex;flex-wrap:wrap;align-items:center;gap:12px"><strong style="font-size:14px" role="status">' + count + ' selected</strong>'
+          + '<button type="button" class="house-chip" onclick="EJ.hwSelectVisible()">' + (allSel ? "Deselect visible" : "Select visible") + "</button>"
+          + '<button type="button" class="icon-btn" aria-label="Clear selection" onclick="EJ.hwClearSelection()">' + icon("x", 16) + "</button></div>"
+          + '<div style="display:flex;flex-wrap:wrap;gap:8px">'
+          + tBtn("status", "Active", "eye", "Active / Show on Site")
+          + tBtn("status", "Draft", "eyeOff", "Draft / Take Off Site")
+          + tBtn("saleTag", "one_day_sale", "clock", "1-Day Sale")
+          + tBtn("saleTag", "regular_sale", "tag", "Regular Sale")
+          + tBtn("shippingNotice", "2-Week Shipping", "truck", "2-Week Shipping")
+          + '<button type="button" class="house-chip" aria-pressed="' + (b.saleTag === "none") + '" onclick="EJ.hwBatchToggle(\'saleTag\',\'none\')">Clear sale</button>'
+          + '<button type="button" class="house-chip" aria-pressed="' + (b.shippingNotice === "") + '" onclick="EJ.hwBatchToggle(\'shippingNotice\',\'\')">Clear shipping</button>'
+          + '<button type="button" class="house-chip" style="color:var(--destructive)" onclick="EJ.hwBatchArchiveAsk()">' + icon("trash", 14) + "Delete Selected</button>"
+          + '<button type="button" class="btn-gold" style="margin-left:auto;padding:8px 16px" ' + (has ? "" : "disabled style=\"opacity:.5\"") + ' onclick="EJ.hwBatchApply()">' + icon("save", 14) + "Apply Batch Changes</button>"
+          + "</div></div>";
+      }
+      EJ.hwSetStatus = function (s) { EJ._hw.status = s; EJ._hw.limit = 60; EJ._hw.menuFor = null; hwRerenderMain(); };
+      EJ.hwSetCategory = function (s) { EJ._hw.category = s; EJ._hw.limit = 60; EJ._hw.menuFor = null; hwRerenderMain(); };
+      EJ.hwShowMore = function () { EJ._hw.limit += 60; hwRerenderMain(); };
+      EJ.hwMenu = function (id) { EJ._hw.menuFor = EJ._hw.menuFor === id ? null : id; hwRerenderMain(); };
+      EJ.hwToggleSelect = function (id) {
+        if (EJ._hw.selected[id]) delete EJ._hw.selected[id];
+        else EJ._hw.selected[id] = 1;
+        EJ._hw.menuFor = null;
+        hwRerenderMain();
+      };
+      EJ.hwSelectVisible = function () {
+        var rows = hwFiltered(hwRows()).filter(function (r) { return r.kind === "live" || r.kind === "hidden"; });
+        var allSel = rows.length > 0 && rows.every(function (r) { return EJ._hw.selected[r.id]; });
+        rows.forEach(function (r) { if (allSel) delete EJ._hw.selected[r.id]; else EJ._hw.selected[r.id] = 1; });
+        hwRerenderMain();
+      };
+      EJ.hwClearSelection = function () { EJ._hw.selected = {}; EJ._hw.batch = {}; hwRerenderMain(); };
+      EJ.hwBatchToggle = function (key, value) {
+        EJ._hw.batch[key] = EJ._hw.batch[key] === value ? undefined : value;
+        hwRerenderMain();
+      };
+      function hwApplyToPiece(id, u) {
+        var inProd = PRODUCTS.findIndex(function (p) { return p.id === id; });
+        var stash = EJ._hwStash[id];
+        var p = inProd >= 0 ? PRODUCTS[inProd] : stash ? stash.p : null;
+        if (!p) return;
+        if (u.saleTag !== undefined || u.shippingNotice !== undefined) {
+          var t = EJ._hwTags[id] = EJ._hwTags[id] || {};
+          if (u.saleTag !== undefined) { t.saleTag = u.saleTag; t.saleEndsAt = u.saleTag === "one_day_sale" ? new Date(Date.now() + 86400000).toISOString() : null; }
+          if (u.shippingNotice !== undefined) t.shippingNotice = u.shippingNotice;
+        }
+        if (u.archive) {
+          if (inProd >= 0) PRODUCTS.splice(inProd, 1);
+          EJ._hwStash[id] = { p: p, archived: true };
+          S.cart = S.cart.filter(function (l) { return l.id !== id; });
+          S.wishlist = S.wishlist.filter(function (w) { return w !== id; });
+          return;
+        }
+        if (u.status === "Draft" && inProd >= 0) {
+          PRODUCTS.splice(inProd, 1);
+          EJ._hwStash[id] = { p: p, archived: false };
+          S.cart = S.cart.filter(function (l) { return l.id !== id; });
+          S.wishlist = S.wishlist.filter(function (w) { return w !== id; });
+        }
+        if (u.status === "Active" && stash && !stash.archived) {
+          delete EJ._hwStash[id];
+          PRODUCTS.push(p);
+        }
+      }
+      EJ.hwToggleVisible = function (id) {
+        var live = !!findProduct(id);
+        hwApplyToPiece(id, { status: live ? "Draft" : "Active" });
+        toast(live ? "Hidden from site." : "Now showing on site.", "");
+        EJ.updateChrome();
+        hwRerenderMain();
+      };
+      EJ.hwBatchApply = function () {
+        var u = EJ._hw.batch;
+        Object.keys(EJ._hw.selected).forEach(function (id) { hwApplyToPiece(id, u); });
+        EJ._hw.selected = {};
+        EJ._hw.batch = {};
+        EJ.updateChrome();
+        toast("Batch changes saved.", "");
+        hwRerenderMain();
+      };
+      EJ.hwBatchArchiveAsk = function () {
+        var count = Object.keys(EJ._hw.selected).length;
+        hwShowOverlay('<h2 style="font-family:var(--font-display);font-size:1.5rem">Archive ' + count + ' selected pieces?</h2>'
+          + '<p style="margin-top:12px;font-size:14px;line-height:1.65;color:var(--muted-foreground)">These pieces will be removed from inventory and, for live pieces, taken off site. Their private records are retained, and Reset in Settings brings them back.</p>'
+          + '<div style="margin-top:20px;display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px"><button type="button" class="btn-ghost" onclick="EJ.closeOverlays()">Cancel</button>'
+          + '<button type="button" class="btn-gold" onclick="EJ.hwBatchArchive()">Archive selected</button></div>', false);
+      };
+      EJ.hwBatchArchive = function () {
+        Object.keys(EJ._hw.selected).forEach(function (id) { hwApplyToPiece(id, { archive: true }); });
+        EJ._hw.selected = {};
+        EJ._hw.batch = {};
+        EJ.closeOverlays();
+        EJ.updateChrome();
+        toast("Pieces archived.", "");
+        hwRerenderMain();
+      };
+      EJ.hwDeleteDraft = function (idx) {
+        EJ._hwDrafts.splice(idx, 1);
+        EJ._hw.menuFor = null;
+        toast("Draft deleted.", "");
+        hwRerenderMain();
+      };
+
+      /* ----- Invoices (house-preview.invoices) ----- */
+      function hwNextInvoiceId() {
+        var seq = (ejStore("ej-house-invseq") || 0) + 1;
+        ejStoreSet("ej-house-invseq", seq);
+        return "INV-" + String(seq).padStart(4, "0");
+      }
+      EJ.hwCreateInvoice = function (id) {
+        EJ._hw.menuFor = null;
+        var p = hwFindPiece(id);
+        if (!p) return;
+        if (!(p.price > 0)) { toast("Price to confirm", "Set a confirmed price before raising an invoice for this piece."); return; }
+        var inv = { id: hwNextInvoiceId(), pieceId: p.id, code: EJ.qrNumFor(p), name: p.name, sku: hwSku(p), description: p.description || "", amount: p.price, customer: "", status: "Draft" };
+        hwInvoices().unshift(inv);
+        hwInvoicesSave();
+        EJ.hwOpenInvoice(inv.id);
+        hwRerenderMain();
+      };
+      function hwInvoicesHtml() {
+        var inv = hwInvoices();
+        if (!inv.length) {
+          return '<section class="house-table"><div style="padding:64px 16px;text-align:center">' + icon("fileText", 32)
+            + '<h2 style="margin-top:12px;font-size:18px;font-weight:400">A clean ledger</h2>'
+            + '<p style="margin-top:4px;font-size:14px;color:var(--connect-muted)">No draft invoices yet.</p>'
+            + '<a class="house-chip" style="margin-top:16px;text-decoration:none" href="#/house/inventory">Choose a piece' + icon("arrowUpRight", 14) + "</a></div></section>";
+        }
+        return '<section class="house-table">' + inv.map(function (i) {
+          return '<div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px;border-bottom:1px solid var(--connect-line);padding:12px 16px"><div><p style="font-size:14px;font-weight:500">' + esc(i.name) + '</p>'
+            + '<p style="font-size:12px;color:var(--connect-muted)">' + i.id + " · " + i.code + " · " + i.status + " · " + esc(i.customer || "Client not assigned") + '</p></div>'
+            + '<div style="display:flex;align-items:center;gap:12px"><span style="font-size:14px">' + hwMoney(i.amount) + '</span>'
+            + '<button type="button" class="house-chip" onclick="EJ.hwOpenInvoice(\'' + i.id + '\')">Review' + icon("arrowUpRight", 14) + "</button></div></div>";
+        }).join("") + "</section>";
+      }
+      EJ.hwOpenInvoice = function (id) {
+        var inv = hwInvoices().filter(function (i) { return i.id === id; })[0];
+        if (!inv) return;
+        EJ._hwInvReviewed = false;
+        var house = hwHouse();
+        var html = '<p style="font-family:var(--font-display);font-size:1.875rem">Draft invoice</p>'
+          + '<div style="margin-top:20px;display:flex;justify-content:space-between;border-bottom:1px solid var(--border);padding-bottom:16px"><span style="font-family:var(--font-display);font-size:1.25rem">' + esc(house.name === "All houses" ? "Elevate Jewels" : house.name) + '</span><span style="font-size:12px;color:var(--gold)">' + inv.id + "</span></div>"
+          + '<label style="display:block;margin-top:16px;font-size:12px;color:var(--muted-foreground)">Client name<input class="hw-in" aria-label="Client name" value="' + esc(inv.customer) + '" onchange="EJ.hwInvoiceCustomer(\'' + inv.id + '\',this.value)" /></label>'
+          + '<div style="border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:20px 0;margin-top:16px"><p style="font-family:var(--font-display);font-size:1.5rem">' + esc(inv.name) + "</p>"
+          + '<p style="margin-top:8px;font-size:12px;color:var(--muted-foreground)">SKU ' + esc(inv.sku) + " · " + inv.code + "</p>"
+          + (inv.description ? '<p style="margin-top:12px;font-size:14px;color:var(--muted-foreground)">' + esc(inv.description) + "</p>" : "")
+          + '<div style="margin-top:16px;display:flex;justify-content:space-between;font-size:14px"><span>Retail price</span><span>' + hwMoney(inv.amount) + "</span></div>"
+          + '<div style="margin-top:24px;display:flex;justify-content:space-between"><span>Total</span><strong style="color:var(--gold)">' + hwMoney(inv.amount) + "</strong></div></div>"
+          + (hwSettings().invoiceNote ? '<p style="margin-top:16px;font-size:14px">' + esc(hwSettings().invoiceNote) + "</p>" : "")
+          + '<p style="margin-top:8px;font-size:12px;color:var(--muted-foreground)">Draft invoice · no payment collected</p>'
+          + '<label style="margin-top:16px;display:flex;align-items:flex-start;gap:8px;font-size:14px"><input type="checkbox" style="margin-top:3px;width:18px;height:18px;accent-color:var(--gold)" onchange="EJ.hwInvoiceReview(this.checked)" />I reviewed the client, item, description and retail total.</label>'
+          + '<div style="margin-top:20px;display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px"><button type="button" class="btn-ghost" onclick="EJ.closeOverlays()">Close</button>'
+          + '<button type="button" class="btn-gold" id="hwInvPaidBtn" disabled style="opacity:.5" onclick="EJ.hwInvoicePaid(\'' + inv.id + '\')">' + icon("check", 14) + "Mark paid</button></div>";
+        hwShowOverlay(html, false);
+      };
+      EJ.hwInvoiceCustomer = function (id, value) {
+        var inv = hwInvoices().filter(function (i) { return i.id === id; })[0];
+        if (inv) { inv.customer = value; hwInvoicesSave(); }
+      };
+      EJ.hwInvoiceReview = function (checked) {
+        EJ._hwInvReviewed = checked;
+        var btn = document.getElementById("hwInvPaidBtn");
+        if (btn) { btn.disabled = !checked; btn.style.opacity = checked ? "1" : ".5"; }
+      };
+      EJ.hwInvoicePaid = function (id) {
+        var inv = hwInvoices().filter(function (i) { return i.id === id; })[0];
+        if (!inv || inv.status === "Paid") return;
+        inv.status = "Paid";
+        hwInvoicesSave();
+        EJ.closeOverlays();
+        toast("Invoice marked paid", inv.id + " · " + hwMoney(inv.amount));
+        EJ.route(true);
+      };
+      /* ----- Ad & Hero Banners (house-banners.tsx) ----- */
+      function hwBanners(house) {
+        EJ._hwBanners = EJ._hwBanners || {};
+        if (!EJ._hwBanners[house]) EJ._hwBanners[house] = ejStore("ej-house-banners:" + house) || [];
+        return EJ._hwBanners[house];
+      }
+      function hwAdsHtml() {
+        var house = EJ._hw.house;
+        var slides = hwBanners(house);
+        var images = [];
+        hwRows().forEach(function (r) { if (r.image && images.indexOf(r.image) < 0) images.push(r.image); });
+        images = images.slice(0, 12);
+        var h = '<section style="display:flex;flex-direction:column;gap:16px">'
+          + '<div class="house-table" style="padding:16px"><div style="margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:8px"><h2 style="font-size:18px;font-weight:400">Preview</h2>'
+          + '<button type="button" class="house-chip" onclick="EJ.hwAdsReplay()">' + icon("play", 14) + "Replay</button></div>"
+          + '<div class="house-banner-stage" id="hwAdsStage">'
+          + (slides.length ? slides.map(function (s, k) {
+            return '<div class="house-banner-slide' + (k === 0 ? " is-on" : "") + '" aria-hidden="' + (k !== 0) + '">' + (s.image ? '<img src="' + s.image + '" alt="" loading="lazy" />' : "") + "<span>" + esc(s.title) + "</span></div>";
+          }).join("") : '<div class="house-banner-slide is-on"><span style="letter-spacing:0.2em">' + esc(hwHouse().name === "All houses" ? "Elevate Jewels" : hwHouse().name) + "</span></div>")
+          + "</div>"
+          + '<p style="margin-top:8px;font-size:12px;color:var(--connect-muted)">Slides cross-fade once and stop on the last banner. Use existing piece photos or a text-only banner; no generated images.</p></div>'
+          + '<div class="house-table">'
+          + slides.map(function (s, k) {
+            return '<div style="display:grid;gap:12px;padding:16px;border-bottom:1px solid var(--connect-line)">'
+              + '<div style="min-width:0"><input class="house-input" style="margin-top:0" maxlength="80" aria-label="Banner ' + (k + 1) + ' headline" value="' + esc(s.title) + '" onchange="EJ.hwBannerTitle(' + k + ',this.value)" />'
+              + '<div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:8px" role="group" aria-label="Banner ' + (k + 1) + ' image">'
+              + '<button type="button" class="house-chip' + (!s.image ? " is-active" : "") + '" aria-pressed="' + !s.image + '" onclick="EJ.hwBannerImage(' + k + ",'')" + '">Text only</button>'
+              + images.map(function (src) {
+                return '<button type="button" aria-pressed="' + (s.image === src) + '" aria-label="Use this existing photo" onclick="EJ.hwBannerImage(' + k + ",'" + src + '\')" style="width:48px;height:48px;overflow:hidden;border-radius:6px;border:1px solid ' + (s.image === src ? "var(--gold)" : "var(--connect-line)") + ';padding:0;background:#fff;cursor:pointer"><img src="' + src + '" alt="" loading="lazy" style="width:100%;height:100%;object-fit:contain" /></button>';
+              }).join("") + "</div></div>"
+              + '<div style="display:flex;gap:4px"><button type="button" class="icon-btn" aria-label="Move up" onclick="EJ.hwBannerMove(' + k + ',-1)">' + icon("arrowUp", 16) + '</button>'
+              + '<button type="button" class="icon-btn" aria-label="Move down" onclick="EJ.hwBannerMove(' + k + ',1)">' + icon("arrowDown", 16) + '</button>'
+              + '<button type="button" class="icon-btn" aria-label="Remove banner" onclick="EJ.hwBannerRemove(' + k + ')">' + icon("trash", 16) + "</button></div></div>";
+          }).join("")
+          + '<div style="display:flex;flex-wrap:wrap;gap:8px;padding:16px"><button type="button" class="house-chip" ' + (slides.length >= 10 ? "disabled" : "") + ' onclick="EJ.hwBannerAdd()">' + icon("plus", 14) + "Add banner</button>"
+          + '<button type="button" class="btn-gold" style="padding:8px 16px" onclick="EJ.hwBannerSave()">Save banners</button></div>'
+          + "</div></section>";
+        return h;
+      }
+      function hwInitAds() {
+        var stage = document.getElementById("hwAdsStage");
+        if (EJ._hwAdsTimer) { clearInterval(EJ._hwAdsTimer); EJ._hwAdsTimer = null; }
+        if (!stage) return;
+        var slides = stage.querySelectorAll(".house-banner-slide");
+        if (slides.length < 2) return;
+        var i = 0;
+        EJ._hwAdsTimer = setInterval(function () {
+          i += 1;
+          slides.forEach(function (s, k) { s.classList.toggle("is-on", k === Math.min(i, slides.length - 1)); s.setAttribute("aria-hidden", k === Math.min(i, slides.length - 1) ? "false" : "true"); });
+          if (i >= slides.length - 1) { clearInterval(EJ._hwAdsTimer); EJ._hwAdsTimer = null; }
+        }, 3500);
+      }
+      EJ.hwAdsReplay = function () { hwRerenderMain(); };
+      EJ.hwBannerTitle = function (k, value) { hwBanners(EJ._hw.house)[k].title = value; };
+      EJ.hwBannerImage = function (k, src) { hwBanners(EJ._hw.house)[k].image = src; hwRerenderMain(); };
+      EJ.hwBannerMove = function (k, d) {
+        var list = hwBanners(EJ._hw.house);
+        var j = k + d;
+        if (j < 0 || j >= list.length) return;
+        var tmp = list[k]; list[k] = list[j]; list[j] = tmp;
+        hwRerenderMain();
+      };
+      EJ.hwBannerRemove = function (k) { hwBanners(EJ._hw.house).splice(k, 1); hwRerenderMain(); };
+      EJ.hwBannerAdd = function () { hwBanners(EJ._hw.house).push({ title: "Elevate Jewels", image: "" }); hwRerenderMain(); };
+      EJ.hwBannerSave = function () {
+        var slides = hwBanners(EJ._hw.house);
+        if (slides.some(function (s) { return !s.title || !s.title.trim(); })) { toast("Every banner needs a headline.", ""); return; }
+        ejStoreSet("ej-house-banners:" + EJ._hw.house, slides);
+        toast("Banners saved", "Kept on this device for " + hwHouse().name + ".");
+      };
+      /* ----- Messages (house-preview.messages) ----- */
+      function hwMessagesHtml() {
+        var h = '<section class="house-table" style="padding:64px 16px;text-align:center">' + icon("msgSquare", 32)
+          + '<h2 style="margin-top:12px;font-size:20px;font-weight:400">Elevate Connect</h2>'
+          + '<p style="margin:8px auto 0;max-width:26rem;font-size:14px;line-height:1.65;color:var(--connect-muted)">Calls, texts, WhatsApp and email for this house, in one staff console.</p>'
+          + '<a class="house-chip" style="margin-top:20px;text-decoration:none" href="#/connect?view=workspace">Open conversations' + icon("arrowUpRight", 14) + "</a></section>";
+        h += '<section style="margin-top:32px"><h2 style="font-size:18px;font-weight:400">Client conversations</h2>'
+          + '<div class="house-table" style="margin-top:12px">'
+          + (S.threads.length ? S.threads.map(function (t) {
+            var last = t.messages[t.messages.length - 1];
+            return '<a href="#/connect?tab=ateliers&thread=' + t.id + '" style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-bottom:1px solid var(--connect-line);color:inherit;text-decoration:none"><span style="min-width:0"><span style="display:block;font-size:14px;font-weight:500">' + esc(t.subject) + '</span><span style="display:block;font-size:12px;color:var(--connect-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:34rem">' + esc(last ? last.body : "") + '</span></span><span style="font-size:12px;color:var(--connect-muted)">' + esc(vendorName(t.vendor)) + "</span></a>";
+          }).join("") : '<p style="padding:24px 16px;font-size:14px;color:var(--connect-muted)">No client conversations yet.</p>')
+          + "</div></section>";
+        var emails = SAMPLE_THREADS.filter(function (t) { return t.channel === "email"; });
+        h += '<section style="margin-top:32px"><h2 style="font-size:18px;font-weight:400">Secretary email desk</h2>'
+          + '<p style="margin-top:4px;font-size:14px;color:var(--connect-muted)">Seller pieces and client email are worked from the Connect email desk; new seller pieces arrive there first, then wait in Pending approvals.</p>'
+          + '<div class="house-table" style="margin-top:12px">'
+          + (emails.length ? emails.map(function (t) {
+            return '<div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-bottom:1px solid var(--connect-line)"><span style="min-width:0"><span style="display:block;font-size:14px;font-weight:500">' + esc(t.title) + '</span><span style="display:block;font-size:12px;color:var(--connect-muted)">' + esc(t.preview) + '</span></span><span style="font-size:12px;color:var(--connect-muted)">' + esc(t.time) + "</span></div>";
+          }).join("") : '<p style="padding:24px 16px;font-size:14px;color:var(--connect-muted)">No email on the desk right now.</p>')
+          + '</div><a class="house-chip" style="margin-top:16px;text-decoration:none" href="#/connect?view=workspace&tab=email">' + icon("mail", 14) + "Open email desk</a></section>";
+        if (hwIsOwner()) {
+          h += '<section style="margin-top:32px"><h2 style="font-size:18px;font-weight:400">Pending approvals (' + (EJ._pwPending || []).length + ')</h2>'
+            + '<p style="margin-top:4px;font-size:14px;color:var(--connect-muted)">' + ((EJ._pwPending || []).length ? "Pieces are waiting for your decision." : "Nothing is waiting for approval.") + '</p>'
+            + '<a class="house-chip" style="margin-top:12px;text-decoration:none" href="#/private">Open the approval queue' + icon("arrowUpRight", 14) + "</a></section>";
+        }
+        return h;
+      }
+      /* ----- Settings (house-preview.settings) ----- */
+      function hwSettingsHtml() {
+        var st = hwSettings();
+        var h = '<section class="house-table" style="max-width:42rem">'
+          + '<label style="display:block;padding:16px;font-size:14px">Invoice closing note<input class="house-input" maxlength="160" aria-label="Invoice closing note" value="' + esc(st.invoiceNote) + '" onchange="EJ.hwSetInvoiceNote(this.value)" /><span style="margin-top:4px;display:block;font-size:12px;color:var(--connect-muted)">Printed at the bottom of every draft invoice.</span></label>'
+          + '<label style="display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px;font-size:14px;border-top:1px solid var(--connect-line)"><span>Show private costs throughout workspace<span style="display:block;font-size:12px;color:var(--connect-muted)">Turn off when a client can see your screen.</span></span><input type="checkbox" aria-label="Show private costs throughout workspace" style="width:20px;height:20px;accent-color:var(--gold)" ' + (st.showCosts ? "checked" : "") + ' onchange="EJ.hwSetCosts(this.checked)" /></label>'
+          + '<label style="display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px;font-size:14px;border-top:1px solid var(--connect-line)"><span>QR code print quality</span><select class="house-select" aria-label="QR code print quality" onchange="EJ.hwSetQrSize(this.value)"><option value="100"' + (st.qrSize === 100 ? " selected" : "") + '>Standard</option><option value="240"' + (st.qrSize === 240 ? " selected" : "") + ">High</option></select></label>"
+          + '<label style="display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px;font-size:14px;border-top:1px solid var(--connect-line)"><span>Seasonal sales default<span style="display:block;font-size:12px;color:var(--connect-muted)">Starting rhythm for new pieces when automatic sales are turned on.</span></span><select class="house-select" aria-label="Seasonal sales default" onchange="EJ.hwSetSaleRhythm(this.value)"><option value="2"' + (st.saleRhythm === 2 ? " selected" : "") + '>Twice a year</option><option value="4"' + (st.saleRhythm === 4 ? " selected" : "") + ">Four times a year</option></select></label>"
+          + '<label style="display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px;font-size:14px;border-top:1px solid var(--connect-line)"><span>Default sale discount ($ off)</span><input class="house-input" style="width:6rem;margin-top:0" inputmode="numeric" aria-label="Default sale discount in dollars off" value="' + (st.saleAmount != null ? st.saleAmount : 50) + '" onchange="EJ.hwSetSaleAmount(this.value)" /></label>'
+          + '<div style="display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px;font-size:14px;border-top:1px solid var(--connect-line)"><span>Reset workspace<span style="display:block;font-size:12px;color:var(--connect-muted)">Restores hidden and archived pieces to the shop and clears draft invoices.</span></span><button type="button" class="house-chip" onclick="EJ.hwResetWorkspace()">Reset</button></div>'
+          + '<p style="padding:16px;font-size:12px;color:var(--connect-muted);border-top:1px solid var(--connect-line)">Pieces, costs and invoices stay inside this workspace. Publishing to the customer shop is a separate staff action.</p>'
+          + "</section>";
+        if (hwIsOwner()) h += '<div style="margin-top:24px;max-width:42rem">' + houseSettingsHtml() + "</div>";
+        return h;
+      }
+      EJ.hwSetInvoiceNote = function (v) { hwSettings().invoiceNote = v; hwSettingsSave(); toast("Invoice closing note saved", "It prints at the bottom of every draft invoice."); };
+      EJ.hwSetCosts = function (checked) { hwSettings().showCosts = !!checked; hwSettingsSave(); EJ.route(true); };
+      EJ.hwSetQrSize = function (v) { hwSettings().qrSize = Number(v); hwSettingsSave(); toast("QR code print quality saved", Number(v) === 240 ? "High" : "Standard"); EJ.route(true); };
+      EJ.hwSetSaleRhythm = function (v) { hwSettings().saleRhythm = Number(v); hwSettingsSave(); };
+      EJ.hwSetSaleAmount = function (v) { hwSettings().saleAmount = Math.min(Number(String(v).replace(/\D/g, "").slice(0, 4)) || 0, 4500); hwSettingsSave(); EJ.route(true); };
+      EJ.hwResetWorkspace = function () {
+        Object.keys(EJ._hwStash).forEach(function (id) { PRODUCTS.push(EJ._hwStash[id].p); });
+        EJ._hwStash = {};
+        EJ._hwInvoices = [];
+        hwInvoicesSave();
+        EJ._hw.selected = {};
+        EJ.updateChrome();
+        toast("Workspace reset", "Hidden pieces are back in the shop and draft invoices are cleared.");
+        EJ.route(true);
+      };
+      /* ----- Limited staff (secretary / AI): Add Products only ----- */
+      function hwLimitedHtml() {
+        var role = hwRole();
+        var mine = role === "ai" ? (EJ._pwPending || []).filter(function (d) { return d.by === "ai"; }) : (EJ._pwPending || []);
+        var h = '<section class="house-card" style="max-width:36rem;padding:24px"><h2 style="font-size:18px;font-weight:400">Add pieces for approval</h2>'
+          + '<p style="margin-top:4px;font-size:14px;line-height:1.65;color:var(--connect-muted)">Your access lets you add new products. Each one is sent to the owner for approval before it appears on the site.</p>'
+          + '<button type="button" class="btn-gold" style="margin-top:16px" onclick="EJ.hwOpenEditor(null)">' + icon("plus", 14) + "Add new product</button></section>";
+        h += '<section style="margin-top:32px" aria-label="Your submissions"><h2 style="font-size:18px;font-weight:400">Your submissions (' + mine.length + ")</h2>"
+          + '<p style="margin-top:4px;font-size:14px;line-height:1.65;color:var(--connect-muted)">Everything here is saved as Pending Approval. Only the owner can confirm a piece and send it live.</p>';
+        if (mine.length) {
+          h += '<div style="margin-top:12px;display:flex;flex-direction:column;gap:12px">' + mine.map(function (d) {
+            return pwDraftRow(d, '<span class="sub-chip" style="margin-top:12px">Pending Approval — waiting for the owner</span>');
+          }).join("") + "</div>";
+        } else {
+          h += '<p style="margin-top:12px;font-size:14px;color:var(--connect-muted)">Nothing submitted yet. Products you add above appear here as Pending Approval.</p>';
+        }
+        h += '<p style="margin-top:24px;font-size:14px"><a href="#/private" style="color:var(--gold)">Open Private World</a> <span style="color:var(--connect-muted)">— the paste-a-piece secretary desk is there, on this same PIN.</span></p></section>';
+        return h;
+      }
+      /* ----- Overlays: detail, pending review, editor ----- */
+      function hwShowOverlay(html, large) {
+        var root = document.getElementById("overlayRoot");
+        root.innerHTML = '<div class="scrim" onclick="EJ.closeOverlays()"></div>'
+          + '<div class="hw-dialog' + (large ? " hw-dialog-lg" : "") + '" role="dialog" aria-modal="true">' + html
+          + '<button type="button" class="icon-btn dialog-close" aria-label="Close" onclick="EJ.closeOverlays()">' + icon("x", 16) + "</button></div>";
+      }
+      EJ.hwOpenDetail = function (id) {
+        var p = hwFindPiece(id);
+        if (!p) return;
+        var code = EJ.qrNumFor(p);
+        var live = !!findProduct(id);
+        var showC = hwShowCosts();
+        var rows = [["Metal", p.metal], ["Stone", p.stone], ["Carat", p.carat], ["Colour", p.color], ["Clarity", p.clarity], ["Cut", p.cut], ["Size", p.size], ["Certificate", p.certification], ["Retail", priceLabel(p)]];
+        if (p.labPrice && p.price > 0 && p.labPrice < p.price) rows.push(["Lab-grown", fmt(p.labPrice)]);
+        else if (p.price > 0 && offersLabGrown(p)) rows.push(["Lab-grown", "Auto · 45% below"]);
+        if (p.model) rows.push(["Model", p.model]);
+        if (p.year) rows.push(["Year", p.year]);
+        if (p.bandType) rows.push(["Band", p.bandType]);
+        if (p.maker) rows.push(["Maker", p.maker]);
+        if (showC) rows.push(["Cost (private)", hwMoney(hwCost(p))]);
+        var html = '<p style="font-family:var(--font-display);font-size:1.875rem">Product details</p>'
+          + '<div style="margin-top:16px;display:flex;flex-direction:column;gap:16px">'
+          + '<span style="display:block;background:#fff;border:1px solid var(--border);border-radius:4px"><img src="' + p.image + '" alt="' + esc(p.name) + '" style="display:block;width:100%;aspect-ratio:16/10;object-fit:contain;padding:16px" /></span>'
+          + '<div style="display:flex;flex-wrap:wrap;gap:16px;align-items:center"><span class="house-qr" data-hw-qr="' + code + '" data-hw-qrsize="' + hwSettings().qrSize + '" data-hw-display="104">' + icon("qr", 104) + "</span>"
+          + '<div style="min-width:0;flex:1 1 12rem"><p style="font-size:12px;color:var(--gold)">' + code + " · " + esc(hwSku(p)) + " · " + (live ? "Active" : "Draft") + '</p><h3 style="margin-top:4px;font-family:var(--font-display);font-size:1.5rem">' + esc(p.name) + "</h3>"
+          + (p.description ? '<p style="margin-top:8px;font-size:14px;line-height:1.65;color:var(--muted-foreground)">' + esc(p.description) + "</p>" : "") + "</div></div>"
+          + '<dl style="display:grid;grid-template-columns:1fr 1fr;gap:12px;border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:16px 0;font-size:14px">'
+          + rows.filter(function (r) { return r[1]; }).map(function (r) { return '<div><dt style="font-size:12px;color:var(--muted-foreground)">' + r[0] + "</dt><dd>" + esc(r[1]) + "</dd></div>"; }).join("") + "</dl>"
+          + '<div style="display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px">'
+          + '<button type="button" class="btn-ghost" onclick="EJ.hwCopyCode(\'' + code + '\')">' + icon("copy", 14) + "Copy tracking code</button>"
+          + '<button type="button" class="btn-ghost" onclick="EJ.hwOpenEditor({kind:\'' + (live ? "live" : "hidden") + '\',id:\'' + p.id + '\'})">Edit</button>'
+          + '<button type="button" class="btn-gold" onclick="EJ.hwCreateInvoice(\'' + p.id + '\')">' + icon("plus", 14) + "Create invoice</button></div></div>";
+        hwShowOverlay(html, true);
+        hwPaintQrs();
+      };
+      EJ.hwCopyCode = function (code) {
+        function done() { toast("Tracking code copied", code); }
+        if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(code).then(done, done);
+        else done();
+      };
+      EJ.hwOpenPending = function (idx) {
+        var d = (EJ._pwPending || [])[idx];
+        if (!d) return;
+        var actions = hwIsOwner()
+          ? '<span style="margin-top:12px;display:flex;flex-wrap:wrap;gap:8px"><button type="button" class="btn-gold" style="padding:8px 16px" onclick="EJ.closeOverlays();EJ.pwApprove(' + idx + ')">Approve &amp; publish</button><button type="button" class="btn-ghost" style="padding:8px 16px" onclick="EJ.closeOverlays();EJ.pwRemovePending(' + idx + ')">Remove</button></span>'
+          : '<span class="sub-chip" style="margin-top:12px">Pending Approval — waiting for the owner</span>';
+        hwShowOverlay('<p style="font-family:var(--font-display);font-size:1.5rem">Submission review</p><div style="margin-top:16px">' + pwDraftRow(d, actions) + "</div>", false);
+      };
+      function hwCompressPhoto(file) {
+        return new Promise(function (resolve, reject) {
+          if (["image/jpeg", "image/png", "image/webp"].indexOf(file.type) < 0) return reject(new Error("Please choose JPG, PNG or WebP photographs."));
+          if (file.size > 12 * 1024 * 1024) return reject(new Error("Choose photographs smaller than 12 MB."));
+          createImageBitmap(file).then(function (bitmap) {
+            var scale = Math.min(1, 1400 / Math.max(bitmap.width, bitmap.height));
+            var canvas = document.createElement("canvas");
+            canvas.width = Math.round(bitmap.width * scale);
+            canvas.height = Math.round(bitmap.height * scale);
+            var ctx = canvas.getContext("2d");
+            if (!ctx) { bitmap.close(); return reject(new Error("This photograph could not be prepared.")); }
+            ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+            bitmap.close();
+            var quality = 0.76;
+            var result = canvas.toDataURL("image/jpeg", quality);
+            while (result.length > 1100000 && quality > 0.36) { quality -= 0.1; result = canvas.toDataURL("image/jpeg", quality); }
+            if (result.length > 1100000) return reject(new Error("Please choose a smaller photograph."));
+            resolve(result);
+          }).catch(function () { reject(new Error("This photograph could not be prepared.")); });
+        });
+      }
+      var HW_EDITOR_FIELDS = ["name", "sku", "metal", "stone", "color", "clarity", "cut", "carat", "size", "certification", "price", "cost", "labPrice", "model", "year", "bandType", "brandId", "category", "status", "description"];
+      function hwHarvestEditor() {
+        var d = EJ._hwEditor;
+        if (!d) return;
+        var form = document.getElementById("hwEditorForm");
+        if (!form) return;
+        HW_EDITOR_FIELDS.forEach(function (k) {
+          var el = form.elements.namedItem("f_" + k);
+          if (el) d[k] = el.value;
+        });
+      }
+      EJ.hwOpenEditor = function (ref) {
+        var d = { _kind: "new", _pid: null, _idx: null, name: "", sku: "", metal: "", stone: "", color: "", clarity: "", cut: "", carat: "", size: "", certification: "", price: "", cost: "", labPrice: "", model: "", year: "", bandType: "", brandId: (EJ._pwLast && EJ._pwLast.brandId) || "elevate", category: (EJ._pwLast && EJ._pwLast.category) || "rings", status: hwCanPublish() ? "Draft" : "Pending", description: "", gallery: [] };
+        if (ref && (ref.kind === "live" || ref.kind === "hidden")) {
+          var p = hwFindPiece(ref.id);
+          if (!p) return;
+          d._kind = ref.similar ? "new" : ref.kind;
+          d._pid = ref.similar ? null : p.id;
+          d.name = p.name; d.sku = ref.similar ? "" : hwSku(p); d.metal = p.metal || ""; d.stone = p.stone || "";
+          d.color = p.color || ""; d.clarity = p.clarity || ""; d.cut = p.cut || ""; d.carat = p.carat || ""; d.size = p.size || "";
+          d.certification = p.certification || ""; d.price = p.price || ""; d.cost = hwCost(p);
+          d.labPrice = p.labPrice && p.price > 0 && p.labPrice < p.price ? p.labPrice : "";
+          d.model = p.model || ""; d.year = p.year || ""; d.bandType = p.bandType || "";
+          d.brandId = p.brandId || "elevate"; d.category = p.category || "rings";
+          d.status = ref.kind === "hidden" ? "Draft" : "Active";
+          if (ref.similar) d.status = hwCanPublish() ? "Draft" : "Pending";
+          d.description = p.description || "";
+          d.gallery = (p.gallery && p.gallery.length ? p.gallery : [p.image]).slice();
+        } else if (ref && ref.kind === "draft") {
+          var dr = EJ._hwDrafts[ref.idx];
+          if (!dr) return;
+          d._kind = "draft"; d._idx = ref.idx;
+          ["name", "sku", "metal", "stone", "color", "clarity", "cut", "carat", "size", "certification", "brandId", "category", "description"].forEach(function (k) { d[k] = dr[k] || ""; });
+          d.price = dr.price || ""; d.cost = dr.cost || ""; d.labPrice = dr.labPrice || ""; d.model = dr.model || ""; d.year = dr.year || ""; d.bandType = dr.bandType || "";
+          d.status = "Draft";
+          d.gallery = (dr.gallery && dr.gallery.length ? dr.gallery : [dr.image]).slice();
+        }
+        EJ._hwEditor = d;
+        EJ.hwRenderEditor();
+      };
+      EJ.hwRenderEditor = function () {
+        var d = EJ._hwEditor;
+        if (!d) return;
+        var showC = hwShowCosts();
+        var isNew = d._kind === "new";
+        function field(key, label, opts) {
+          opts = opts || {};
+          return '<label style="display:block;font-size:12px;color:var(--muted-foreground)">' + label
+            + '<input class="hw-in" name="f_' + key + '"' + (opts.required ? " required" : "") + (opts.numeric ? ' type="number" step="0.01"' : "") + (opts.placeholder ? ' placeholder="' + esc(opts.placeholder) + '"' : "") + ' value="' + esc(d[key]) + '" /></label>';
+        }
+        var html = '<div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;padding-right:32px">'
+          + '<p style="font-family:var(--font-display);font-size:1.875rem">' + (isNew ? "Add new product" : "Edit product") + "</p>"
+          + (isNew
+            ? '<label style="font-size:12px;color:var(--muted-foreground)">Brand<select class="hw-in" style="margin-top:4px" name="f_brandId" form="hwEditorForm">' + BRANDS.map(function (b) { return '<option value="' + b.id + '"' + (d.brandId === b.id ? " selected" : "") + ">" + esc(b.name) + "</option>"; }).join("") + "</select></label>"
+            : '<span style="font-size:12px;color:var(--muted-foreground)">' + esc(vendorName((hwFindPiece(d._pid) || {}).vendor || "")) + "</span>")
+          + "</div>"
+          + '<form id="hwEditorForm" onsubmit="return EJ.hwSaveEditor(event)" style="margin-top:20px;display:flex;flex-direction:column;gap:24px">'
+          + '<section style="border-bottom:1px solid var(--border);padding-bottom:20px"><p style="font-size:12px;color:var(--muted-foreground)">Image gallery</p>'
+          + '<div style="margin-top:12px;display:flex;flex-wrap:wrap;gap:12px">'
+          + d.gallery.map(function (photo, i) {
+            return '<span style="position:relative;display:block"><img src="' + photo + '" alt="Product photograph ' + (i + 1) + '" style="width:88px;height:88px;border-radius:4px;object-fit:contain;background:#fff;padding:4px;border:1px solid var(--border)" /><button type="button" aria-label="Remove photograph ' + (i + 1) + '" onclick="EJ.hwEditorPhotoRemove(' + i + ')" style="position:absolute;top:0;right:0;width:24px;height:24px;display:grid;place-items:center;background:var(--popover);border:1px solid var(--border);border-radius:4px;cursor:pointer">' + icon("x", 12) + "</button></span>";
+          }).join("")
+          + '<label style="width:88px;height:88px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;border:1px solid var(--border);border-radius:4px;font-size:12px;cursor:pointer;background:var(--popover)">' + icon("imagePlus", 18) + 'Add photos<input type="file" accept="image/jpeg,image/png,image/webp" multiple style="display:none" onchange="EJ.hwEditorPhotos(this)" /></label>'
+          + "</div></section>"
+          + '<div class="hw-form-grid">'
+          + field("name", "Item title", { required: true })
+          + field("sku", "SKU", { required: true })
+          + field("metal", "Metal type", { required: true })
+          + field("stone", "Stone type")
+          + field("color", "Stone color")
+          + field("clarity", "Clarity")
+          + field("cut", "Cut")
+          + field("carat", "Carat weight")
+          + field("size", "Ring size / variation")
+          + field("certification", "Certificate reference")
+          + field("price", "Retail price ($)", { numeric: true })
+          + (showC ? field("cost", "Internal investment / cost ($)", { numeric: true }) : "")
+          + field("labPrice", "Lab-grown price ($, optional)", { numeric: true })
+          + field("model", "Model name")
+          + field("year", "Year")
+          + '<label style="display:block;font-size:12px;color:var(--muted-foreground)">Material / band type<select class="hw-in" name="f_bandType"><option value="">Not applicable</option>' + ["Leather", "Metal/Steel", "Gold", "Rubber", "Fabric"].map(function (b) { return '<option value="' + b + '"' + (d.bandType === b ? " selected" : "") + ">" + b + "</option>"; }).join("") + "</select></label>"
+          + '<label style="display:block;font-size:12px;color:var(--muted-foreground)">Category<select class="hw-in" name="f_category">' + CATEGORIES.map(function (c) { return '<option value="' + c.slug + '"' + (d.category === c.slug ? " selected" : "") + ">" + esc(c.name) + "</option>"; }).join("") + "</select></label>"
+          + '<label style="display:block;font-size:12px;color:var(--muted-foreground)">Listing status<select class="hw-in" name="f_status">'
+          + (hwCanPublish()
+            ? '<option value="Draft"' + (d.status === "Draft" ? " selected" : "") + '>Draft</option><option value="Active"' + (d.status === "Active" ? " selected" : "") + ">Active</option>"
+            : '<option value="Pending" selected>Send for owner approval</option>')
+          + "</select></label>"
+          + '<label style="display:block;font-size:12px;color:var(--muted-foreground);grid-column:1/-1">Product description<textarea class="hw-in" name="f_description" style="min-height:96px">' + esc(d.description) + "</textarea></label>"
+          + "</div>"
+          + '<p style="font-size:12px;color:var(--muted-foreground)">Changes are not saved until you save the product.</p>'
+          + '<div style="display:flex;justify-content:flex-end;gap:8px;border-top:1px solid var(--border);padding-top:20px"><button type="button" class="btn-ghost" onclick="EJ.closeOverlays()">Cancel</button>'
+          + '<button type="submit" class="btn-gold">Confirm &amp; save piece' + icon("arrowRight", 14) + "</button></div></form>";
+        hwShowOverlay(html, true);
+      };
+      EJ.hwEditorPhotos = function (input) {
+        var files = Array.prototype.slice.call(input.files || []);
+        input.value = "";
+        var d = EJ._hwEditor;
+        if (!d || !files.length) return;
+        if (files.length + d.gallery.length > 6) { toast("Choose up to six photographs.", ""); return; }
+        hwHarvestEditor();
+        Promise.all(files.map(hwCompressPhoto)).then(function (photos) {
+          d.gallery = d.gallery.concat(photos);
+          EJ.hwRenderEditor();
+        }).catch(function (e) { toast(e.message || "Photographs could not be prepared.", ""); });
+      };
+      EJ.hwEditorPhotoRemove = function (i) {
+        hwHarvestEditor();
+        EJ._hwEditor.gallery.splice(i, 1);
+        EJ.hwRenderEditor();
+      };
+      EJ.hwSaveEditor = function (ev) {
+        ev.preventDefault();
+        var d = EJ._hwEditor;
+        if (!d) return false;
+        hwHarvestEditor();
+        var name = String(d.name || "").trim();
+        var sku = String(d.sku || "").trim();
+        var metal = String(d.metal || "").trim();
+        var price = Number(d.price);
+        var cost = Number(d.cost) || 0;
+        var labPrice = d.labPrice === "" || d.labPrice == null ? null : Number(d.labPrice);
+        if (!name || !sku || !metal) { toast("Add a title, SKU and metal type.", ""); return false; }
+        if (!d.gallery.length) { toast("Add at least one photograph.", ""); return false; }
+        if (!isFinite(price) || price < 1 || Math.floor(price) !== price || cost < 0 || !isFinite(cost)) { toast("Retail price must be a whole dollar amount of $1 or more, and cost cannot be negative.", ""); return false; }
+        if (labPrice != null && (!isFinite(labPrice) || Math.floor(labPrice) !== labPrice || labPrice < 1 || labPrice > price)) { toast("Lab-grown price must be a whole dollar amount up to the natural price, or left empty.", ""); return false; }
+        var dupe = PRODUCTS.some(function (p) { return p.id !== d._pid && hwSku(p).toLowerCase() === sku.toLowerCase(); })
+          || Object.keys(EJ._hwStash).some(function (id) { return id !== d._pid && hwSku(EJ._hwStash[id].p).toLowerCase() === sku.toLowerCase(); });
+        if (dupe) { toast("That SKU already belongs to another piece.", ""); return false; }
+        var cat = findCategory(d.category) || CATEGORIES[0];
+        function applyFields(p) {
+          p.name = name; p.metal = metal; p.stone = String(d.stone || ""); p.carat = String(d.carat || "");
+          p.certification = String(d.certification || ""); p.description = String(d.description || "");
+          p.category = cat.slug; p.price = price; p.image = d.gallery[0]; p.gallery = d.gallery.slice();
+          p.color = String(d.color || ""); p.clarity = String(d.clarity || ""); p.cut = String(d.cut || ""); p.size = String(d.size || "");
+          p.model = String(d.model || "") || undefined; p.year = String(d.year || "").replace(/\D/g, "").slice(0, 4) || undefined; p.bandType = String(d.bandType || "") || undefined;
+          if (labPrice != null) p.labPrice = labPrice;
+          EJ._hwCosts[p.id] = cost;
+          EJ._hwSkus[p.id] = sku;
+        }
+        EJ._hwEditor = null;
+        EJ.closeOverlays();
+        if (d._kind === "live" || d._kind === "hidden") {
+          var p0 = hwFindPiece(d._pid);
+          if (p0) {
+            applyFields(p0);
+            if (d.status === "Draft" && findProduct(p0.id)) hwApplyToPiece(p0.id, { status: "Draft" });
+            if (d.status === "Active" && !findProduct(p0.id)) hwApplyToPiece(p0.id, { status: "Active" });
+            toast(d.status === "Active" ? "Changes saved and showing on the site." : "Changes saved.", "");
+          }
+          EJ._hw.menuFor = null;
+          if (location.hash !== "#/house/inventory") location.hash = "#/house/inventory"; else EJ.route(true);
+          return false;
+        }
+        var entry = {
+          key: uid(), by: hwRole() || "owner", name: name, brandId: d.brandId || "elevate",
+          category: cat.slug, subcategory: (cat.subcategories[0] || {}).slug || "",
+          price: price, metal: metal, stone: String(d.stone || ""), carat: String(d.carat || ""),
+          certification: String(d.certification || ""), description: String(d.description || ""),
+          image: d.gallery[0], gallery: d.gallery.slice(), oneOfOne: false,
+          color: String(d.color || ""), clarity: String(d.clarity || ""), cut: String(d.cut || ""), size: String(d.size || ""),
+          cost: cost, sku: sku, labPrice: labPrice, model: String(d.model || ""), year: String(d.year || ""), bandType: String(d.bandType || "")
+        };
+        if (d._kind === "draft") {
+          EJ._hwDrafts[d._idx] = entry;
+          toast("Changes saved.", "");
+          if (location.hash !== "#/house/inventory") location.hash = "#/house/inventory"; else EJ.route(true);
+          return false;
+        }
+        if (!hwCanPublish() || d.status === "Pending") {
+          EJ._pwPending.unshift(entry);
+          toast(name + " sent to the owner for approval.", "");
+          EJ.route(true);
+          return false;
+        }
+        if (d.status === "Draft") {
+          EJ._hwDrafts.unshift(entry);
+          toast("Product created successfully — saved as a private draft.", "");
+          if (location.hash !== "#/house/inventory") location.hash = "#/house/inventory"; else EJ.route(true);
+          return false;
+        }
+        var p = pwPublish(entry);
+        p.gallery = entry.gallery.slice();
+        if (entry.model) p.model = entry.model;
+        if (entry.year) p.year = entry.year;
+        if (entry.bandType) p.bandType = entry.bandType;
+        if (labPrice != null) p.labPrice = labPrice;
+        EJ._hwCosts[p.id] = cost;
+        EJ._hwSkus[p.id] = sku;
+        EJ.updateChrome();
+        toast("Product created successfully — " + EJ.qrNumFor(p) + " is now showing on the site.", "");
+        if (location.hash !== "#/house/inventory") location.hash = "#/house/inventory"; else EJ.route(true);
         return false;
       };
 
@@ -7141,6 +8304,44 @@ var PRODUCTS = [
       var PW_IN = "width:100%;border:1px solid var(--border);border-radius:0.25rem;padding:0.625rem 0.75rem;font:inherit;font-size:0.875rem;background:transparent";
       var PW_SEL = "width:100%;border:1px solid var(--border);border-radius:0.25rem;padding:0.625rem 0.75rem;font:inherit;font-size:0.875rem;background:var(--popover)";
       EJ._pwPending = EJ._pwPending || [];
+      /* ---------- On-device persistence (front-end build) ----------
+         Two small registers are kept in the browser's session
+         storage on this device, so they survive a page reload:
+         the customer accounts (ej-accounts) and the staff PINs
+         (ej-pw-pins). Nothing is ever written into the page code,
+         and nothing leaves the device; the connected back end
+         replaces both with server-side storage. Every read and
+         write is guarded — where storage is unavailable the state
+         simply stays in memory, exactly as before. */
+      function ejStore(key) {
+        try {
+          var raw = window.sessionStorage.getItem(key);
+          return raw ? JSON.parse(raw) : null;
+        } catch (e) { return null; }
+      }
+      function ejStoreSet(key, val) {
+        try {
+          if (val === null || val === undefined) window.sessionStorage.removeItem(key);
+          else window.sessionStorage.setItem(key, JSON.stringify(val));
+        } catch (e) { /* storage unavailable: state stays in memory */ }
+      }
+      function ejPinsLoad() {
+        if (EJ._pinsLoaded) return;
+        EJ._pinsLoaded = true;
+        var p = ejStore("ej-pw-pins");
+        if (p) {
+          if (p.owner) EJ._pwOwnerPin = p.owner;
+          if (p.sec) EJ._pwSecPin = p.sec;
+          if (p.ai) EJ._pwAiPin = p.ai;
+        }
+      }
+      function ejPinsSave() {
+        var p = {};
+        if (EJ._pwOwnerPin) p.owner = EJ._pwOwnerPin;
+        if (EJ._pwSecPin) p.sec = EJ._pwSecPin;
+        if (EJ._pwAiPin) p.ai = EJ._pwAiPin;
+        ejStoreSet("ej-pw-pins", Object.keys(p).length ? p : null);
+      }
       /* Seller submission placed live by the website secretary from
          the jewelry inbox (2026-11-09) for LLG — cluster stud earrings,
          14K white gold, lab-grown diamonds, 5.84 ct total per the tag
@@ -7161,13 +8362,14 @@ var PRODUCTS = [
       EJ._pwStaged = EJ._pwStaged || null;
       EJ._pwRole = EJ._pwRole || null;
       EJ._pwLast = EJ._pwLast || { brandId: "elevate", category: "rings" };
-      /* AI role PIN — created at the owner's direction (2026-11-11)
-         so the AI can sign in to Store House / Private World and add
-         products as Pending Approval. The owner can change it at any
-         time in Store House → Settings → PINs (owner only); a change
-         made there replaces this value for the rest of the session,
-         on this device, like the rest of the front-end state. */
-      EJ._pwAiPin = EJ._pwAiPin || "9438929221";
+      /* Staff PINs (owner, secretary, AI) load from this device's
+         session store — no PIN value is written into the page code.
+         The owner creates them in order at the Private World door
+         (owner first, then secretary and AI inside the studio) or
+         changes them in Store House → Settings → PINs; every setter
+         saves them back with ejPinsSave(), so a PIN set once keeps
+         unlocking on this device after a reload. */
+      ejPinsLoad();
 
       function pwGateHtml(withPad) {
         var h = '<div data-pwgate="1" style="display:flex;flex-direction:column;gap:1rem">';
@@ -7219,6 +8421,7 @@ var PRODUCTS = [
         if (a.length !== 10) { pwGateFail("Your owner PIN needs exactly 10 digits."); return false; }
         if (a !== b) { pwGateFail("The two PINs do not match — type the same 10 digits twice."); return false; }
         EJ._pwOwnerPin = a;
+        ejPinsSave();
         pwGatePass("owner");
         return false;
       };
@@ -7242,6 +8445,7 @@ var PRODUCTS = [
         if (a === EJ._pwOwnerPin) { EJ._pwPinMsg = "The secretary PIN must be different from your owner PIN."; EJ.route(true); return false; }
         if (EJ._pwAiPin && a === EJ._pwAiPin) { EJ._pwPinMsg = "The secretary PIN must be different from the AI PIN."; EJ.route(true); return false; }
         EJ._pwSecPin = a;
+        ejPinsSave();
         EJ._pwSecReveal = a;
         EJ._pwPinMsg = "";
         EJ.route(true);
@@ -7262,6 +8466,7 @@ var PRODUCTS = [
         if (a === EJ._pwOwnerPin) { EJ._pwPinMsg = "The AI PIN must be different from your owner PIN."; EJ.route(true); return false; }
         if (EJ._pwSecPin && a === EJ._pwSecPin) { EJ._pwPinMsg = "The AI PIN must be different from the secretary PIN."; EJ.route(true); return false; }
         EJ._pwAiPin = a;
+        ejPinsSave();
         EJ._pwAiReveal = a;
         EJ._pwPinMsg = "";
         EJ.route(true);
@@ -7282,6 +8487,7 @@ var PRODUCTS = [
         if (EJ._pwSecPin && a === EJ._pwSecPin) { EJ._pwPinMsg = "Your owner PIN must be different from the secretary PIN."; EJ.route(true); return false; }
         if (EJ._pwAiPin && a === EJ._pwAiPin) { EJ._pwPinMsg = "Your owner PIN must be different from the AI PIN."; EJ.route(true); return false; }
         EJ._pwOwnerPin = a;
+        ejPinsSave();
         EJ._pwPinMsg = "";
         toast("Owner PIN changed", "Use the new PIN next time you unlock Private World.");
         EJ.route(true);
@@ -8170,7 +9376,7 @@ var PRODUCTS = [
         else if (seg[0] === "connect") { name = "connect"; html = pageConnect(query); }
         else if (seg[0] === "auth") { name = "auth"; html = pageAuth(query); }
         else if (seg[0] === "account") { name = "account"; html = pageAccount(); }
-        else if (seg[0] === "house") { name = "house"; html = pageHouse(); }
+        else if (seg[0] === "house") { name = "house"; param = seg[1] || null; html = pageHouseWorkspace(seg[1], query); }
         else if (seg[0] === "backend") { name = "backend"; html = pageBackend(); }
         else if (seg[0] === "private") { name = "private"; html = pagePrivate(); }
         else if (seg[0] === "tag" && seg.length === 2) { name = "tag"; param = seg[1]; html = pageTag(seg[1]); }
@@ -8191,6 +9397,7 @@ var PRODUCTS = [
           var slot = document.getElementById("connectTopbarSlot");
           if (slot) slot.outerHTML = connectTopbarHtml();
         }
+        if (name === "house") hwAfterRender();
         if (name !== "item") { EJ._item = null; EJ._conciergeOpen = false; }
         EJ.updateChrome();
         EJ.renderConcierge();
@@ -8687,6 +9894,12 @@ var PRODUCTS = [
       });
   </script>
 
+<script>
+/* qrcode-generator 1.4.4 — QR code generation library by Kazuhiko Arase, MIT License (https://github.com/kazuhikoarase/qrcode-generator). Embedded so staff QR codes render without any network dependency. */
+var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],f={},c=function(t,r){o=function(t){for(var r=new Array(t),e=0;e<t;e+=1){r[e]=new Array(t);for(var n=0;n<t;n+=1)r[e][n]=null}return r}(i=4*e+17),l(0,0),l(i-7,0),l(0,i-7),s(),h(),d(t,r),e>=7&&v(t),null==a&&(a=p(e,n,u)),w(a,r)},l=function(t,r){for(var e=-1;e<=7;e+=1)if(!(t+e<=-1||i<=t+e))for(var n=-1;n<=7;n+=1)r+n<=-1||i<=r+n||(o[t+e][r+n]=0<=e&&e<=6&&(0==n||6==n)||0<=n&&n<=6&&(0==e||6==e)||2<=e&&e<=4&&2<=n&&n<=4)},h=function(){for(var t=8;t<i-8;t+=1)null==o[t][6]&&(o[t][6]=t%2==0);for(var r=8;r<i-8;r+=1)null==o[6][r]&&(o[6][r]=r%2==0)},s=function(){for(var t=B.getPatternPosition(e),r=0;r<t.length;r+=1)for(var n=0;n<t.length;n+=1){var i=t[r],a=t[n];if(null==o[i][a])for(var u=-2;u<=2;u+=1)for(var f=-2;f<=2;f+=1)o[i+u][a+f]=-2==u||2==u||-2==f||2==f||0==u&&0==f}},v=function(t){for(var r=B.getBCHTypeNumber(e),n=0;n<18;n+=1){var a=!t&&1==(r>>n&1);o[Math.floor(n/3)][n%3+i-8-3]=a}for(n=0;n<18;n+=1){a=!t&&1==(r>>n&1);o[n%3+i-8-3][Math.floor(n/3)]=a}},d=function(t,r){for(var e=n<<3|r,a=B.getBCHTypeInfo(e),u=0;u<15;u+=1){var f=!t&&1==(a>>u&1);u<6?o[u][8]=f:u<8?o[u+1][8]=f:o[i-15+u][8]=f}for(u=0;u<15;u+=1){f=!t&&1==(a>>u&1);u<8?o[8][i-u-1]=f:u<9?o[8][15-u-1+1]=f:o[8][15-u-1]=f}o[i-8][8]=!t},w=function(t,r){for(var e=-1,n=i-1,a=7,u=0,f=B.getMaskFunction(r),c=i-1;c>0;c-=2)for(6==c&&(c-=1);;){for(var g=0;g<2;g+=1)if(null==o[n][c-g]){var l=!1;u<t.length&&(l=1==(t[u]>>>a&1)),f(n,c-g)&&(l=!l),o[n][c-g]=l,-1==(a-=1)&&(u+=1,a=7)}if((n+=e)<0||i<=n){n-=e,e=-e;break}}},p=function(t,r,e){for(var n=A.getRSBlocks(t,r),o=b(),i=0;i<e.length;i+=1){var a=e[i];o.put(a.getMode(),4),o.put(a.getLength(),B.getLengthInBits(a.getMode(),t)),a.write(o)}var u=0;for(i=0;i<n.length;i+=1)u+=n[i].dataCount;if(o.getLengthInBits()>8*u)throw"code length overflow. ("+o.getLengthInBits()+">"+8*u+")";for(o.getLengthInBits()+4<=8*u&&o.put(0,4);o.getLengthInBits()%8!=0;)o.putBit(!1);for(;!(o.getLengthInBits()>=8*u||(o.put(236,8),o.getLengthInBits()>=8*u));)o.put(17,8);return function(t,r){for(var e=0,n=0,o=0,i=new Array(r.length),a=new Array(r.length),u=0;u<r.length;u+=1){var f=r[u].dataCount,c=r[u].totalCount-f;n=Math.max(n,f),o=Math.max(o,c),i[u]=new Array(f);for(var g=0;g<i[u].length;g+=1)i[u][g]=255&t.getBuffer()[g+e];e+=f;var l=B.getErrorCorrectPolynomial(c),h=k(i[u],l.getLength()-1).mod(l);for(a[u]=new Array(l.getLength()-1),g=0;g<a[u].length;g+=1){var s=g+h.getLength()-a[u].length;a[u][g]=s>=0?h.getAt(s):0}}var v=0;for(g=0;g<r.length;g+=1)v+=r[g].totalCount;var d=new Array(v),w=0;for(g=0;g<n;g+=1)for(u=0;u<r.length;u+=1)g<i[u].length&&(d[w]=i[u][g],w+=1);for(g=0;g<o;g+=1)for(u=0;u<r.length;u+=1)g<a[u].length&&(d[w]=a[u][g],w+=1);return d}(o,n)};f.addData=function(t,r){var e=null;switch(r=r||"Byte"){case"Numeric":e=M(t);break;case"Alphanumeric":e=x(t);break;case"Byte":e=m(t);break;case"Kanji":e=L(t);break;default:throw"mode:"+r}u.push(e),a=null},f.isDark=function(t,r){if(t<0||i<=t||r<0||i<=r)throw t+","+r;return o[t][r]},f.getModuleCount=function(){return i},f.make=function(){if(e<1){for(var t=1;t<40;t++){for(var r=A.getRSBlocks(t,n),o=b(),i=0;i<u.length;i++){var a=u[i];o.put(a.getMode(),4),o.put(a.getLength(),B.getLengthInBits(a.getMode(),t)),a.write(o)}var g=0;for(i=0;i<r.length;i++)g+=r[i].dataCount;if(o.getLengthInBits()<=8*g)break}e=t}c(!1,function(){for(var t=0,r=0,e=0;e<8;e+=1){c(!0,e);var n=B.getLostPoint(f);(0==e||t>n)&&(t=n,r=e)}return r}())},f.createTableTag=function(t,r){t=t||2;var e="";e+='<table style="',e+=" border-width: 0px; border-style: none;",e+=" border-collapse: collapse;",e+=" padding: 0px; margin: "+(r=void 0===r?4*t:r)+"px;",e+='">',e+="<tbody>";for(var n=0;n<f.getModuleCount();n+=1){e+="<tr>";for(var o=0;o<f.getModuleCount();o+=1)e+='<td style="',e+=" border-width: 0px; border-style: none;",e+=" border-collapse: collapse;",e+=" padding: 0px; margin: 0px;",e+=" width: "+t+"px;",e+=" height: "+t+"px;",e+=" background-color: ",e+=f.isDark(n,o)?"#000000":"#ffffff",e+=";",e+='"/>';e+="</tr>"}return e+="</tbody>",e+="</table>"},f.createSvgTag=function(t,r,e,n){var o={};"object"==typeof arguments[0]&&(t=(o=arguments[0]).cellSize,r=o.margin,e=o.alt,n=o.title),t=t||2,r=void 0===r?4*t:r,(e="string"==typeof e?{text:e}:e||{}).text=e.text||null,e.id=e.text?e.id||"qrcode-description":null,(n="string"==typeof n?{text:n}:n||{}).text=n.text||null,n.id=n.text?n.id||"qrcode-title":null;var i,a,u,c,g=f.getModuleCount()*t+2*r,l="";for(c="l"+t+",0 0,"+t+" -"+t+",0 0,-"+t+"z ",l+='<svg version="1.1" xmlns="http://www.w3.org/2000/svg"',l+=o.scalable?"":' width="'+g+'px" height="'+g+'px"',l+=' viewBox="0 0 '+g+" "+g+'" ',l+=' preserveAspectRatio="xMinYMin meet"',l+=n.text||e.text?' role="img" aria-labelledby="'+y([n.id,e.id].join(" ").trim())+'"':"",l+=">",l+=n.text?'<title id="'+y(n.id)+'">'+y(n.text)+"</title>":"",l+=e.text?'<description id="'+y(e.id)+'">'+y(e.text)+"</description>":"",l+='<rect width="100%" height="100%" fill="white" cx="0" cy="0"/>',l+='<path d="',a=0;a<f.getModuleCount();a+=1)for(u=a*t+r,i=0;i<f.getModuleCount();i+=1)f.isDark(a,i)&&(l+="M"+(i*t+r)+","+u+c);return l+='" stroke="transparent" fill="black"/>',l+="</svg>"},f.createDataURL=function(t,r){t=t||2,r=void 0===r?4*t:r;var e=f.getModuleCount()*t+2*r,n=r,o=e-r;return I(e,e,(function(r,e){if(n<=r&&r<o&&n<=e&&e<o){var i=Math.floor((r-n)/t),a=Math.floor((e-n)/t);return f.isDark(a,i)?0:1}return 1}))},f.createImgTag=function(t,r,e){t=t||2,r=void 0===r?4*t:r;var n=f.getModuleCount()*t+2*r,o="";return o+="<img",o+=' src="',o+=f.createDataURL(t,r),o+='"',o+=' width="',o+=n,o+='"',o+=' height="',o+=n,o+='"',e&&(o+=' alt="',o+=y(e),o+='"'),o+="/>"};var y=function(t){for(var r="",e=0;e<t.length;e+=1){var n=t.charAt(e);switch(n){case"<":r+="&lt;";break;case">":r+="&gt;";break;case"&":r+="&amp;";break;case'"':r+="&quot;";break;default:r+=n}}return r};return f.createASCII=function(t,r){if((t=t||1)<2)return function(t){t=void 0===t?2:t;var r,e,n,o,i,a=1*f.getModuleCount()+2*t,u=t,c=a-t,g={"██":"█","█ ":"▀"," █":"▄","  ":" "},l={"██":"▀","█ ":"▀"," █":" ","  ":" "},h="";for(r=0;r<a;r+=2){for(n=Math.floor((r-u)/1),o=Math.floor((r+1-u)/1),e=0;e<a;e+=1)i="█",u<=e&&e<c&&u<=r&&r<c&&f.isDark(n,Math.floor((e-u)/1))&&(i=" "),u<=e&&e<c&&u<=r+1&&r+1<c&&f.isDark(o,Math.floor((e-u)/1))?i+=" ":i+="█",h+=t<1&&r+1>=c?l[i]:g[i];h+="\n"}return a%2&&t>0?h.substring(0,h.length-a-1)+Array(a+1).join("▀"):h.substring(0,h.length-1)}(r);t-=1,r=void 0===r?2*t:r;var e,n,o,i,a=f.getModuleCount()*t+2*r,u=r,c=a-r,g=Array(t+1).join("██"),l=Array(t+1).join("  "),h="",s="";for(e=0;e<a;e+=1){for(o=Math.floor((e-u)/t),s="",n=0;n<a;n+=1)i=1,u<=n&&n<c&&u<=e&&e<c&&f.isDark(o,Math.floor((n-u)/t))&&(i=0),s+=i?g:l;for(o=0;o<t;o+=1)h+=s+"\n"}return h.substring(0,h.length-1)},f.renderTo2dContext=function(t,r){r=r||2;for(var e=f.getModuleCount(),n=0;n<e;n++)for(var o=0;o<e;o++)t.fillStyle=f.isDark(n,o)?"black":"white",t.fillRect(n*r,o*r,r,r)},f};t.stringToBytes=(t.stringToBytesFuncs={default:function(t){for(var r=[],e=0;e<t.length;e+=1){var n=t.charCodeAt(e);r.push(255&n)}return r}}).default,t.createStringToBytes=function(t,r){var e=function(){for(var e=S(t),n=function(){var t=e.read();if(-1==t)throw"eof";return t},o=0,i={};;){var a=e.read();if(-1==a)break;var u=n(),f=n()<<8|n();i[String.fromCharCode(a<<8|u)]=f,o+=1}if(o!=r)throw o+" != "+r;return i}(),n="?".charCodeAt(0);return function(t){for(var r=[],o=0;o<t.length;o+=1){var i=t.charCodeAt(o);if(i<128)r.push(i);else{var a=e[t.charAt(o)];"number"==typeof a?(255&a)==a?r.push(a):(r.push(a>>>8),r.push(255&a)):r.push(n)}}return r}};var r,e,n,o,i,a=1,u=2,f=4,c=8,g={L:1,M:0,Q:3,H:2},l=0,h=1,s=2,v=3,d=4,w=5,p=6,y=7,B=(r=[[],[6,18],[6,22],[6,26],[6,30],[6,34],[6,22,38],[6,24,42],[6,26,46],[6,28,50],[6,30,54],[6,32,58],[6,34,62],[6,26,46,66],[6,26,48,70],[6,26,50,74],[6,30,54,78],[6,30,56,82],[6,30,58,86],[6,34,62,90],[6,28,50,72,94],[6,26,50,74,98],[6,30,54,78,102],[6,28,54,80,106],[6,32,58,84,110],[6,30,58,86,114],[6,34,62,90,118],[6,26,50,74,98,122],[6,30,54,78,102,126],[6,26,52,78,104,130],[6,30,56,82,108,134],[6,34,60,86,112,138],[6,30,58,86,114,142],[6,34,62,90,118,146],[6,30,54,78,102,126,150],[6,24,50,76,102,128,154],[6,28,54,80,106,132,158],[6,32,58,84,110,136,162],[6,26,54,82,110,138,166],[6,30,58,86,114,142,170]],e=1335,n=7973,i=function(t){for(var r=0;0!=t;)r+=1,t>>>=1;return r},(o={}).getBCHTypeInfo=function(t){for(var r=t<<10;i(r)-i(e)>=0;)r^=e<<i(r)-i(e);return 21522^(t<<10|r)},o.getBCHTypeNumber=function(t){for(var r=t<<12;i(r)-i(n)>=0;)r^=n<<i(r)-i(n);return t<<12|r},o.getPatternPosition=function(t){return r[t-1]},o.getMaskFunction=function(t){switch(t){case l:return function(t,r){return(t+r)%2==0};case h:return function(t,r){return t%2==0};case s:return function(t,r){return r%3==0};case v:return function(t,r){return(t+r)%3==0};case d:return function(t,r){return(Math.floor(t/2)+Math.floor(r/3))%2==0};case w:return function(t,r){return t*r%2+t*r%3==0};case p:return function(t,r){return(t*r%2+t*r%3)%2==0};case y:return function(t,r){return(t*r%3+(t+r)%2)%2==0};default:throw"bad maskPattern:"+t}},o.getErrorCorrectPolynomial=function(t){for(var r=k([1],0),e=0;e<t;e+=1)r=r.multiply(k([1,C.gexp(e)],0));return r},o.getLengthInBits=function(t,r){if(1<=r&&r<10)switch(t){case a:return 10;case u:return 9;case f:case c:return 8;default:throw"mode:"+t}else if(r<27)switch(t){case a:return 12;case u:return 11;case f:return 16;case c:return 10;default:throw"mode:"+t}else{if(!(r<41))throw"type:"+r;switch(t){case a:return 14;case u:return 13;case f:return 16;case c:return 12;default:throw"mode:"+t}}},o.getLostPoint=function(t){for(var r=t.getModuleCount(),e=0,n=0;n<r;n+=1)for(var o=0;o<r;o+=1){for(var i=0,a=t.isDark(n,o),u=-1;u<=1;u+=1)if(!(n+u<0||r<=n+u))for(var f=-1;f<=1;f+=1)o+f<0||r<=o+f||0==u&&0==f||a==t.isDark(n+u,o+f)&&(i+=1);i>5&&(e+=3+i-5)}for(n=0;n<r-1;n+=1)for(o=0;o<r-1;o+=1){var c=0;t.isDark(n,o)&&(c+=1),t.isDark(n+1,o)&&(c+=1),t.isDark(n,o+1)&&(c+=1),t.isDark(n+1,o+1)&&(c+=1),0!=c&&4!=c||(e+=3)}for(n=0;n<r;n+=1)for(o=0;o<r-6;o+=1)t.isDark(n,o)&&!t.isDark(n,o+1)&&t.isDark(n,o+2)&&t.isDark(n,o+3)&&t.isDark(n,o+4)&&!t.isDark(n,o+5)&&t.isDark(n,o+6)&&(e+=40);for(o=0;o<r;o+=1)for(n=0;n<r-6;n+=1)t.isDark(n,o)&&!t.isDark(n+1,o)&&t.isDark(n+2,o)&&t.isDark(n+3,o)&&t.isDark(n+4,o)&&!t.isDark(n+5,o)&&t.isDark(n+6,o)&&(e+=40);var g=0;for(o=0;o<r;o+=1)for(n=0;n<r;n+=1)t.isDark(n,o)&&(g+=1);return e+=Math.abs(100*g/r/r-50)/5*10},o),C=function(){for(var t=new Array(256),r=new Array(256),e=0;e<8;e+=1)t[e]=1<<e;for(e=8;e<256;e+=1)t[e]=t[e-4]^t[e-5]^t[e-6]^t[e-8];for(e=0;e<255;e+=1)r[t[e]]=e;var n={glog:function(t){if(t<1)throw"glog("+t+")";return r[t]},gexp:function(r){for(;r<0;)r+=255;for(;r>=256;)r-=255;return t[r]}};return n}();function k(t,r){if(void 0===t.length)throw t.length+"/"+r;var e=function(){for(var e=0;e<t.length&&0==t[e];)e+=1;for(var n=new Array(t.length-e+r),o=0;o<t.length-e;o+=1)n[o]=t[o+e];return n}(),n={getAt:function(t){return e[t]},getLength:function(){return e.length},multiply:function(t){for(var r=new Array(n.getLength()+t.getLength()-1),e=0;e<n.getLength();e+=1)for(var o=0;o<t.getLength();o+=1)r[e+o]^=C.gexp(C.glog(n.getAt(e))+C.glog(t.getAt(o)));return k(r,0)},mod:function(t){if(n.getLength()-t.getLength()<0)return n;for(var r=C.glog(n.getAt(0))-C.glog(t.getAt(0)),e=new Array(n.getLength()),o=0;o<n.getLength();o+=1)e[o]=n.getAt(o);for(o=0;o<t.getLength();o+=1)e[o]^=C.gexp(C.glog(t.getAt(o))+r);return k(e,0).mod(t)}};return n}var A=function(){var t=[[1,26,19],[1,26,16],[1,26,13],[1,26,9],[1,44,34],[1,44,28],[1,44,22],[1,44,16],[1,70,55],[1,70,44],[2,35,17],[2,35,13],[1,100,80],[2,50,32],[2,50,24],[4,25,9],[1,134,108],[2,67,43],[2,33,15,2,34,16],[2,33,11,2,34,12],[2,86,68],[4,43,27],[4,43,19],[4,43,15],[2,98,78],[4,49,31],[2,32,14,4,33,15],[4,39,13,1,40,14],[2,121,97],[2,60,38,2,61,39],[4,40,18,2,41,19],[4,40,14,2,41,15],[2,146,116],[3,58,36,2,59,37],[4,36,16,4,37,17],[4,36,12,4,37,13],[2,86,68,2,87,69],[4,69,43,1,70,44],[6,43,19,2,44,20],[6,43,15,2,44,16],[4,101,81],[1,80,50,4,81,51],[4,50,22,4,51,23],[3,36,12,8,37,13],[2,116,92,2,117,93],[6,58,36,2,59,37],[4,46,20,6,47,21],[7,42,14,4,43,15],[4,133,107],[8,59,37,1,60,38],[8,44,20,4,45,21],[12,33,11,4,34,12],[3,145,115,1,146,116],[4,64,40,5,65,41],[11,36,16,5,37,17],[11,36,12,5,37,13],[5,109,87,1,110,88],[5,65,41,5,66,42],[5,54,24,7,55,25],[11,36,12,7,37,13],[5,122,98,1,123,99],[7,73,45,3,74,46],[15,43,19,2,44,20],[3,45,15,13,46,16],[1,135,107,5,136,108],[10,74,46,1,75,47],[1,50,22,15,51,23],[2,42,14,17,43,15],[5,150,120,1,151,121],[9,69,43,4,70,44],[17,50,22,1,51,23],[2,42,14,19,43,15],[3,141,113,4,142,114],[3,70,44,11,71,45],[17,47,21,4,48,22],[9,39,13,16,40,14],[3,135,107,5,136,108],[3,67,41,13,68,42],[15,54,24,5,55,25],[15,43,15,10,44,16],[4,144,116,4,145,117],[17,68,42],[17,50,22,6,51,23],[19,46,16,6,47,17],[2,139,111,7,140,112],[17,74,46],[7,54,24,16,55,25],[34,37,13],[4,151,121,5,152,122],[4,75,47,14,76,48],[11,54,24,14,55,25],[16,45,15,14,46,16],[6,147,117,4,148,118],[6,73,45,14,74,46],[11,54,24,16,55,25],[30,46,16,2,47,17],[8,132,106,4,133,107],[8,75,47,13,76,48],[7,54,24,22,55,25],[22,45,15,13,46,16],[10,142,114,2,143,115],[19,74,46,4,75,47],[28,50,22,6,51,23],[33,46,16,4,47,17],[8,152,122,4,153,123],[22,73,45,3,74,46],[8,53,23,26,54,24],[12,45,15,28,46,16],[3,147,117,10,148,118],[3,73,45,23,74,46],[4,54,24,31,55,25],[11,45,15,31,46,16],[7,146,116,7,147,117],[21,73,45,7,74,46],[1,53,23,37,54,24],[19,45,15,26,46,16],[5,145,115,10,146,116],[19,75,47,10,76,48],[15,54,24,25,55,25],[23,45,15,25,46,16],[13,145,115,3,146,116],[2,74,46,29,75,47],[42,54,24,1,55,25],[23,45,15,28,46,16],[17,145,115],[10,74,46,23,75,47],[10,54,24,35,55,25],[19,45,15,35,46,16],[17,145,115,1,146,116],[14,74,46,21,75,47],[29,54,24,19,55,25],[11,45,15,46,46,16],[13,145,115,6,146,116],[14,74,46,23,75,47],[44,54,24,7,55,25],[59,46,16,1,47,17],[12,151,121,7,152,122],[12,75,47,26,76,48],[39,54,24,14,55,25],[22,45,15,41,46,16],[6,151,121,14,152,122],[6,75,47,34,76,48],[46,54,24,10,55,25],[2,45,15,64,46,16],[17,152,122,4,153,123],[29,74,46,14,75,47],[49,54,24,10,55,25],[24,45,15,46,46,16],[4,152,122,18,153,123],[13,74,46,32,75,47],[48,54,24,14,55,25],[42,45,15,32,46,16],[20,147,117,4,148,118],[40,75,47,7,76,48],[43,54,24,22,55,25],[10,45,15,67,46,16],[19,148,118,6,149,119],[18,75,47,31,76,48],[34,54,24,34,55,25],[20,45,15,61,46,16]],r=function(t,r){var e={};return e.totalCount=t,e.dataCount=r,e},e={};return e.getRSBlocks=function(e,n){var o=function(r,e){switch(e){case g.L:return t[4*(r-1)+0];case g.M:return t[4*(r-1)+1];case g.Q:return t[4*(r-1)+2];case g.H:return t[4*(r-1)+3];default:return}}(e,n);if(void 0===o)throw"bad rs block @ typeNumber:"+e+"/errorCorrectionLevel:"+n;for(var i=o.length/3,a=[],u=0;u<i;u+=1)for(var f=o[3*u+0],c=o[3*u+1],l=o[3*u+2],h=0;h<f;h+=1)a.push(r(c,l));return a},e}(),b=function(){var t=[],r=0,e={getBuffer:function(){return t},getAt:function(r){var e=Math.floor(r/8);return 1==(t[e]>>>7-r%8&1)},put:function(t,r){for(var n=0;n<r;n+=1)e.putBit(1==(t>>>r-n-1&1))},getLengthInBits:function(){return r},putBit:function(e){var n=Math.floor(r/8);t.length<=n&&t.push(0),e&&(t[n]|=128>>>r%8),r+=1}};return e},M=function(t){var r=a,e=t,n={getMode:function(){return r},getLength:function(t){return e.length},write:function(t){for(var r=e,n=0;n+2<r.length;)t.put(o(r.substring(n,n+3)),10),n+=3;n<r.length&&(r.length-n==1?t.put(o(r.substring(n,n+1)),4):r.length-n==2&&t.put(o(r.substring(n,n+2)),7))}},o=function(t){for(var r=0,e=0;e<t.length;e+=1)r=10*r+i(t.charAt(e));return r},i=function(t){if("0"<=t&&t<="9")return t.charCodeAt(0)-"0".charCodeAt(0);throw"illegal char :"+t};return n},x=function(t){var r=u,e=t,n={getMode:function(){return r},getLength:function(t){return e.length},write:function(t){for(var r=e,n=0;n+1<r.length;)t.put(45*o(r.charAt(n))+o(r.charAt(n+1)),11),n+=2;n<r.length&&t.put(o(r.charAt(n)),6)}},o=function(t){if("0"<=t&&t<="9")return t.charCodeAt(0)-"0".charCodeAt(0);if("A"<=t&&t<="Z")return t.charCodeAt(0)-"A".charCodeAt(0)+10;switch(t){case" ":return 36;case"$":return 37;case"%":return 38;case"*":return 39;case"+":return 40;case"-":return 41;case".":return 42;case"/":return 43;case":":return 44;default:throw"illegal char :"+t}};return n},m=function(r){var e=f,n=t.stringToBytes(r),o={getMode:function(){return e},getLength:function(t){return n.length},write:function(t){for(var r=0;r<n.length;r+=1)t.put(n[r],8)}};return o},L=function(r){var e=c,n=t.stringToBytesFuncs.SJIS;if(!n)throw"sjis not supported.";!function(){var t=n("友");if(2!=t.length||38726!=(t[0]<<8|t[1]))throw"sjis not supported."}();var o=n(r),i={getMode:function(){return e},getLength:function(t){return~~(o.length/2)},write:function(t){for(var r=o,e=0;e+1<r.length;){var n=(255&r[e])<<8|255&r[e+1];if(33088<=n&&n<=40956)n-=33088;else{if(!(57408<=n&&n<=60351))throw"illegal char at "+(e+1)+"/"+n;n-=49472}n=192*(n>>>8&255)+(255&n),t.put(n,13),e+=2}if(e<r.length)throw"illegal char at "+(e+1)}};return i},D=function(){var t=[],r={writeByte:function(r){t.push(255&r)},writeShort:function(t){r.writeByte(t),r.writeByte(t>>>8)},writeBytes:function(t,e,n){e=e||0,n=n||t.length;for(var o=0;o<n;o+=1)r.writeByte(t[o+e])},writeString:function(t){for(var e=0;e<t.length;e+=1)r.writeByte(t.charCodeAt(e))},toByteArray:function(){return t},toString:function(){var r="";r+="[";for(var e=0;e<t.length;e+=1)e>0&&(r+=","),r+=t[e];return r+="]"}};return r},S=function(t){var r=t,e=0,n=0,o=0,i={read:function(){for(;o<8;){if(e>=r.length){if(0==o)return-1;throw"unexpected end of file./"+o}var t=r.charAt(e);if(e+=1,"="==t)return o=0,-1;t.match(/^\s$/)||(n=n<<6|a(t.charCodeAt(0)),o+=6)}var i=n>>>o-8&255;return o-=8,i}},a=function(t){if(65<=t&&t<=90)return t-65;if(97<=t&&t<=122)return t-97+26;if(48<=t&&t<=57)return t-48+52;if(43==t)return 62;if(47==t)return 63;throw"c:"+t};return i},I=function(t,r,e){for(var n=function(t,r){var e=t,n=r,o=new Array(t*r),i={setPixel:function(t,r,n){o[r*e+t]=n},write:function(t){t.writeString("GIF87a"),t.writeShort(e),t.writeShort(n),t.writeByte(128),t.writeByte(0),t.writeByte(0),t.writeByte(0),t.writeByte(0),t.writeByte(0),t.writeByte(255),t.writeByte(255),t.writeByte(255),t.writeString(","),t.writeShort(0),t.writeShort(0),t.writeShort(e),t.writeShort(n),t.writeByte(0);var r=a(2);t.writeByte(2);for(var o=0;r.length-o>255;)t.writeByte(255),t.writeBytes(r,o,255),o+=255;t.writeByte(r.length-o),t.writeBytes(r,o,r.length-o),t.writeByte(0),t.writeString(";")}},a=function(t){for(var r=1<<t,e=1+(1<<t),n=t+1,i=u(),a=0;a<r;a+=1)i.add(String.fromCharCode(a));i.add(String.fromCharCode(r)),i.add(String.fromCharCode(e));var f,c,g,l=D(),h=(f=l,c=0,g=0,{write:function(t,r){if(t>>>r!=0)throw"length over";for(;c+r>=8;)f.writeByte(255&(t<<c|g)),r-=8-c,t>>>=8-c,g=0,c=0;g|=t<<c,c+=r},flush:function(){c>0&&f.writeByte(g)}});h.write(r,n);var s=0,v=String.fromCharCode(o[s]);for(s+=1;s<o.length;){var d=String.fromCharCode(o[s]);s+=1,i.contains(v+d)?v+=d:(h.write(i.indexOf(v),n),i.size()<4095&&(i.size()==1<<n&&(n+=1),i.add(v+d)),v=d)}return h.write(i.indexOf(v),n),h.write(e,n),h.flush(),l.toByteArray()},u=function(){var t={},r=0,e={add:function(n){if(e.contains(n))throw"dup key:"+n;t[n]=r,r+=1},size:function(){return r},indexOf:function(r){return t[r]},contains:function(r){return void 0!==t[r]}};return e};return i}(t,r),o=0;o<r;o+=1)for(var i=0;i<t;i+=1)n.setPixel(i,o,e(i,o));var a=D();n.write(a);for(var u=function(){var t=0,r=0,e=0,n="",o={},i=function(t){n+=String.fromCharCode(a(63&t))},a=function(t){if(t<0);else{if(t<26)return 65+t;if(t<52)return t-26+97;if(t<62)return t-52+48;if(62==t)return 43;if(63==t)return 47}throw"n:"+t};return o.writeByte=function(n){for(t=t<<8|255&n,r+=8,e+=1;r>=6;)i(t>>>r-6),r-=6},o.flush=function(){if(r>0&&(i(t<<6-r),t=0,r=0),e%3!=0)for(var o=3-e%3,a=0;a<o;a+=1)n+="="},o.toString=function(){return n},o}(),f=a.toByteArray(),c=0;c<f.length;c+=1)u.writeByte(f[c]);return u.flush(),"data:image/gif;base64,"+u};return t}();qrcode.stringToBytesFuncs["UTF-8"]=function(t){return function(t){for(var r=[],e=0;e<t.length;e++){var n=t.charCodeAt(e);n<128?r.push(n):n<2048?r.push(192|n>>6,128|63&n):n<55296||n>=57344?r.push(224|n>>12,128|n>>6&63,128|63&n):(e++,n=65536+((1023&n)<<10|1023&t.charCodeAt(e)),r.push(240|n>>18,128|n>>12&63,128|n>>6&63,128|63&n))}return r}(t)},function(t){"function"==typeof define&&define.amd?define([],t):"object"==typeof exports&&(module.exports=t())}((function(){return qrcode}));
+//# sourceMappingURL=/sm/26b4b0d0b1e283d6b3ec9857ac597d7a60c76ac17be1ef4c965f03086de426bb.map
+</script>
+  
   <script>
     "use strict";
     /* ===== Subconscious details engine =====
