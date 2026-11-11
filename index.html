@@ -1517,7 +1517,8 @@
       @media (prefers-reduced-motion: reduce) { .aurora-layer, .aurora-stage, .voice-reveal { animation: none !important; } }
 
       /* House PIN gate bits */
-      .house-card { border: 1px solid var(--border); border-radius: 0.5rem; background: var(--popover); box-shadow: var(--shadow-lux); }
+      .house-card { border: 1px solid var(--border); border-radius: 0.5rem; background: var(--popover); box-shadow: var(--shadow-lux); padding: 1.75rem 1.5rem; }
+      @media (min-width: 640px) { .house-card { padding: 2.25rem 2rem; } }
       .house-input { border: 1px solid var(--border); border-radius: 8px; background: var(--popover); color: var(--foreground); padding: 8px 10px; font-size: 13px; width: 100%; margin-top: 8px; font-family: inherit; }
 
       .google-signin-logo { width: 20px; height: 20px; flex-shrink: 0; }
@@ -1547,6 +1548,15 @@
       .connect-nav-item svg { width: 20px; height: 20px; flex-shrink: 0; }
       .connect-service-note, .connect-sample-label { font-size: 12px; line-height: 20px; color: var(--connect-muted); padding: 20px 24px; }
       .connect-main { min-height: 60vh; background: var(--connect-surface); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+      /* Staff workspace on a phone: the channel rail stacks above the
+         content instead of squeezing it into the side of the screen,
+         so message rows keep their full width and stay tappable. */
+      @media (max-width: 767px) {
+        .connect-shell { flex-direction: column; align-items: stretch !important; }
+        .connect-shell .connect-nav { width: 100%; padding: 8px 0 0; }
+        .connect-shell .connect-nav > nav { width: 100% !important; }
+        .connect-shell .connect-main { width: 100%; }
+      }
       .connect-list-heading { min-height: 72px; padding: 12px 28px; display: flex; align-items: center; justify-content: space-between; gap: 1rem; border-bottom: 1px solid var(--connect-line); background: var(--sale-band-surface); }
       .connect-list-heading h1 { font-size: 22px; font-weight: 400; }
       .connect-call-row { display: flex; align-items: center; gap: 16px; min-height: 80px; padding: 12px 24px; border-bottom: 1px solid var(--connect-line); flex-wrap: wrap; }
@@ -6482,6 +6492,39 @@ var PRODUCTS = [
       };
 
       /* ---------- Check / tracking (src/routes/check.tsx) ---------- */
+      /* One lookup for every code the house hands out, shared by the
+         tracking page's first render and its form: a piece QR number
+         (EJ-…) resolves to the piece itself, a gift-card number
+         (GC-…) to the Store House register, anything else honestly
+         reports no record. */
+      function checkResultHtml(code) {
+        var noRecord = '<div class="glass-soft" style="border-radius:0.25rem;padding:1.5rem"><p style="font-size:0.875rem;line-height:1.7">No matching record. Check the complete code on your tag or repair receipt, including its letters and dash.</p></div>';
+        if (!code) return "";
+        var piece = EJ.pwFindByQr ? EJ.pwFindByQr(code) : null;
+        if (piece) {
+          return '<div class="glass-soft" style="border-radius:0.25rem;padding:1.5rem"><p class="eyebrow">Piece record · ' + esc(code) + '</p>'
+            + '<div style="margin-top:1rem;display:flex;flex-wrap:wrap;gap:1rem;align-items:center"><img src="' + piece.image + '" alt="" style="width:4.5rem;height:4.5rem;border-radius:0.25rem;object-fit:contain;background:#fff;padding:0.3rem;border:1px solid var(--border)" />'
+            + '<div style="min-width:0;flex:1 1 12rem"><p style="font-weight:500;font-size:1rem">' + esc(piece.name) + '</p>'
+            + '<p style="margin-top:0.25rem;font-size:0.875rem;color:var(--muted-foreground)">' + esc(vendorName(piece.vendor)) + " · " + fmt(piece.price) + '</p>'
+            + '<p style="margin-top:0.5rem"><span class="sub-chip">Status: live in the shop</span></p></div>'
+            + '<a class="btn-gold" href="#/item/' + piece.id + '">Open the piece page</a></div></div>';
+        }
+        var cards = EJ._gcCards || (EJ._gcCards = [
+          { code: "GC-100101", balance: 250, status: "Active" },
+          { code: "GC-100102", balance: 500, status: "Active" },
+          { code: "GC-100103", balance: 75, status: "Active" },
+          { code: "GC-100104", balance: 0, status: "Redeemed" }
+        ]);
+        var gc = null;
+        for (var i = 0; i < cards.length; i++) { if (cards[i].code.toUpperCase() === code) { gc = cards[i]; break; } }
+        if (gc) {
+          return '<div class="glass-soft" style="border-radius:0.25rem;padding:1.5rem"><p class="eyebrow">Gift card · ' + esc(gc.code) + '</p>'
+            + '<p style="margin-top:1rem;font-family:var(--font-display);font-size:1.75rem">Balance ' + fmt(gc.balance) + '</p>'
+            + '<p style="margin-top:0.5rem"><span class="sub-chip">Status: ' + esc(gc.status) + '</span></p>'
+            + '<p style="margin-top:1rem;font-size:0.75rem;line-height:1.65;color:var(--muted-foreground)">Register record from the Store House desk — sample records until the connected back end is live.</p></div>';
+        }
+        return noRecord;
+      }
       function pageCheck(query) {
         var code = (query.code || "").toUpperCase();
         var h = '<div class="wrap" style="padding-top:2.5rem;padding-bottom:3.5rem;max-width:56rem">'
@@ -6491,7 +6534,7 @@ var PRODUCTS = [
           + '<form style="margin-top:2rem;display:grid;gap:1rem" onsubmit="return EJ.checkGo(event)"><label style="font-size:0.875rem">Full item or repair code<input id="checkCode" placeholder="RP-100001" value="' + esc(code) + '" autocapitalize="characters" autocomplete="off" spellcheck="false" style="margin-top:0.375rem;width:100%;border:1px solid var(--border);border-radius:0.25rem;padding:0.75rem;font:inherit;background:transparent" /></label>'
           + '<div style="display:flex;flex-wrap:wrap;gap:0.75rem"><button type="submit" class="btn-gold">Track it</button><button type="button" class="btn-ghost" onclick="EJ.qrScanCustomer()">' + icon("camera", 15) + 'Scan the QR code</button></div></form>'
           + '<div id="checkResult" style="margin-top:2rem">'
-          + (code ? '<div class="glass-soft" style="border-radius:0.25rem;padding:1.5rem"><p style="font-size:0.875rem;line-height:1.7">No matching record. Check the complete code on your tag or repair receipt, including its letters and dash.</p></div>' : "")
+          + checkResultHtml(code)
           + '</div>'
           + '<div style="margin-top:2rem;display:flex;flex-wrap:wrap;align-items:center;gap:1rem;border-top:1px solid var(--border);padding-top:1.5rem"><p style="font-size:0.875rem;color:var(--muted-foreground)">Need help with your code?</p><a href="' + PHONE_TEL + '" style="display:inline-flex;align-items:center;gap:0.5rem;font-size:0.875rem;color:var(--gold)">' + icon("phone", 16) + PHONE_DISPLAY + "</a></div>"
           + "</div>";
@@ -6502,7 +6545,7 @@ var PRODUCTS = [
         var code = document.getElementById("checkCode").value.trim().toUpperCase();
         var res = document.getElementById("checkResult");
         if (!code) { res.innerHTML = '<p style="font-size:0.875rem;color:var(--muted-foreground)">Enter the full code from your tag or receipt first.</p>'; return false; }
-        res.innerHTML = '<div class="glass-soft" style="border-radius:0.25rem;padding:1.5rem"><p style="font-size:0.875rem;line-height:1.7">No matching record. Check the complete code on your tag or repair receipt, including its letters and dash.</p></div>';
+        res.innerHTML = checkResultHtml(code);
         return false;
       };
 
@@ -6714,7 +6757,7 @@ var PRODUCTS = [
         var msg = EJ._houseMsg || "";
         var unlocked = !!(EJ._houseUnlocked || EJ._pwRole);
         if (unlocked) {
-          var roleLabel = EJ._pwRole === "owner" ? "Owner" : EJ._pwRole === "ai" ? "AI — Add Products only" : EJ._housePreview ? "Sales Preview" : "Secretary";
+          var roleLabel = EJ._pwRole === "owner" ? "Owner" : EJ._pwRole === "ai" ? "AI — Add Products only" : EJ._pwRole === "secretary" ? "Secretary" : EJ._housePreview ? "Sales Preview" : EJ._houseRole === "owner" ? "Owner" : EJ._houseRole === "ai" ? "AI — Add Products only" : "Secretary";
           return '<div class="wrap" style="max-width:56rem;padding-top:2.5rem;padding-bottom:0.5rem">'
             + '<div style="display:flex;flex-wrap:wrap;align-items:flex-start;gap:1rem"><div style="flex:1;min-width:16rem"><p class="eyebrow">Store House · Staff desk</p>'
             + '<h1 style="margin-top:0.5rem;font-family:var(--font-display);font-size:2.25rem">Store House</h1>'
@@ -6736,8 +6779,8 @@ var PRODUCTS = [
           + '<p style="margin-top:0.5rem;font-size:0.875rem;line-height:1.7;color:var(--muted-foreground)">Enter the same 10-digit PIN you use for Private World — owner, secretary or AI. The Store House opens on the same PINs.</p>'
           + '<form style="margin-top:1.5rem;display:grid;gap:1rem" onsubmit="return EJ.houseSubmit(event)"><input type="password" inputmode="numeric" maxlength="10" placeholder="••••••••••" aria-label="10-digit PIN" style="text-align:center;letter-spacing:0.5em;border:1px solid var(--border);border-radius:0.25rem;padding:0.875rem;font:inherit;background:transparent" /><button type="submit" class="btn-gold">Unlock Store House</button></form>'
           + (msg ? '<p role="alert" style="margin-top:1rem;font-size:0.875rem;color:var(--destructive)">' + esc(msg) + "</p>" : "")
-          + '<a href="#/connect?view=workspace" style="display:inline-block;margin-top:1.5rem;font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold)">Elevate Connect</a>'
-          + '<button type="button" class="btn-ghost" style="margin-top:1rem;margin-left:0.75rem" onclick="EJ.openPrivate()">Private World — add &amp; approve products</button>'
+          + '<div style="margin-top:1.5rem;display:flex;flex-wrap:wrap;align-items:center;gap:0.75rem 1rem"><a href="#/connect?view=workspace" style="font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold)">Elevate Connect</a>'
+          + '<button type="button" class="btn-ghost" onclick="EJ.openPrivate()">Private World — add &amp; approve products</button></div>'
           + '<div style="margin-top:1.5rem;border-top:1px solid var(--border);padding-top:1.25rem;text-align:left">'
           + '<p style="font-size:0.875rem;line-height:1.65;color:var(--muted-foreground)"><strong style="color:var(--foreground)">Reviewing the back end?</strong> See the staff desk exactly as a salesperson gets it — no PIN needed for this look. The gift-card register inside runs on sample records until the connected back end is live.</p>'
           + '<div style="margin-top:0.75rem;display:flex;flex-wrap:wrap;gap:0.5rem"><button type="button" class="btn-gold" onclick="EJ.housePreview()">Open Store House — Sales Preview</button><a href="#/backend" class="btn-ghost">See the whole back end</a></div></div>'
@@ -6792,8 +6835,10 @@ var PRODUCTS = [
           EJ.route(true);
           return false;
         }
-        if (digits === EJ._pwOwnerPin || (EJ._pwSecPin && digits === EJ._pwSecPin) || (EJ._pwAiPin && digits === EJ._pwAiPin)) {
+        var houseRole = digits === EJ._pwOwnerPin ? "owner" : (EJ._pwSecPin && digits === EJ._pwSecPin) ? "secretary" : (EJ._pwAiPin && digits === EJ._pwAiPin) ? "ai" : null;
+        if (houseRole) {
           EJ._houseUnlocked = true;
+          EJ._houseRole = houseRole;
           EJ._housePreview = false;
           EJ._houseMsg = "";
           toast("Store House is open", "The gift-card register and the staff shortcuts are on this page.");
@@ -6806,6 +6851,7 @@ var PRODUCTS = [
       };
       EJ.housePreview = function () {
         EJ._houseUnlocked = true;
+        EJ._houseRole = null;
         EJ._housePreview = true;
         EJ._houseMsg = "";
         toast("Store House — Sales Preview", "This is the staff desk your sales people get. The register runs on sample records.");
@@ -6814,6 +6860,7 @@ var PRODUCTS = [
       };
       EJ.houseLock = function () {
         EJ._houseUnlocked = false;
+        EJ._houseRole = null;
         EJ._housePreview = false;
         EJ._houseMsg = "";
         toast("Store House locked", "A staff PIN — or the Sales Preview — opens it again.");
@@ -7223,7 +7270,8 @@ var PRODUCTS = [
         });
         EJ._pwLast = { brandId: f.elements.brand.value, category: cat.slug };
         EJ._pwPhoto = null; EJ._pwPhotoName = "";
-        toast("Added to your review queue", name + " — nothing is live until you approve it.");
+        if (EJ._pwRole === "owner") toast("Added to your review queue", name + " — nothing is live until you approve it.");
+        else toast("Submitted — Pending Approval", name + " — the owner reviews it before anything goes live.");
         EJ.route(true);
         return false;
       };
@@ -7308,7 +7356,9 @@ var PRODUCTS = [
         var n = staged.length;
         staged.slice().reverse().forEach(function (d) { d.key = uid(); d.by = EJ._pwRole || "owner"; EJ._pwPending.unshift(d); });
         EJ._pwStaged = null;
-        EJ._pwSay = n + (n === 1 ? " product is" : " products are") + " in your review queue below. Nothing is live until you approve it.";
+        EJ._pwSay = EJ._pwRole === "owner"
+          ? n + (n === 1 ? " product is" : " products are") + " in your review queue below. Nothing is live until you approve it."
+          : n + (n === 1 ? " product is" : " products are") + " submitted below as Pending Approval. Only the owner can send " + (n === 1 ? "it" : "them") + " live.";
         EJ.route(true);
       };
       EJ.pwStageCancel = function () {
@@ -7421,7 +7471,7 @@ var PRODUCTS = [
             var studioLive = EJ._pwLiveIds.indexOf(p.id) >= 0;
             h += '<div style="margin-top:1.25rem;display:flex;flex-wrap:wrap;gap:1rem;align-items:center;border:1px solid color-mix(in oklab, var(--gold) 40%, transparent);border-radius:0.25rem;padding:1rem;background:var(--popover)">'
               + '<img src="' + p.image + '" alt="" style="width:4rem;height:4rem;border-radius:0.25rem;object-fit:contain;background:#fff;padding:0.3rem;flex-shrink:0" />'
-              + '<div style="min-width:0;flex:1"><p style="font-weight:500">' + esc(p.name) + '</p>'
+              + '<div style="min-width:0;flex:1 1 12rem"><p style="font-weight:500">' + esc(p.name) + '</p>'
               + '<p style="margin-top:0.25rem;font-size:0.75rem;color:var(--muted-foreground)">' + esc(vendorName(p.vendor)) + " · " + fmt(p.price) + '</p>'
               + '<p style="margin-top:0.375rem;display:flex;flex-wrap:wrap;gap:0.5rem;align-items:center"><span class="sub-chip">QR ' + esc(EJ.qrNumFor(p)) + '</span><span class="sub-chip">' + (studioLive ? "Live — published from this studio" : "Live in the shop") + "</span></p></div>"
               + '<span style="display:flex;flex-wrap:wrap;gap:0.5rem"><a class="btn-ghost" style="padding:0.5rem 1rem" href="#/item/' + p.id + '">Open piece</a>'
@@ -7465,7 +7515,7 @@ var PRODUCTS = [
         if (EJ._pwSecReveal) {
           h += '<div style="margin-top:1rem;border:1px solid color-mix(in oklab, var(--gold) 45%, transparent);border-radius:0.25rem;padding:1rem;text-align:center">'
             + '<p style="font-size:10px;letter-spacing:0.24em;text-transform:uppercase;color:var(--gold)">Secretary PIN — shown once</p>'
-            + '<p style="margin-top:0.5rem;font-family:var(--font-display);font-size:2rem;letter-spacing:0.35em;color:var(--foreground)">' + esc(EJ._pwSecReveal) + '</p>'
+            + '<p style="margin-top:0.5rem;font-family:var(--font-display);font-size:1.75rem;letter-spacing:0.22em;color:var(--foreground)">' + esc(EJ._pwSecReveal) + '</p>'
             + '<p style="margin-top:0.5rem;font-size:0.75rem;line-height:1.65;color:var(--muted-foreground)">Hand this to your secretary now — it will not be shown again. It opens Add Products only; everything added waits for your approval.</p>'
             + '<button type="button" class="btn-gold" style="margin-top:0.75rem" onclick="EJ.pwSecRevealDone()">I\'ve handed it over — hide it</button></div>';
         } else if (!EJ._pwSecPin) {
@@ -7478,7 +7528,7 @@ var PRODUCTS = [
         if (EJ._pwAiReveal) {
           h += '<div style="margin-top:1.5rem;border:1px solid color-mix(in oklab, var(--gold) 45%, transparent);border-radius:0.25rem;padding:1rem;text-align:center">'
             + '<p style="font-size:10px;letter-spacing:0.24em;text-transform:uppercase;color:var(--gold)">AI PIN — shown once</p>'
-            + '<p style="margin-top:0.5rem;font-family:var(--font-display);font-size:2rem;letter-spacing:0.35em;color:var(--foreground)">' + esc(EJ._pwAiReveal) + '</p>'
+            + '<p style="margin-top:0.5rem;font-family:var(--font-display);font-size:1.75rem;letter-spacing:0.22em;color:var(--foreground)">' + esc(EJ._pwAiReveal) + '</p>'
             + '<p style="margin-top:0.5rem;font-size:0.75rem;line-height:1.65;color:var(--muted-foreground)">This is the AI&rsquo;s PIN. It opens Add Products only — no approvals, no PIN settings, no costs or finance — and everything added on it waits for your approval.</p>'
             + '<button type="button" class="btn-gold" style="margin-top:0.75rem" onclick="EJ.pwAiRevealDone()">I\'ve noted it — hide it</button></div>';
         } else if (!EJ._pwAiPin) {
@@ -7504,8 +7554,8 @@ var PRODUCTS = [
             + '<h1 style="margin-top:1rem;font-size:1.5rem">Private World</h1>'
             + '<p style="margin-top:0.5rem;font-size:0.875rem;line-height:1.7;color:var(--muted-foreground)">Three 10-digit PINs open this studio: the owner PIN for the full studio and approvals, and the secretary PIN and the AI PIN for Add Products only — everything added on them waits as Pending Approval.</p>'
             + '<div style="margin-top:1.5rem">' + pwGateHtml(true) + "</div>"
-            + '<a href="#/house" style="display:inline-block;margin-top:1.5rem;font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold)">Store House</a>'
-            + '<a href="#/backend" style="display:inline-block;margin-top:1.5rem;margin-left:1rem;font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold)">Back End overview</a>'
+            + '<div style="margin-top:1.5rem;display:flex;flex-wrap:wrap;gap:0.75rem 1rem"><a href="#/house" style="font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold)">Store House</a>'
+            + '<a href="#/backend" style="font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold)">Back End overview</a></div>'
             + "</div></div>";
         }
         var pending = EJ._pwPending, liveIds = EJ._pwLiveIds;
@@ -7543,7 +7593,7 @@ var PRODUCTS = [
           + "</section>";
         h += '<section class="glass-soft" style="margin-top:1.5rem;border-radius:0.25rem;padding:1.5rem" aria-label="Add a product">'
           + '<h2 style="font-family:var(--font-display);font-size:1.375rem">Add a product</h2>'
-          + '<p style="margin-top:0.375rem;font-size:0.875rem;line-height:1.65;color:var(--muted-foreground)">It waits in your review queue — nothing goes live until you approve it below. Brand and collection stay selected, so you can add many pieces one after another.</p>'
+          + '<p style="margin-top:0.375rem;font-size:0.875rem;line-height:1.65;color:var(--muted-foreground)">' + (isOwner ? "It waits in your review queue — nothing goes live until you approve it below." : "It is saved as Pending Approval — only the owner can confirm it and send it live.") + ' Brand and collection stay selected, so you can add many pieces one after another.</p>'
           + '<form style="margin-top:1.25rem;display:grid;gap:1rem" onsubmit="return EJ.pwAddSubmit(event)">'
           + '<div class="pw-grid" style="display:grid;gap:1rem">'
           + '<label style="display:block;font-size:0.875rem">Product name<input required name="name" placeholder="e.g. Aurora Tennis Bracelet" style="margin-top:0.375rem;' + PW_IN + '" /></label>'
@@ -7593,7 +7643,7 @@ var PRODUCTS = [
           + '<h2 style="font-family:var(--font-display);font-size:1.5rem">Live from this studio (' + live.length + ')</h2>';
         if (live.length) {
           h += '<div style="margin-top:1rem;display:flex;flex-direction:column;gap:0.75rem">' + live.map(function (p) {
-            return '<div style="display:flex;flex-wrap:wrap;gap:1rem;align-items:center;border:1px solid var(--border);border-radius:0.25rem;padding:1rem;background:var(--popover)"><img src="' + p.image + '" alt="" style="width:3.5rem;height:3.5rem;border-radius:0.25rem;object-fit:contain;background:#fff;padding:0.3rem;flex-shrink:0" /><div style="min-width:0;flex:1"><p style="font-weight:500">' + esc(p.name) + '</p><p style="margin-top:0.25rem;font-size:0.75rem;color:var(--muted-foreground)">' + esc(vendorName(p.vendor)) + " · " + fmt(p.price) + " · QR " + EJ.qrNumFor(p) + '</p></div><a class="btn-ghost" style="padding:0.5rem 1rem" href="#/item/' + p.id + '">Open piece</a><button type="button" class="btn-ghost" style="padding:0.5rem 1rem" onclick="EJ.pwUnpublish(\'' + p.id + '\')">Take down</button></div>';
+            return '<div style="display:flex;flex-wrap:wrap;gap:1rem;align-items:center;border:1px solid var(--border);border-radius:0.25rem;padding:1rem;background:var(--popover)"><img src="' + p.image + '" alt="" style="width:3.5rem;height:3.5rem;border-radius:0.25rem;object-fit:contain;background:#fff;padding:0.3rem;flex-shrink:0" /><div style="min-width:0;flex:1 1 12rem"><p style="font-weight:500">' + esc(p.name) + '</p><p style="margin-top:0.25rem;font-size:0.75rem;color:var(--muted-foreground)">' + esc(vendorName(p.vendor)) + " · " + fmt(p.price) + " · QR " + EJ.qrNumFor(p) + '</p></div><a class="btn-ghost" style="padding:0.5rem 1rem" href="#/item/' + p.id + '">Open piece</a><button type="button" class="btn-ghost" style="padding:0.5rem 1rem" onclick="EJ.pwUnpublish(\'' + p.id + '\')">Take down</button></div>';
           }).join("") + "</div>";
         } else {
           h += '<p style="margin-top:1rem;font-size:0.875rem;color:var(--muted-foreground)">Nothing published from the studio yet — approved pieces appear here and in the shop.</p>';
@@ -7716,6 +7766,10 @@ var PRODUCTS = [
       function pageConnectWorkspace(cw, query) {
         var tab = query.tab || "calls";
         if (query.thread) { cw.threadOpen = query.thread; tab = "ateliers"; }
+        /* Compose belongs to the tab it was opened from: following a
+           nav link to another channel leaves the compose form behind
+           instead of trapping every tab behind it. */
+        if (cw.compose && cw._composeTab && cw._composeTab !== tab) cw.compose = false;
         cw.tab = tab;
         var h = '<div class="connect-material"><div class="customer-connect">'
           + '<div id="connectTopbarSlot"></div>'
@@ -7792,6 +7846,9 @@ var PRODUCTS = [
         var rows = SAMPLE_THREADS.filter(function (s2) { return s2.channel === channel; });
         if (cw.sampleOpen) {
           var st = SAMPLE_THREADS.find(function (s2) { return s2.id === cw.sampleOpen; });
+          /* A sample opened under one channel must not surface under
+             another — switching tabs clears it back to that list. */
+          if (st && st.channel !== channel) { cw.sampleOpen = null; st = null; }
           if (st) {
             return '<button type="button" style="display:inline-flex;align-items:center;gap:0.375rem;font-size:0.875rem;color:var(--muted-foreground)" onclick="EJ.cwBack()">' + icon("arrowLeft", 16) + "All " + label + '</button>'
               + '<h1 style="margin-top:0.75rem;font-family:var(--font-display);font-size:1.5rem">' + esc(st.title) + '</h1>'
@@ -7861,7 +7918,7 @@ var PRODUCTS = [
         cw[k] = !cw[k];
         EJ.route(true);
       };
-      EJ.cwCompose = function () { EJ._cw.compose = true; EJ._cw.threadOpen = null; EJ.route(true); };
+      EJ.cwCompose = function () { EJ._cw.compose = true; EJ._cw._composeTab = EJ._cw.tab || "calls"; EJ._cw.threadOpen = null; EJ.route(true); };
       EJ.cwOpenThread = function (id) { EJ._cw.threadOpen = id; EJ._cw.compose = false; EJ.route(true); };
       EJ.cwOpenSample = function (id) { EJ._cw.sampleOpen = id; EJ.route(true); };
       EJ.cwBack = function () { EJ._cw.threadOpen = null; EJ._cw.sampleOpen = null; EJ._cw.compose = false; history.replaceState(null, "", "#/connect?" + (EJ._cw.workspace ? "view=workspace&" : "") + "tab=" + (EJ._cw.tab || "ateliers")); EJ.route(true); };
@@ -7902,7 +7959,20 @@ var PRODUCTS = [
           }
         });
       };
-      EJ.cwDial = function (v) { EJ._cw.dial = v; EJ.route(true); };
+      EJ.cwDial = function (v) {
+        /* Typing the number must not re-render the page: a full route
+           rebuilds the dialpad input and throws the caret (and the
+           salesperson's place) away after the first digit. Update the
+           state and the Call link in place instead. */
+        EJ._cw.dial = v;
+        var digits = String(v || "").replace(/\D/g, "");
+        var link = document.querySelector("[aria-label='Dialpad'] a.btn-gold");
+        if (link) {
+          link.setAttribute("href", "tel:+" + digits);
+          link.style.opacity = digits ? "" : ".5";
+          link.style.pointerEvents = digits ? "" : "none";
+        }
+      };
       EJ.cwKey = function (k) { EJ._cw.dial = (EJ._cw.dial || "") + k; EJ.route(true); };
       EJ.cwDialBack = function () { EJ._cw.dial = (EJ._cw.dial || "").slice(0, -1); EJ.route(true); };
 
