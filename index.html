@@ -96,7 +96,7 @@
         --font-sans: "Jost", system-ui, sans-serif;
       }
       * { box-sizing: border-box; border-color: var(--border); }
-      html { scroll-behavior: smooth; scroll-padding-top: 100px; }
+      html { scroll-behavior: smooth; scroll-padding-top: 7rem; scroll-padding-bottom: calc(4.5rem + env(safe-area-inset-bottom)); }
       body {
         margin: 0; background: var(--background); color: var(--foreground);
         font-family: var(--font-sans); -webkit-font-smoothing: antialiased;
@@ -188,16 +188,24 @@
       @media (min-width: 640px) { .header-search .search-ico { display: block; } }
       .acct-btn { width: 2rem; height: 2rem; display: grid; place-items: center; border-radius: 0.375rem; border: 1px solid var(--border); background: #FAFAFC; box-shadow: 0 1px 3px oklch(0 0 0 / 5%); flex-shrink: 0; }
       .acct-btn svg { width: 1rem; height: 1rem; }
-      .ai-btn { height: 2.25rem; padding: 0 0.375rem; font-size: 0.875rem; font-weight: 500; flex-shrink: 0; border-radius: 0.5rem; }
+      .ai-btn { display: inline-flex; align-items: center; justify-content: center; min-width: 2.5rem; height: 2.5rem; padding: 0 0.5rem; font-size: 0.875rem; font-weight: 500; flex-shrink: 0; border-radius: 0.5rem; }
       @media (min-width: 640px) { .ai-btn { padding: 0 0.5rem; } }
       .ai-btn:hover { background: var(--card); }
-      .badges-btn { position: relative; width: 2rem; padding: 0.25rem 0; flex-shrink: 0; border-radius: 0.5rem; }
-      @media (min-width: 640px) { .badges-btn { width: 2.5rem; margin-right: 0.25rem; } }
-      .welcome-badges { display: flex; flex-direction: column; gap: 2px; align-items: center; }
+      /* Header counters (2026-11-11 sizing fix): each count sits as a
+         badge on its own icon — bag, favorites, messages — in a row,
+         never stacked, never clipped at the edge. Badge 18px, digits
+         11px. The button still opens the same quick-navigation menu. */
+      .badges-btn { position: relative; display: inline-flex; align-items: center; min-height: 2.5rem; padding: 0.25rem 0.375rem; flex-shrink: 0; border-radius: 0.5rem; }
+      @media (min-width: 640px) { .badges-btn { margin-right: 0.25rem; } }
+      .welcome-badges { display: flex; flex-direction: row; gap: 0.625rem; align-items: center; }
+      .welcome-ico { position: relative; display: inline-flex; align-items: center; justify-content: center; width: 1.375rem; height: 1.375rem; color: var(--foreground); }
+      .welcome-ico svg { width: 1.25rem; height: 1.25rem; }
       .welcome-badge {
-        display: grid; place-items: center; height: 1rem; min-width: 1rem; border-radius: 999px;
-        background: var(--primary); color: var(--primary-foreground); padding: 0 0.25rem;
-        font-size: 9px; line-height: 1; animation: welcome-badge-spring .5s cubic-bezier(.68,-.55,.27,1.55);
+        position: absolute; top: -0.4375rem; right: -0.5rem;
+        display: grid; place-items: center; height: 1.125rem; min-width: 1.125rem; border-radius: 999px;
+        background: var(--primary); color: var(--primary-foreground); padding: 0 0.3125rem;
+        font-size: 11px; font-weight: 600; line-height: 1; box-shadow: 0 0 0 2px var(--background);
+        animation: welcome-badge-spring .5s cubic-bezier(.68,-.55,.27,1.55);
       }
       @keyframes welcome-badge-spring { from { transform: scale(.65); } 65% { transform: scale(1.15); } to { transform: scale(1); } }
       .search-pop {
@@ -262,21 +270,23 @@
 
       /* ===== Bottom navigation (styles.css, near-verbatim) ===== */
       .customer-bottom-nav { position: fixed; inset: auto 0 0; z-index: 50; background: var(--popover); border-top: 1px solid var(--border); padding: 4px 16px calc(4px + env(safe-area-inset-bottom)); box-shadow: var(--shadow-lux); }
-      .customer-bottom-nav-inner { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); align-items: center; gap: 12px; max-width: 1200px; margin: auto; position: relative; }
+      .customer-bottom-nav-inner { display: grid; grid-template-columns: repeat(5, minmax(0,1fr)); align-items: center; gap: 12px; max-width: 1200px; margin: auto; position: relative; }
       .customer-bottom-nav .customer-bottom-link { display: flex; align-items: center; justify-content: center; height: 52px; min-width: 0; padding: 5px 2px; color: var(--muted-foreground); border-radius: 0.5rem; }
       .customer-bottom-nav .customer-bottom-link svg { width: 24px; height: 24px; }
       .customer-bottom-nav .customer-bottom-link.is-active { color: var(--foreground); background: var(--background); }
-      .customer-bottom-nav .customer-bottom-call { position: absolute; bottom: calc(100% + 10px); right: 12px; width: 46px; height: 46px; padding: 0; border-radius: 999px; background: var(--navigation-gold); color: var(--foreground); box-shadow: var(--navigation-shadow); display: inline-flex; align-items: center; justify-content: center; }
-      .customer-bottom-nav .customer-bottom-call svg { width: 1.125rem; height: 1.125rem; }
-      .customer-bag-count { position: absolute; top: -5px; right: -12px; min-width: 16px; padding: 0 3px; border-radius: 8px; background: var(--primary); color: var(--primary-foreground); font-size: 10px; line-height: 16px; text-align: center; }
+      .customer-bag-count { position: absolute; top: -6px; right: -11px; min-width: 18px; padding: 0 4px; border-radius: 9px; background: var(--primary); color: var(--primary-foreground); font-size: 11px; line-height: 18px; text-align: center; }
       @media (max-width: 540px) {
         .customer-bottom-nav { padding-left: 8px; padding-right: 8px; }
         .customer-bottom-nav-inner { gap: 3px; }
         .customer-bottom-nav .customer-bottom-link { height: 48px; }
-        .customer-bottom-nav .customer-bottom-call { width: 42px; height: 42px; }
       }
       .page-shell { display: flex; min-height: 100vh; flex-direction: column; padding-bottom: 7rem; }
       main { flex: 1; padding-bottom: 5rem; }
+      /* Anchor clearance (2026-11-11 sizing fix): scroll targets land
+         fully below the sticky header (header height + margin) instead
+         of being sliced under it, and the bottom padding above lets
+         the last content scroll fully clear of the fixed bottom nav. */
+      section, .sec-head, .showcase-head, .brand-ads-head, h1, h2, h3 { scroll-margin-top: 7rem; }
 
       /* ===== Footer ===== */
       .site-footer { margin-top: 6rem; border-top: 1px solid var(--border); background: var(--background); }
@@ -528,6 +538,14 @@
         background-color: var(--background); overflow: hidden;
         display: flex; align-items: center; justify-content: center;
         perspective: 1000px;
+      }
+      /* Wide screens (2026-11-11 sizing fix, with the 55vh film cap):
+         the stage also runs as a shallower band so the film, the QR
+         strip and the stage together leave the hero copy within a
+         short scroll of arrival. The centre logo (205px) stays whole
+         and centred inside the band. */
+      @media (min-width: 1024px) {
+        .luxury-screen-showcase { max-height: 36vh; }
       }
       /* Soft colour orbs behind the logos. Their softness is baked
          into radial-gradient falloff — deliberately NO filter:blur():
@@ -893,7 +911,7 @@
       .cj-card.open .cj-details > *:nth-child(6) { transition-delay: .21s; }
       .cj-d-close { position: absolute; top: 0.6rem; right: 0.6rem; z-index: 2; width: 2rem; height: 2rem; display: grid; place-items: center; border-radius: 999px; border: 1px solid var(--border); background: var(--popover); box-shadow: 0 2px 8px oklch(0 0 0 / 10%); }
       .cj-d-close:hover { border-color: var(--gold); color: var(--gold); }
-      .cj-d-vendor { font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--gold); padding-right: 2rem; }
+      .cj-d-vendor { font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--gold); padding-right: 2rem; }
       .cj-d-name { font-size: 1.35rem; line-height: 1.15; margin-top: 0.35rem; padding-right: 1.6rem; }
       .cj-d-specs { margin: 0.85rem 0 0; display: grid; gap: 0.32rem; }
       .cj-d-spec { display: flex; gap: 0.6rem; font-size: 0.8rem; line-height: 1.4; }
@@ -963,13 +981,16 @@
         .brand-ad-top { padding: 1rem 0.5rem 0; }
         .brand-ad-logo { height: 2.75rem; }
         .brand-ad-name { margin-top: 0.55rem; font-size: 0.98rem; letter-spacing: 0.08em; }
-        .brand-ad-line { margin-top: 0.4rem; font-size: 0.52rem; letter-spacing: 0.16em; }
+        .brand-ad-line { margin-top: 0.4rem; font-size: 0.6875rem; letter-spacing: 0.06em; }
         .brand-ad-photo { margin-top: 0.65rem; }
       }
-      .brand-ads-dots { display: flex; justify-content: center; gap: 0.45rem; margin-top: 0.9rem; }
-      .brand-ads-dot { width: 0.45rem; height: 0.45rem; padding: 0; border-radius: 999px; border: 1px solid color-mix(in oklab, var(--gold) 55%, transparent); background: transparent; transition: background .25s ease, transform .25s ease; }
-      .brand-ads-dot.on { background: var(--gold); transform: scale(1.15); }
-      @media (prefers-reduced-motion: reduce) { .brand-ads-dot { transition: none; } .brand-ad-slide { transition: none; } }
+      .brand-ads-dots { display: flex; justify-content: center; gap: 0.125rem; margin-top: 0.35rem; }
+      /* 40px hit area with the small visual dot drawn centred inside
+         (2026-11-11 sizing fix — the dot itself stays ~8px). */
+      .brand-ads-dot { position: relative; width: 2.5rem; height: 2.5rem; padding: 0; border: none; border-radius: 999px; background: transparent; }
+      .brand-ads-dot::before { content: ""; position: absolute; left: 50%; top: 50%; width: 0.5rem; height: 0.5rem; transform: translate(-50%, -50%); border-radius: 999px; border: 1px solid color-mix(in oklab, var(--gold) 55%, transparent); background: transparent; transition: background .25s ease, transform .25s ease; }
+      .brand-ads-dot.on::before { background: var(--gold); transform: translate(-50%, -50%) scale(1.15); }
+      @media (prefers-reduced-motion: reduce) { .brand-ads-dot::before { transition: none; } .brand-ad-slide { transition: none; } }
 
       /* Section-top intro videos — one mechanism for every page.
          The film plays muted, once, at the top; the page content
@@ -979,11 +1000,18 @@
          poster frame shown, content present immediately. */
       .intro-top { padding-top: 1.25rem; }
       .intro-frame { position: relative; overflow: hidden; border-radius: 0.5rem; border: 1px solid var(--border); box-shadow: var(--trending-shadow); background: var(--card); aspect-ratio: 16/9; }
+      /* Wide screens (2026-11-11 sizing fix): cap the film at ~55vh so
+         the headline beneath it is at least partly visible on arrival
+         instead of a full screen of video. The film is object-fit:
+         cover, so it stays centred and fills the capped frame. */
+      @media (min-width: 641px) {
+        .intro-frame { max-height: 55vh; }
+      }
       /* On phones the film runs in a slimmer cinematic band so the
          hero's own buttons stay clear of the fixed bottom navigation. */
       @media (max-width: 640px) {
-        .intro-top { padding-top: 0.75rem; }
-        .intro-frame { aspect-ratio: 21/9; }
+        .intro-top { padding-top: 0.5rem; }
+        .intro-frame { aspect-ratio: 21/9; max-height: 7.5rem; }
       }
       .intro-frame video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
       .intro-skip { position: absolute; right: 0.75rem; bottom: 0.75rem; z-index: 2; display: inline-flex; align-items: center; gap: 0.375rem; border-radius: 999px; background: color-mix(in oklab, var(--popover) 88%, transparent); border: 1px solid var(--border); padding: 0.45rem 0.9rem; font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; backdrop-filter: blur(6px); }
@@ -1034,6 +1062,14 @@
         .hero h1 { margin-top: 0.75rem; }
         .hero .sub { margin-top: 0.875rem; }
         .hero .sub + div { margin-top: 1.125rem !important; gap: 0.5rem !important; }
+        /* 2026-11-11 sizing fix: the showcase stage runs shorter on
+           phones and the copy's top padding tightens, so the full H1
+           sits above the fixed bottom nav at first load (at 390×844
+           the nav sliced its third line). Logos scale down with it. */
+        .luxury-screen-showcase { aspect-ratio: auto; height: 8.5rem; }
+        .main-logo-center { height: 7rem; }
+        .logo-small { height: 2rem; }
+        .hero .hero-copy { padding-top: 1rem; }
       }
 
       /* Connect avatars — light circle; a house's real logo when the
@@ -1092,7 +1128,7 @@
       .pcard .wish svg { width: 1rem; height: 1rem; }
       .pcard .wish.on svg { fill: var(--gold); color: var(--gold); }
       .pcard .bd { padding: 1.25rem; display: flex; flex-direction: column; gap: 0.75rem; }
-      .pcard .vn { font-size: 10px; letter-spacing: 0.24em; text-transform: uppercase; color: var(--muted-foreground); }
+      .pcard .vn { font-size: 11px; letter-spacing: 0.24em; text-transform: uppercase; color: var(--muted-foreground); }
       .pcard h3 { font-size: 1.125rem; line-height: 1.3; }
       .pcard h3:hover { color: var(--gold); }
       .pcard .spec { font-size: 0.75rem; color: var(--muted-foreground); }
@@ -1136,9 +1172,11 @@
       .showcase-nav { margin-top: 1.25rem; display: flex; align-items: center; justify-content: center; gap: 1rem; }
       .sc-arrow { display: grid; place-items: center; width: 2.75rem; height: 2.75rem; border-radius: 999px; border: 1px solid var(--border); background: var(--popover); color: var(--foreground); transition: border-color 0.18s, color 0.18s; }
       .sc-arrow:hover { border-color: var(--gold); color: var(--gold); }
-      .showcase-dots { display: flex; gap: 0.45rem; }
-      .sc-dot { width: 0.5rem; height: 0.5rem; border-radius: 999px; background: var(--border); padding: 0; transition: background 0.3s, transform 0.3s; }
-      .sc-dot.on { background: var(--gold); transform: scale(1.25); }
+      .showcase-dots { display: flex; gap: 0.125rem; align-items: center; }
+      /* 40px hit area, ~8px visual dot centred inside (sizing fix). */
+      .sc-dot { position: relative; width: 2.5rem; height: 2.5rem; border-radius: 999px; background: transparent; padding: 0; }
+      .sc-dot::before { content: ""; position: absolute; left: 50%; top: 50%; width: 0.5rem; height: 0.5rem; transform: translate(-50%, -50%); border-radius: 999px; background: var(--border); transition: background 0.3s, transform 0.3s; }
+      .sc-dot.on::before { background: var(--gold); transform: translate(-50%, -50%) scale(1.25); }
       @media (prefers-reduced-motion: reduce) { .showcase-track, .sc-panel, .sc-details { transition: none; } }
       .add-btn { display: inline-flex; width: 7.5rem; flex-shrink: 0; align-items: center; justify-content: center; gap: 0.375rem; border-radius: 0.25rem; border: 1px solid var(--border); padding: 0.5rem 0.75rem; font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; transition: border-color .18s, color .18s; background: var(--popover); }
       .add-btn:hover { border-color: color-mix(in oklab, var(--gold) 60%, transparent); color: var(--gold); }
@@ -1162,9 +1200,9 @@
       /* Catalog grid */
       .filter-bar { display: flex; align-items: center; gap: 0.75rem; border-bottom: 1px solid var(--border); padding-bottom: 1rem; position: relative; }
       .view-toggle { display: flex; align-items: center; gap: 0.25rem; border-radius: 0.25rem; border: 1px solid var(--border); padding: 0.25rem; }
-      .view-toggle button { display: grid; place-items: center; width: 1.75rem; height: 1.75rem; border-radius: 0.25rem; color: color-mix(in oklab, var(--foreground) 50%, transparent); }
+      .view-toggle button { display: grid; place-items: center; width: 2.5rem; height: 2.5rem; border-radius: 0.25rem; color: color-mix(in oklab, var(--foreground) 50%, transparent); }
       .view-toggle button.on { color: var(--gold); }
-      .view-toggle svg { width: 14px; height: 14px; }
+      .view-toggle svg { width: 16px; height: 16px; }
       .filter-pop { position: absolute; left: 0; top: calc(100% + 0.5rem); z-index: 60; width: min(20rem, calc(100vw - 2.5rem)); max-height: 70vh; overflow-y: auto; border-radius: 0.5rem; border: 1px solid var(--border); background: var(--popover); padding: 1rem; display: grid; gap: 0.75rem; box-shadow: 0 16px 40px oklch(0 0 0 / 14%); }
       .filter-pop h3 { font-size: 1.25rem; }
       .select-filter { border-radius: 0.25rem; border: 1px solid var(--input); background: color-mix(in oklab, var(--background) 60%, transparent); padding: 0.5rem 0.75rem; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--foreground); width: 100%; font-family: inherit; }
@@ -3635,7 +3673,7 @@ var PRODUCTS = [
         }
         if (st.dense) {
           h += '<div style="margin-top:1.5rem">' + filtered.map(function (p, i) {
-            return (i ? '<div style="border-top:1px solid var(--border)"></div>' : "") + '<a class="dense-row" href="#/item/' + p.id + '"><img src="' + p.image + '" alt="' + esc(p.name) + '" loading="lazy" /><span style="min-width:0;flex:1"><span style="display:block;font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted-foreground)">' + esc(vendorName(p.vendor)) + '</span><span style="display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:1rem">' + esc(p.name) + '</span><span style="display:block;font-size:0.75rem;color:var(--muted-foreground)">' + esc(p.metal) + " · " + esc(p.carat) + '</span></span><span style="font-size:0.875rem;color:var(--gold)">' + priceLabel(p) + "</span></a>";
+            return (i ? '<div style="border-top:1px solid var(--border)"></div>' : "") + '<a class="dense-row" href="#/item/' + p.id + '"><img src="' + p.image + '" alt="' + esc(p.name) + '" loading="lazy" /><span style="min-width:0;flex:1"><span style="display:block;font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted-foreground)">' + esc(vendorName(p.vendor)) + '</span><span style="display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:1rem">' + esc(p.name) + '</span><span style="display:block;font-size:0.75rem;color:var(--muted-foreground)">' + esc(p.metal) + " · " + esc(p.carat) + '</span></span><span style="font-size:0.875rem;color:var(--gold)">' + priceLabel(p) + "</span></a>";
           }).join("") + "</div>";
           return h;
         }
@@ -3651,7 +3689,7 @@ var PRODUCTS = [
           var parts = splitCategoryRows(group);
           h += '<section aria-label="' + esc(cat ? cat.name : slug) + ' pieces"><h3 style="font-size:1.25rem;letter-spacing:-0.01em">' + esc(cat ? cat.name : slug.replace(/-/g, " ")) + "</h3>"
             + '<div class="peek-rail-wrap" style="margin-top:1rem"><div class="peek-rail" onmousedown="EJ.railDrag(event)">' + parts.rail.map(function (p) {
-              return '<a class="peek-card glass-soft" href="#/item/' + p.id + '"><div class="ph"><img src="' + p.image + '" alt="' + esc(p.name) + '" loading="lazy" /></div><div class="bd"><p style="font-size:9px;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted-foreground)">' + esc(vendorName(p.vendor)) + '</p><p style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:0.75rem">' + esc(p.name) + '</p><p style="font-size:11px;color:var(--gold)">' + priceLabel(p) + "</p></div></a>";
+              return '<a class="peek-card glass-soft" href="#/item/' + p.id + '"><div class="ph"><img src="' + p.image + '" alt="' + esc(p.name) + '" loading="lazy" /></div><div class="bd"><p style="font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted-foreground)">' + esc(vendorName(p.vendor)) + '</p><p style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:0.75rem">' + esc(p.name) + '</p><p style="font-size:11px;color:var(--gold)">' + priceLabel(p) + "</p></div></a>";
             }).join("") + "</div></div>";
           if (parts.rest.length) {
             h += '<div class="grid-cards-2col" style="margin-top:2rem">' + parts.rest.map(function (p) { return productCard(p); }).join("") + "</div>";
@@ -3936,14 +3974,15 @@ var PRODUCTS = [
         _route: { page: "home", param: null, query: {} },
 
         updateChrome: function () {
-          /* The three stacked gold circles, top to bottom: pieces in
-             the bag, saved favorites, and unread messages from the
-             Elevate team — each read live from app state on every
-             change, never a hard-coded number. */
+          /* One badge per header icon, left to right: pieces in the
+             bag (on the bag icon), saved favorites (on the heart),
+             unread messages from the Elevate team (on the speech
+             bubble) — each read live from app state on every change,
+             never a hard-coded number. */
           var badges = document.getElementById("welcomeBadges");
           if (badges) {
             badges.setAttribute("aria-label", cartCount() + " bag items, " + S.wishlist.length + " saved favorites, " + teamUnreadCount() + " unread messages from the Elevate team");
-            badges.innerHTML = [cartCount(), S.wishlist.length, teamUnreadCount()].map(function (n) { return '<span class="welcome-badge">' + n + "</span>"; }).join("");
+            badges.innerHTML = [["bag", cartCount()], ["heart", S.wishlist.length], ["msgCircle", teamUnreadCount()]].map(function (b) { return '<span class="welcome-ico">' + icon(b[0], 20) + '<span class="welcome-badge">' + b[1] + "</span></span>"; }).join("");
           }
           EJ.renderBottomNav();
         },
@@ -3956,6 +3995,7 @@ var PRODUCTS = [
           var dests = [
             { href: "#/", label: "Home", ic: "home", active: page === "home" },
             { href: "#/shop", label: "Shop", ic: "diamond", active: page === "shop" || page === "category" || page === "item" || page === "studio" },
+            { href: PHONE_TEL, label: "Call us", ic: "phone", active: false },
             { href: "#/connect?tab=ateliers", label: "Messages", ic: "msgCircle", active: page === "connect" },
             { href: "#/cart", label: "Bag", ic: "bag", active: page === "cart" || page === "checkout" }
           ];
@@ -3965,7 +4005,7 @@ var PRODUCTS = [
             return '<a class="customer-bottom-link' + (d.active ? " is-active" : "") + '" href="' + d.href + '" aria-label="' + d.label + '"' + (d.active ? ' aria-current="page"' : "") + '><span style="position:relative">' + icon(d.ic, 24)
               + (d.label === "Bag" && cartCount() > 0 ? '<span class="customer-bag-count">' + cartCount() + "</span>" : "")
               + (d.label === "Messages" && unread > 0 ? '<span class="customer-bag-count">' + unread + "</span>" : "") + "</span></a>";
-          }).join("") + '<a class="customer-bottom-call" href="' + PHONE_TEL + '" aria-label="Call us">' + icon("phone", 18) + "</a>";
+          }).join("");
         },
 
         /* ----- cart / wishlist card buttons ----- */
@@ -8320,8 +8360,8 @@ var PRODUCTS = [
           + '<a href="#/private" class="btn-gold" style="margin-top:1.25rem">Go to Private World</a>'
           + "</section>";
         h += '<section style="margin-top:1.5rem;border:1px solid var(--border);border-radius:0.25rem;padding:1.5rem" aria-label="What the connected back end adds">'
-          + '<h2 style="font-family:var(--font-display);font-size:1.375rem">Why a salesperson on their own phone still starts empty</h2>'
-          + '<p style="margin-top:0.5rem;font-size:0.875rem;line-height:1.7;color:var(--muted-foreground)">In this build, PINs and queues live in this tab\'s memory — so the screens above are the real design, but nothing is shared between phones yet. The connected back end is the next step: PINs stored hashed on a server, one shared review queue for the whole team, and approvals that stay live for every visitor. That is the step that turns these rooms into your team\'s working back end.</p>'
+          + '<h2 style="font-family:var(--font-display);font-size:1.375rem">The back end is connected</h2>'
+          + '<p style="margin-top:0.5rem;font-size:0.875rem;line-height:1.7;color:var(--muted-foreground)">The back end is connected: PINs are stored securely (hashed) on the Elevate back-end server and work on any device, and the whole team shares one Pending Approval queue — a piece added on any phone waits in the same queue for everyone, and approvals stay live for every visitor. Until the owner sets the PINs at the Private World door (one time), the rooms above show NOT SET YET — that one-time setup is the only step left.</p>'
           + "</section>";
         h += "</div>";
         return h;
