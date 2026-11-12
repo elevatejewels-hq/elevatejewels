@@ -2999,6 +2999,7 @@ var PRODUCTS = [
         var id = "t-" + uid();
         var thread = { id: id, vendor: input.vendor, subject: input.subject, productId: input.productId, audience: input.audience || "atelier", messages: [{ id: uid(), from: "you", body: input.body, at: new Date().toISOString() }] };
         S.threads.unshift(thread);
+        bePostStaffMessage(input.body);
         setTimeout(function () {
           var t = S.threads.find(function (x) { return x.id === id; });
           if (t) {
@@ -3013,6 +3014,7 @@ var PRODUCTS = [
         var t = S.threads.find(function (x) { return x.id === threadId; });
         if (!t || !body.trim()) return;
         t.messages.push({ id: uid(), from: "you", body: body, at: new Date().toISOString() });
+        bePostStaffMessage(body);
         setTimeout(function () {
           t.messages.push({ id: uid(), from: "vendor", body: DISPATCH_REPLY, at: new Date().toISOString(), unread: !threadIsOpen(threadId) });
           EJ.updateChrome();
@@ -6986,6 +6988,7 @@ var PRODUCTS = [
         if (unlocked) {
           var roleLabel = EJ._pwRole === "owner" ? "Owner" : EJ._pwRole === "ai" ? "AI — Add Products only" : EJ._pwRole === "secretary" ? "Secretary" : EJ._housePreview ? "Sales Preview" : EJ._houseRole === "owner" ? "Owner" : EJ._houseRole === "ai" ? "AI — Add Products only" : "Secretary";
           var isHouseOwner = EJ._pwRole === "owner" || (EJ._houseUnlocked && EJ._houseRole === "owner");
+          beHydrate();
           return '<div class="wrap" style="max-width:56rem;padding-top:2.5rem;padding-bottom:0.5rem">'
             + '<div style="display:flex;flex-wrap:wrap;align-items:flex-start;gap:1rem"><div style="flex:1;min-width:16rem"><p class="eyebrow">Store House · Staff desk</p>'
             + '<h1 style="margin-top:0.5rem;font-family:var(--font-display);font-size:2.25rem">Store House</h1>'
@@ -7050,7 +7053,12 @@ var PRODUCTS = [
       EJ.gcToggle = function (i) {
         var c = (EJ._gcCards || [])[i];
         if (!c) return;
-        c.status = c.status === "Active" ? "Redeemed" : "Active";
+        var redeeming = c.status === "Active";
+        c.status = redeeming ? "Redeemed" : "Active";
+        /* Marking a card redeemed is mirrored to the back end when a
+           server session exists; the on-device register behaves
+           exactly as before either way. */
+        if (redeeming && beHasSession()) EJ.backend.redeemGiftcard(c.code, c.balance);
         EJ.route(true);
       };
       EJ.houseSubmit = function (ev) {
@@ -7058,26 +7066,40 @@ var PRODUCTS = [
         var input = ev.target.querySelector("input");
         var digits = (input.value || "").replace(/\D/g, "");
         if (digits.length < 10) { EJ._houseMsg = "Enter all 10 digits."; EJ.route(true); return false; }
-        ejPinsLoad();
-        if (!EJ._pwOwnerPin && !EJ._pwSecPin && !EJ._pwAiPin) {
-          EJ._houseMsg = "No staff PINs have been set on this device yet. The owner creates them at the Private World door — or open the Sales Preview below for a look at the desk.";
-          EJ.route(true);
-          return false;
-        }
-        var houseRole = digits === EJ._pwOwnerPin ? "owner" : (EJ._pwSecPin && digits === EJ._pwSecPin) ? "secretary" : (EJ._pwAiPin && digits === EJ._pwAiPin) ? "ai" : null;
-        if (houseRole) {
+        function houseOpen(role) {
           EJ._houseUnlocked = true;
-          EJ._houseRole = houseRole;
-          EJ._pwRole = houseRole;
+          EJ._houseRole = role;
+          EJ._pwRole = role;
           EJ._pwPreview = false;
           EJ._housePreview = false;
           EJ._houseMsg = "";
           toast("Store House is open", "The gift-card register and the staff shortcuts are on this page.");
+          beHydrate();
           EJ.route(true);
+        }
+        function localHouse() {
+          ejPinsLoad();
+          if (!EJ._pwOwnerPin && !EJ._pwSecPin && !EJ._pwAiPin) {
+            EJ._houseMsg = "No staff PINs have been set on this device yet. The owner creates them at the Private World door — or open the Sales Preview below for a look at the desk.";
+            EJ.route(true);
+            return;
+          }
+          var houseRole = digits === EJ._pwOwnerPin ? "owner" : (EJ._pwSecPin && digits === EJ._pwSecPin) ? "secretary" : (EJ._pwAiPin && digits === EJ._pwAiPin) ? "ai" : null;
+          if (houseRole) { houseOpen(houseRole); return; }
+          EJ._houseMsg = "That PIN does not match the owner, secretary or AI PIN. Try again.";
+          EJ.route(true);
+        }
+        /* Server mode: the back end gets the first try; a 401 — or
+           any failure — falls back to the on-device PIN check,
+           unchanged. */
+        if (EJ.backend.configured() && !EJ.backend.off()) {
+          EJ.backend.login(digits).then(function (r) {
+            if (r.ok && beValidRole(r.role)) { houseOpen(r.role); return; }
+            localHouse();
+          });
           return false;
         }
-        EJ._houseMsg = "That PIN does not match the owner, secretary or AI PIN. Try again.";
-        EJ.route(true);
+        localHouse();
         return false;
       };
       EJ.housePreview = function () {
@@ -7163,6 +7185,7 @@ var PRODUCTS = [
         else if (role === "secretary") EJ._pwSecPin = a;
         else EJ._pwAiPin = a;
         ejPinsSave();
+        if (role === "owner") beMirrorOwnerPin(a); else beMirrorStaffPin(role, a);
         EJ._setMsg = "";
         EJ._setDone = "The " + label + " PIN has been changed. The new PIN works from the next unlock; the old one no longer opens the door.";
         EJ._setOpen = null;
@@ -7209,7 +7232,7 @@ var PRODUCTS = [
         }
         return EJ._hwSettings;
       }
-      function hwSettingsSave() { ejStoreSet("ej-house-settings", EJ._hwSettings); }
+      function hwSettingsSave() { ejStoreSet("ej-house-settings", EJ._hwSettings); beSyncSettings(); }
       function hwRole() {
         if (EJ._housePreview) return "preview";
         if (EJ._pwRole) return EJ._pwRole;
@@ -7384,6 +7407,7 @@ var PRODUCTS = [
         var valid = { overview: 1, inventory: 1, invoices: 1, ads: 1, messages: 1, settings: 1 };
         view = valid[view] ? view : "overview";
         EJ._hw.view = view;
+        beHydrate();
         hwEnsureCodes();
         return '<div class="house-workspace connect-material">'
           + hwRailHtml(view)
@@ -7706,6 +7730,11 @@ var PRODUCTS = [
         var inv = { id: hwNextInvoiceId(), pieceId: p.id, code: EJ.qrNumFor(p), name: p.name, sku: hwSku(p), description: p.description || "", amount: p.price, customer: "", status: "Draft" };
         hwInvoices().unshift(inv);
         hwInvoicesSave();
+        if (beHasSession() && EJ.backend.session().role === "owner") {
+          EJ.backend.createInvoice(inv).then(function (r) {
+            if (r.ok && r.data && (r.data.id || r.data.invoiceId)) inv.serverId = r.data.id || r.data.invoiceId;
+          });
+        }
         EJ.hwOpenInvoice(inv.id);
         hwRerenderMain();
       };
@@ -7758,6 +7787,7 @@ var PRODUCTS = [
         if (!inv || inv.status === "Paid") return;
         inv.status = "Paid";
         hwInvoicesSave();
+        if (beHasSession()) EJ.backend.payInvoice(inv.serverId || inv.id);
         EJ.closeOverlays();
         toast("Invoice marked paid", inv.id + " · " + hwMoney(inv.amount));
         EJ.route(true);
@@ -7846,6 +7876,12 @@ var PRODUCTS = [
           }).join("") : '<p style="padding:24px 16px;font-size:14px;color:var(--connect-muted)">No client conversations yet.</p>')
           + "</div></section>";
         var emails = SAMPLE_THREADS.filter(function (t) { return t.channel === "email"; });
+        /* Staff messages hydrated from the back end (only when a
+           server session exists) join the desk list in the same row
+           shape; offline, the list is exactly the samples. */
+        (EJ._beMessages || []).forEach(function (m) {
+          emails.push({ title: m.channel ? "Back end · " + m.channel : "Back end message", preview: m.text || m.body || "", time: m.time || "" });
+        });
         h += '<section style="margin-top:32px"><h2 style="font-size:18px;font-weight:400">Secretary email desk</h2>'
           + '<p style="margin-top:4px;font-size:14px;color:var(--connect-muted)">Seller pieces and client email are worked from the Connect email desk; new seller pieces arrive there first, then wait in Pending approvals.</p>'
           + '<div class="house-table" style="margin-top:12px">'
@@ -8150,6 +8186,7 @@ var PRODUCTS = [
         }
         if (!hwCanPublish() || d.status === "Pending") {
           EJ._pwPending.unshift(entry);
+          bePostPending(entry);
           toast(name + " sent to the owner for approval.", "");
           EJ.route(true);
           return false;
@@ -8290,6 +8327,296 @@ var PRODUCTS = [
         return h;
       }
 
+      /* ================= Elevate back-end client (additive) =================
+         A thin client for the Elevate back-end service. It is purely
+         additive: when no server is configured, or the server cannot
+         be reached, every flow in Private World and the Store House
+         behaves exactly as the on-device build always has. No server
+         call ever blocks the UI, and every failure silently falls
+         back to the on-device behaviour. */
+
+      // Elevate back-end service URL — set after the service is deployed; empty keeps today's on-device behaviour.
+      window.EJ_BACKEND_URL = window.EJ_BACKEND_URL || "https://elevate-backend-240z.onrender.com";
+
+      EJ.backend = (function () {
+        var TOKEN_KEY = "ej-be-token";
+        var probed = false, serverOn = false, healthInfo = null, probePromise = null;
+
+        /* Base URL resolution: (a) the localStorage test override
+           "ej-backend-url" when set, else (b) window.EJ_BACKEND_URL
+           above. Empty means server mode is OFF. */
+        function base() {
+          try {
+            var override = window.localStorage.getItem("ej-backend-url");
+            if (override) return String(override).replace(/\/+$/, "");
+          } catch (e) { /* storage unavailable */ }
+          return String(window.EJ_BACKEND_URL || "").replace(/\/+$/, "");
+        }
+        function configured() { return !!base(); }
+        /* The session token lives only in sessionStorage at runtime,
+           stored together with the role it was issued for. */
+        function session() {
+          try {
+            var raw = window.sessionStorage.getItem(TOKEN_KEY);
+            if (!raw) return null;
+            var s = JSON.parse(raw);
+            return s && s.token ? s : null;
+          } catch (e) { return null; }
+        }
+        function saveSession(token, role) {
+          try { window.sessionStorage.setItem(TOKEN_KEY, JSON.stringify({ token: token, role: role })); } catch (e) { /* storage unavailable */ }
+        }
+        function clearSession() {
+          try { window.sessionStorage.removeItem(TOKEN_KEY); } catch (e) { /* storage unavailable */ }
+        }
+        /* One JSON call against the service. It never rejects:
+           network errors, timeouts and unreadable responses all
+           resolve as { ok:false } so callers fall back silently. */
+        function request(method, path, body, timeoutMs) {
+          return new Promise(function (resolve) {
+            var b = base();
+            if (!b || typeof fetch !== "function") { resolve({ ok: false, status: 0, data: null }); return; }
+            var ctrl = typeof AbortController === "function" ? new AbortController() : null;
+            var timer = setTimeout(function () { if (ctrl) { try { ctrl.abort(); } catch (e) {} } }, timeoutMs || 5000);
+            var headers = { "Content-Type": "application/json" };
+            var s = session();
+            if (s) headers.Authorization = "Bearer " + s.token;
+            var opts = { method: method, headers: headers };
+            if (body !== undefined) opts.body = JSON.stringify(body);
+            if (ctrl) opts.signal = ctrl.signal;
+            fetch(b + path, opts).then(function (res) {
+              clearTimeout(timer);
+              res.text().then(function (txt) {
+                var data = null;
+                try { data = txt ? JSON.parse(txt) : null; } catch (e) { data = null; }
+                resolve({ ok: res.ok, status: res.status, data: data });
+              }, function () { resolve({ ok: false, status: res.status, data: null }); });
+            }, function () { clearTimeout(timer); resolve({ ok: false, status: 0, data: null }); });
+          });
+        }
+        /* First use probes GET /health once, with a short timeout.
+           If it fails, server mode is OFF for the rest of the session
+           and the UI is never blocked on the server again. */
+        function probe() {
+          if (probePromise) return probePromise;
+          if (!configured()) { probed = true; serverOn = false; probePromise = Promise.resolve(false); return probePromise; }
+          probePromise = request("GET", "/health", undefined, 2500).then(function (r) {
+            probed = true;
+            if (r.ok) { serverOn = true; healthInfo = r.data || {}; }
+            else { serverOn = false; healthInfo = null; }
+            return serverOn;
+          });
+          return probePromise;
+        }
+        function login(pin) {
+          return probe().then(function (on) {
+            if (!on) return { ok: false, status: 0, data: null };
+            return request("POST", "/auth/login", { pin: pin }).then(function (r) {
+              if (r.ok && r.data && r.data.token) {
+                saveSession(r.data.token, r.data.role);
+                return { ok: true, status: r.status, role: r.data.role, data: r.data };
+              }
+              return r;
+            });
+          });
+        }
+        return {
+          configured: configured,
+          probe: probe,
+          on: function () { return serverOn; },
+          off: function () { return probed && !serverOn; },
+          health: function () { return healthInfo; },
+          session: session,
+          clearSession: clearSession,
+          login: login,
+          setupOwner: function (pin) { return request("POST", "/auth/setup-owner", { pin: pin }); },
+          setStaffPin: function (role, pin) { return request("POST", "/staff/pins", { role: role, pin: pin }); },
+          changeOwnerPin: function (newPin) { return request("POST", "/staff/owner-pin", { newPin: newPin }); },
+          getPending: function () { return request("GET", "/pending"); },
+          addPending: function (product) { return request("POST", "/pending", product); },
+          patchPending: function (queueId, partial) { return request("PATCH", "/pending/" + encodeURIComponent(queueId), partial); },
+          approvePending: function (queueId) { return request("POST", "/pending/" + encodeURIComponent(queueId) + "/approve"); },
+          rejectPending: function (queueId) { return request("POST", "/pending/" + encodeURIComponent(queueId) + "/reject"); },
+          getProducts: function () { return request("GET", "/products"); },
+          getInvoices: function () { return request("GET", "/invoices"); },
+          createInvoice: function (invoice) { return request("POST", "/invoices", invoice); },
+          payInvoice: function (id) { return request("POST", "/invoices/" + encodeURIComponent(id) + "/pay"); },
+          issueGiftcard: function (amount) { return request("POST", "/giftcards", { amount: amount }); },
+          getGiftcard: function (code) { return request("GET", "/giftcards/" + encodeURIComponent(code)); },
+          redeemGiftcard: function (code, amount) { return request("POST", "/giftcards/" + encodeURIComponent(code) + "/redeem", { amount: amount }); },
+          getMessages: function () { return request("GET", "/messages?since=0"); },
+          postMessage: function (channel, text) { return request("POST", "/messages", { channel: channel, text: text }); },
+          getSettings: function () { return request("GET", "/settings"); },
+          putSettings: function (settings) { return request("PUT", "/settings", settings); }
+        };
+      })();
+
+      /* ---------- Back-end wiring helpers ----------
+         Each helper is a no-op unless a server session exists, and
+         each server call is fire-and-forget: a failure leaves the
+         on-device state exactly as it was. */
+      function beHasSession() { return !!EJ.backend.session(); }
+      function beValidRole(role) { return role === "owner" || role === "secretary" || role === "ai"; }
+
+      /* Owner setup at the door: when the server is on and has no
+         owner yet, register the same PIN there, then log in so this
+         tab holds a server session. Local behaviour is unchanged. */
+      function beSetupOwnerOnServer(pin) {
+        EJ.backend.probe().then(function (on) {
+          if (!on) return;
+          var h = EJ.backend.health();
+          if (h && h.staffConfigured && h.staffConfigured.owner === false) {
+            EJ.backend.setupOwner(pin).then(function () {
+              EJ.backend.login(pin).then(function (r) { if (r.ok) beHydrate(); });
+            });
+          }
+        });
+      }
+      function beMirrorStaffPin(role, pin) {
+        if (!beHasSession()) return;
+        EJ.backend.setStaffPin(role, pin);
+      }
+      function beMirrorOwnerPin(pin) {
+        if (!beHasSession()) return;
+        EJ.backend.changeOwnerPin(pin);
+      }
+      function bePendingPayload(d) {
+        var p = {};
+        ["name", "brandId", "category", "subcategory", "price", "metal", "stone", "carat", "certification", "description", "image", "gallery", "oneOfOne", "by", "color", "clarity", "cut", "size", "sku", "cost", "labPrice", "model", "year", "bandType"].forEach(function (k) {
+          if (d[k] !== undefined) p[k] = d[k];
+        });
+        if (d.queueId) p.queueId = d.queueId;
+        return p;
+      }
+      function bePostPending(d) {
+        if (!beHasSession()) return;
+        EJ.backend.addPending(bePendingPayload(d)).then(function (r) {
+          if (r.ok && r.data) {
+            var qid = r.data.queueId || r.data.id || null;
+            if (!qid && r.data.product) qid = r.data.product.queueId || r.data.product.id || null;
+            if (qid) d.queueId = qid;
+          }
+        });
+      }
+      function beMapPending(item) {
+        if (!item || typeof item !== "object") return null;
+        var src = item.product && typeof item.product === "object" ? item.product : item;
+        var d = {};
+        Object.keys(src).forEach(function (k) { d[k] = src[k]; });
+        d.queueId = item.queueId || item.id || src.queueId || src.id || null;
+        if (!d.key) d.key = d.queueId || uid();
+        if (d.price == null) d.price = 0;
+        if (!d.by) d.by = item.by || "owner";
+        if (!d.name) return null;
+        return d;
+      }
+      function bePostStaffMessage(text) {
+        if (!beHasSession() || !text) return;
+        EJ.backend.postMessage("staff", text);
+      }
+      var beSettingsHydrating = false;
+      function beSyncSettings() {
+        if (!beHasSession() || beSettingsHydrating || !EJ._hwSettings) return;
+        var s = EJ.backend.session();
+        if (!s || s.role !== "owner") return;
+        EJ.backend.putSettings(EJ._hwSettings);
+      }
+      var beHydrateState = { pending: false, invoices: false, settings: false, messages: false, giftcards: false };
+      function beRerenderIfBackEnd() {
+        var r = EJ._route;
+        if (r && (r.name === "private" || r.name === "house")) EJ.route(true);
+      }
+      /* Hydrate the back-end rooms from the server when a session
+         exists: the server list is the source of truth while online,
+         and the on-device lists remain the offline cache (they are
+         refreshed with whatever the server returned). Runs once per
+         resource per session; a failed read is retried next open. */
+      function beHydrate() {
+        var s = EJ.backend.session();
+        if (!s) return;
+        if (!beHydrateState.pending) {
+          beHydrateState.pending = true;
+          EJ.backend.getPending().then(function (r) {
+            if (r.ok && Array.isArray(r.data)) {
+              EJ._pwPending = r.data.map(beMapPending).filter(Boolean);
+              beRerenderIfBackEnd();
+            } else beHydrateState.pending = false;
+          });
+        }
+        if (s.role !== "owner") return;
+        if (!beHydrateState.invoices) {
+          beHydrateState.invoices = true;
+          EJ.backend.getInvoices().then(function (r) {
+            if (r.ok && Array.isArray(r.data)) {
+              EJ._hwInvoices = r.data;
+              ejStoreSet("ej-house-invoices", EJ._hwInvoices);
+              beRerenderIfBackEnd();
+            } else beHydrateState.invoices = false;
+          });
+        }
+        if (!beHydrateState.settings) {
+          beHydrateState.settings = true;
+          EJ.backend.getSettings().then(function (r) {
+            if (r.ok && r.data && typeof r.data === "object") {
+              var st = hwSettings();
+              Object.keys(r.data).forEach(function (k) { st[k] = r.data[k]; });
+              beSettingsHydrating = true;
+              hwSettingsSave();
+              beSettingsHydrating = false;
+              beRerenderIfBackEnd();
+            } else beHydrateState.settings = false;
+          });
+        }
+        if (!beHydrateState.messages) {
+          beHydrateState.messages = true;
+          EJ.backend.getMessages().then(function (r) {
+            if (r.ok && Array.isArray(r.data)) {
+              EJ._beMessages = r.data;
+              beRerenderIfBackEnd();
+            } else beHydrateState.messages = false;
+          });
+        }
+        if (!beHydrateState.giftcards) {
+          beHydrateState.giftcards = true;
+          beRefreshGiftcards();
+        }
+      }
+      /* Gift-card balances: each register card is looked up on the
+         server when online; any card the server cannot answer for
+         keeps its on-device register value. */
+      function beRefreshGiftcards() {
+        var cards = EJ._gcCards;
+        if (!cards || !cards.length || !beHasSession()) return;
+        var changed = false, remaining = cards.length;
+        cards.forEach(function (c) {
+          EJ.backend.getGiftcard(c.code).then(function (r) {
+            if (r.ok && r.data) {
+              if (typeof r.data.balance === "number" && r.data.balance !== c.balance) { c.balance = r.data.balance; changed = true; }
+              if (r.data.status && r.data.status !== c.status) { c.status = r.data.status; changed = true; }
+            }
+            remaining -= 1;
+            if (!remaining && changed) beRerenderIfBackEnd();
+          });
+        });
+      }
+      /* The gate footnote tells the truth about where PINs live:
+         probe quietly when the gate is shown, and repaint once if
+         server mode turns out to be on. */
+      var beGateProbed = false;
+      function beKickGateProbe() {
+        if (beGateProbed || !EJ.backend.configured()) return;
+        beGateProbed = true;
+        EJ.backend.probe().then(function (on) {
+          if (!on || EJ._pwRole) return;
+          if (EJ._route && EJ._route.name === "private") EJ.route(true);
+          else if (document.querySelector("[data-pwgate]")) EJ.openPrivate();
+        });
+      }
+      function pwPinFootnote() {
+        if (EJ.backend.on()) return "PINs are stored securely (hashed) on the Elevate back-end server and work on any device. They are never written into the page code.";
+        return "Preview PINs: in this front-end build the PINs are kept only in this tab's memory and are never written into the page code. On the real back end they will be stored hashed on a server.";
+      }
+
       /* ---------- Private World — owner product studio ----------
          The owner asked for: a 10-digit PIN at Private World; inside,
          a way to add many products with a brand selector; a website
@@ -8372,6 +8699,7 @@ var PRODUCTS = [
       ejPinsLoad();
 
       function pwGateHtml(withPad) {
+        beKickGateProbe();
         var h = '<div data-pwgate="1" style="display:flex;flex-direction:column;gap:1rem">';
         if (!EJ._pwOwnerPin) {
           h += '<p style="font-size:0.875rem;line-height:1.65;color:var(--muted-foreground)"><strong style="color:var(--foreground)">Set your PINs — step 1 of 3.</strong> Create your private owner PIN (10 digits, typed twice). It opens the full studio, including approvals. Inside, you will then create the secretary PIN and the AI PIN, which open Add Products only.</p>'
@@ -8396,7 +8724,7 @@ var PRODUCTS = [
           + '<p style="font-size:0.875rem;line-height:1.65"><strong style="color:var(--foreground)">Sales team — see your screen now.</strong><br/><span style="color:var(--muted-foreground)">Open Add Products in Sales Preview: the exact screen a salesperson gets on the secretary PIN. Pieces they add wait as Pending Approval; approvals and PIN settings stay owner-only. No PIN is needed for this review look.</span></p>'
           + '<button type="button" class="btn-gold" style="margin-top:0.75rem;width:100%" onclick="EJ.pwPreviewSales()">Open Add Products — Sales Preview</button>'
           + '<a href="#/backend" style="display:inline-block;margin-top:0.75rem;font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold)">Back End overview — all three rooms</a></div>';
-        h += '<p style="font-size:0.75rem;line-height:1.65;color:var(--muted-foreground)">Preview PINs: in this front-end build the PINs are kept only in this tab\'s memory and are never written into the page code. On the real back end they will be stored hashed on a server.</p></div>';
+        h += '<p style="font-size:0.75rem;line-height:1.65;color:var(--muted-foreground)">' + pwPinFootnote() + '</p></div>';
         return h;
       }
       function pwGateFail(msg) {
@@ -8410,6 +8738,7 @@ var PRODUCTS = [
         EJ._pwRole = role;
         EJ.closeOverlays();
         toast("Private World is open", role === "owner" ? "Owner access — add products and approve them to go live." : role === "ai" ? "AI access — Add Products only; everything waits for the owner." : "Secretary access — Add Products only; everything waits for the owner.");
+        beHydrate();
         if (location.hash === "#/private") EJ.route();
         else location.hash = "#/private";
       }
@@ -8422,16 +8751,31 @@ var PRODUCTS = [
         if (a !== b) { pwGateFail("The two PINs do not match — type the same 10 digits twice."); return false; }
         EJ._pwOwnerPin = a;
         ejPinsSave();
+        beSetupOwnerOnServer(a);
         pwGatePass("owner");
         return false;
       };
       EJ.pwUnlock = function (ev) {
         ev.preventDefault();
         var v = (ev.target.elements.pin.value || "").replace(/\D/g, "");
-        if (v && v === EJ._pwOwnerPin) { pwGatePass("owner"); return false; }
-        if (v && EJ._pwSecPin && v === EJ._pwSecPin) { pwGatePass("secretary"); return false; }
-        if (v && EJ._pwAiPin && v === EJ._pwAiPin) { pwGatePass("ai"); return false; }
-        pwGateFail("That PIN does not match any of the PINs. Try again.");
+        function localUnlock() {
+          if (v && v === EJ._pwOwnerPin) { pwGatePass("owner"); return; }
+          if (v && EJ._pwSecPin && v === EJ._pwSecPin) { pwGatePass("secretary"); return; }
+          if (v && EJ._pwAiPin && v === EJ._pwAiPin) { pwGatePass("ai"); return; }
+          pwGateFail("That PIN does not match any of the PINs. Try again.");
+        }
+        /* Server mode: the back end gets the first try, and the
+           server-returned role opens the studio exactly as the
+           on-device role does. A 401 — or any failure — falls back
+           to the on-device PIN check, unchanged. */
+        if (v && EJ.backend.configured() && !EJ.backend.off()) {
+          EJ.backend.login(v).then(function (r) {
+            if (r.ok && beValidRole(r.role)) { pwGatePass(r.role); return; }
+            localUnlock();
+          });
+          return false;
+        }
+        localUnlock();
         return false;
       };
       EJ.pwSetSecPin = function (ev) {
@@ -8446,6 +8790,7 @@ var PRODUCTS = [
         if (EJ._pwAiPin && a === EJ._pwAiPin) { EJ._pwPinMsg = "The secretary PIN must be different from the AI PIN."; EJ.route(true); return false; }
         EJ._pwSecPin = a;
         ejPinsSave();
+        beMirrorStaffPin("secretary", a);
         EJ._pwSecReveal = a;
         EJ._pwPinMsg = "";
         EJ.route(true);
@@ -8467,6 +8812,7 @@ var PRODUCTS = [
         if (EJ._pwSecPin && a === EJ._pwSecPin) { EJ._pwPinMsg = "The AI PIN must be different from the secretary PIN."; EJ.route(true); return false; }
         EJ._pwAiPin = a;
         ejPinsSave();
+        beMirrorStaffPin("ai", a);
         EJ._pwAiReveal = a;
         EJ._pwPinMsg = "";
         EJ.route(true);
@@ -8488,6 +8834,7 @@ var PRODUCTS = [
         if (EJ._pwAiPin && a === EJ._pwAiPin) { EJ._pwPinMsg = "Your owner PIN must be different from the AI PIN."; EJ.route(true); return false; }
         EJ._pwOwnerPin = a;
         ejPinsSave();
+        beMirrorOwnerPin(a);
         EJ._pwPinMsg = "";
         toast("Owner PIN changed", "Use the new PIN next time you unlock Private World.");
         EJ.route(true);
@@ -8594,7 +8941,7 @@ var PRODUCTS = [
         var price = Math.round(Number(f.elements.price.value) || 0);
         if (!name || price <= 0) { toast("A name and a price are needed", "A piece cannot be queued without both."); return false; }
         var cat = findCategory(f.elements.category.value) || CATEGORIES[0];
-        EJ._pwPending.unshift({
+        var beDraft = {
           key: uid(),
           by: EJ._pwRole || "owner",
           name: name,
@@ -8609,7 +8956,9 @@ var PRODUCTS = [
           description: f.elements.description.value.trim(),
           image: EJ._pwPhoto || f.elements.photoPreset.value,
           oneOfOne: f.elements.oneofone.value === "yes"
-        });
+        };
+        EJ._pwPending.unshift(beDraft);
+        bePostPending(beDraft);
         EJ._pwLast = { brandId: f.elements.brand.value, category: cat.slug };
         EJ._pwPhoto = null; EJ._pwPhotoName = "";
         if (EJ._pwRole === "owner") toast("Added to your review queue", name + " — nothing is live until you approve it.");
@@ -8696,7 +9045,7 @@ var PRODUCTS = [
       EJ.pwStageConfirm = function () {
         var staged = EJ._pwStaged || [];
         var n = staged.length;
-        staged.slice().reverse().forEach(function (d) { d.key = uid(); d.by = EJ._pwRole || "owner"; EJ._pwPending.unshift(d); });
+        staged.slice().reverse().forEach(function (d) { d.key = uid(); d.by = EJ._pwRole || "owner"; EJ._pwPending.unshift(d); bePostPending(d); });
         EJ._pwStaged = null;
         EJ._pwSay = EJ._pwRole === "owner"
           ? n + (n === 1 ? " product is" : " products are") + " in your review queue below. Nothing is live until you approve it."
@@ -8713,21 +9062,55 @@ var PRODUCTS = [
         var d = EJ._pwPending[i];
         if (!d) return;
         if (!(d.price > 0)) { toast("Price still to confirm", d.name + " has no price yet — it cannot go live at $0. Add the confirmed price first."); return; }
-        var p = pwPublish(d);
-        EJ._pwPending.splice(i, 1);
-        toast("Live in the shop", p.name + " — under " + pwBrandName(p.brandId) + ".");
-        EJ.route(true);
+        function publishLocal() {
+          var idx = EJ._pwPending.indexOf(d);
+          if (idx < 0) return;
+          var p = pwPublish(d);
+          EJ._pwPending.splice(idx, 1);
+          toast("Live in the shop", p.name + " — under " + pwBrandName(p.brandId) + ".");
+          EJ.route(true);
+        }
+        /* Online, the server approves first: a 422 (price required)
+           blocks the piece exactly as the on-device priceless block
+           does; any other failure falls back to the local approval. */
+        if (d.queueId && beHasSession()) {
+          EJ.backend.approvePending(d.queueId).then(function (r) {
+            if (r.status === 422) { toast("Price still to confirm", d.name + " has no price yet — it cannot go live at $0. Add the confirmed price first."); return; }
+            publishLocal();
+          });
+          return;
+        }
+        publishLocal();
       };
       EJ.pwApproveAll = function () {
         if (EJ._pwRole !== "owner") return;
         var ready = EJ._pwPending.filter(function (d) { return d.price > 0; });
         var held = EJ._pwPending.length - ready.length;
-        ready.slice().reverse().forEach(function (d) { pwPublish(d); });
-        EJ._pwPending = EJ._pwPending.filter(function (d) { return !(d.price > 0); });
-        toast("Approved pieces are live", ready.length + (ready.length === 1 ? " product" : " products") + " published to the shop." + (held ? " " + held + " held back — price still to confirm." : ""));
+        function publishReady(list, heldCount) {
+          list.slice().reverse().forEach(function (d) { pwPublish(d); });
+          EJ._pwPending = EJ._pwPending.filter(function (d) { return list.indexOf(d) < 0; });
+          toast("Approved pieces are live", list.length + (list.length === 1 ? " product" : " products") + " published to the shop." + (heldCount ? " " + heldCount + " held back — price still to confirm." : ""));
+          EJ.route(true);
+        }
+        var online = beHasSession() ? ready.filter(function (d) { return d.queueId; }) : [];
+        if (!online.length) { publishReady(ready, held); return; }
+        /* Online pieces are approved on the server first; a 422
+           (price required) holds that piece back, exactly like a
+           priceless piece. Other failures fall back to local. */
+        Promise.all(online.map(function (d) {
+          return EJ.backend.approvePending(d.queueId).then(function (r) { return { d: d, blocked: r.status === 422 }; });
+        })).then(function (results) {
+          var blocked = results.filter(function (x) { return x.blocked; }).map(function (x) { return x.d; });
+          publishReady(ready.filter(function (d) { return blocked.indexOf(d) < 0; }), held + blocked.length);
+        });
+      };
+      EJ.pwRemovePending = function (i) {
+        if (EJ._pwRole !== "owner") return;
+        var d = EJ._pwPending[i];
+        if (d && d.queueId && beHasSession()) EJ.backend.rejectPending(d.queueId);
+        EJ._pwPending.splice(i, 1);
         EJ.route(true);
       };
-      EJ.pwRemovePending = function (i) { if (EJ._pwRole !== "owner") return; EJ._pwPending.splice(i, 1); EJ.route(true); };
       EJ.pwUnpublish = function (id) {
         if (EJ._pwRole !== "owner") return;
         var idx = PRODUCTS.findIndex(function (p) { return p.id === id; });
@@ -8885,7 +9268,7 @@ var PRODUCTS = [
           + '<input name="newpin1" type="password" inputmode="numeric" autocomplete="off" maxlength="10" placeholder="New owner PIN (10 digits)" aria-label="New owner PIN" style="text-align:center;letter-spacing:0.5em;' + PW_IN + '" />'
           + '<input name="newpin2" type="password" inputmode="numeric" autocomplete="off" maxlength="10" placeholder="Type it again to confirm" aria-label="Confirm new owner PIN" style="text-align:center;letter-spacing:0.5em;' + PW_IN + '" />'
           + '<div><button type="submit" class="btn-ghost">Change owner PIN</button></div></form>'
-          + '<p style="margin-top:1rem;font-size:0.75rem;line-height:1.65;color:var(--muted-foreground)">Preview PINs: in this front-end build the PINs are kept only in this tab\'s memory and never written into the page code. On the real back end they will be stored hashed on a server.</p></section>';
+          + '<p style="margin-top:1rem;font-size:0.75rem;line-height:1.65;color:var(--muted-foreground)">' + pwPinFootnote() + '</p></section>';
         return h;
       }
 
@@ -8900,6 +9283,7 @@ var PRODUCTS = [
             + '<a href="#/backend" style="font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold)">Back End overview</a></div>'
             + "</div></div>";
         }
+        beHydrate();
         var pending = EJ._pwPending, liveIds = EJ._pwLiveIds;
         var isOwner = EJ._pwRole === "owner";
         var isAi = EJ._pwRole === "ai";
