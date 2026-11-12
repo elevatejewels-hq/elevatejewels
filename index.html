@@ -1186,6 +1186,24 @@
       .item-main img { display: block; width: 100%; height: 100%; object-fit: contain; padding: 1.5rem; transition: transform 0.3s; }
       .item-main.zoomed { cursor: zoom-out; }
       .item-main.zoomed img { transform: scale(2.1); }
+      /* 2026-11-12 photo round — swipe counters, AI voice spinner and
+         the desktop home headline fix (desktop only, min-width 1024px;
+         phone rules untouched). Product photos already sit whole
+         (object-fit: contain) on the bright-white/ivory gold-edged
+         panel; the cut-outs are transparent WebP, so they float on
+         that same panel. Swipe areas claim only horizontal gestures
+         (touch-action: pan-y) so vertical page scroll keeps working. */
+      .item-main { touch-action: pan-y; }
+      .pcard .ph { touch-action: pan-y; }
+      .ej-gallery-counter { margin-top: 0.5rem; font-size: 0.75rem; letter-spacing: 0.14em; color: var(--muted-foreground); text-align: center; }
+      .card-counter { position: absolute; right: 0.5rem; bottom: 0.5rem; z-index: 2; background: color-mix(in oklab, var(--foreground) 70%, transparent); color: var(--background); font-size: 10px; letter-spacing: 0.12em; padding: 0.2rem 0.45rem; border-radius: 999px; pointer-events: none; }
+      .narr-spin { display: none; width: 14px; height: 14px; flex-shrink: 0; border-radius: 50%; border: 2px solid color-mix(in oklab, var(--gold) 30%, transparent); border-top-color: var(--gold); animation: ej-narr-spin .7s linear infinite; }
+      @keyframes ej-narr-spin { to { transform: rotate(360deg); } }
+      @media (min-width: 1024px) {
+        .intro-frame.intro-frame-home { max-height: 24vh; }
+        .luxury-screen-showcase { max-height: 20vh; }
+        .hero .hero-copy { padding-top: 0.5rem; }
+      }
       .zoom-badge { position: absolute; right: 0.75rem; bottom: 0.75rem; pointer-events: none; display: inline-flex; align-items: center; gap: 0.375rem; border-radius: 0.25rem; background: color-mix(in oklab, var(--foreground) 70%, transparent); padding: 0.25rem 0.5rem; font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: color-mix(in oklab, var(--background) 85%, transparent); backdrop-filter: blur(8px); }
       .piece-hero .grid { grid-template-columns: 1fr; }
       .piece-hero .grid > div { min-width: 0; }
@@ -2730,6 +2748,29 @@ var PRODUCTS = [
         if (ejSet && ejSet.length) { p.image = ejSet[0]; p.gallery = ejSet.slice(); }
       });
 
+      /* Background-removed main photos (owner direction, 2026-11-12):
+         each wired product's MAIN photo is its clean cut-out (the piece
+         alone on the ivory panel); the brand angles stay original behind
+         it, with the old brand main kept as a later angle. Deadfix
+         products have brand-CDN photos that all return 404, so they use
+         the given local asset as their only photo and no dead widen.net
+         URL is left on them. Products in neither map are untouched. */
+      var EJ_CUTOUT_WIRING = {"llg-cluster-studs":"assets/cutouts/llg-cluster-studs.webp","bulova-98a321":"assets/cutouts/EJ-100002.webp","bulova-98a343":"assets/cutouts/EJ-100003.webp","bulova-96b429":"assets/cutouts/EJ-100004.webp","bulova-98a227":"assets/cutouts/EJ-100005.webp","bulova-98a318":"assets/cutouts/EJ-100006.webp","bulova-96b460":"assets/cutouts/EJ-100007.webp","bulova-98b474":"assets/cutouts/EJ-100008.webp","bulova-97a138":"assets/cutouts/EJ-100009.webp","bulova-97b169":"assets/cutouts/EJ-100010.webp","bulova-96b483":"assets/cutouts/EJ-100011.webp","bulova-96b403":"assets/cutouts/EJ-100012.webp","bulova-98b471":"assets/cutouts/EJ-100013.webp","bulova-98b469":"assets/cutouts/EJ-100014.webp","bulova-98b301":"assets/cutouts/EJ-100015.webp","bulova-98d184":"assets/cutouts/EJ-100016.webp","bulova-96a208":"assets/cutouts/EJ-100017.webp","bulova-98d144":"assets/cutouts/EJ-100018.webp","bulova-96b272":"assets/cutouts/EJ-100019.webp","bulova-43b175":"assets/cutouts/EJ-100020.webp","bulova-96k118":"assets/cutouts/EJ-100021.webp","bulova-96a354":"assets/cutouts/EJ-100022.webp","bulova-97a194":"assets/cutouts/EJ-100023.webp","bulova-98b429":"assets/cutouts/EJ-100024.webp","bulova-96b349":"assets/cutouts/EJ-100025.webp","bulova-98b456":"assets/cutouts/EJ-100026.webp","bulova-98a342":"assets/cutouts/EJ-100027.webp","bulova-98b468":"assets/cutouts/EJ-100028.webp","bulova-98b427":"assets/cutouts/EJ-100029.webp","bulova-98b432":"assets/cutouts/EJ-100030.webp","bulova-98b446":"assets/cutouts/EJ-100031.webp","bulova-98b449":"assets/cutouts/EJ-100032.webp","bulova-98b448":"assets/cutouts/EJ-100033.webp","bulova-98b445":"assets/cutouts/EJ-100034.webp","bulova-97d132":"assets/cutouts/EJ-100035.webp","bulova-98a236":"assets/cutouts/EJ-100036.webp","bulova-97a163":"assets/cutouts/EJ-100037.webp","bulova-97l163":"assets/cutouts/EJ-100038.webp","bulova-98a309":"assets/cutouts/EJ-100039.webp","bulova-98l309":"assets/cutouts/EJ-100040.webp","bulova-98a327":"assets/cutouts/EJ-100041.webp","bulova-97d120":"assets/cutouts/EJ-100042.webp","bulova-98c146":"assets/cutouts/EJ-100043.webp","bulova-97d116":"assets/cutouts/EJ-100044.webp","bulova-98a203":"assets/cutouts/EJ-100045.webp","bulova-96a204":"assets/cutouts/EJ-100046.webp","bulova-96a259":"assets/cutouts/EJ-100047.webp","bulova-96b482":"assets/cutouts/EJ-100048.webp","bulova-96a246":"assets/cutouts/EJ-100049.webp","bulova-96a245":"assets/cutouts/EJ-100050.webp","bulova-96a282":"assets/cutouts/EJ-100051.webp","bulova-97a200":"assets/cutouts/EJ-100052.webp","bulova-98b476":"assets/cutouts/EJ-100053.webp","bulova-96b460gp":"assets/cutouts/EJ-100054.webp","bulova-98b384":"assets/cutouts/EJ-100055.webp","bulova-96b382":"assets/cutouts/EJ-100056.webp","bulova-98a302":"assets/cutouts/EJ-100057.webp","bulova-98a272":"assets/cutouts/EJ-100058.webp","bulova-98a273":"assets/cutouts/EJ-100059.webp","bulova-98a225":"assets/cutouts/EJ-100060.webp","bulova-98b467":"assets/cutouts/EJ-100061.webp","bulova-98b466":"assets/cutouts/EJ-100062.webp","bulova-98b465":"assets/cutouts/EJ-100063.webp","bulova-97b168":"assets/cutouts/EJ-100064.webp","bulova-96b380":"assets/cutouts/EJ-100065.webp","bulova-96b256":"assets/cutouts/EJ-100066.webp","bulova-98d176":"assets/cutouts/EJ-100067.webp","bulova-98b278":"assets/cutouts/EJ-100068.webp","bulova-98a177":"assets/cutouts/EJ-100071.webp","bulova-98a224":"assets/cutouts/EJ-100072.webp","bulova-98a340":"assets/cutouts/EJ-100073.webp","bulova-98a178":"assets/cutouts/EJ-100074.webp","bulova-98a345":"assets/cutouts/EJ-100075.webp","bulova-98a346":"assets/cutouts/EJ-100076.webp","bulova-98a319":"assets/cutouts/EJ-100077.webp","bulova-97a207":"assets/cutouts/EJ-100078.webp","bulova-98a341":"assets/cutouts/EJ-100079.webp","bulova-98a320":"assets/cutouts/EJ-100080.webp","bulova-98b229":"assets/cutouts/EJ-100081.webp","bulova-96b175":"assets/cutouts/EJ-100082.webp","bulova-98j120":"assets/cutouts/EJ-100083.webp","bulova-98d149":"assets/cutouts/EJ-100084.webp","bulova-98d156":"assets/cutouts/EJ-100085.webp","bulova-97b216":"assets/cutouts/EJ-100086.webp","bulova-97a192":"assets/cutouts/EJ-100087.webp","bulova-98a330":"assets/cutouts/EJ-100088.webp","bulova-97a185":"assets/cutouts/EJ-100089.webp","bulova-98a328":"assets/cutouts/EJ-100090.webp","bulova-96k117":"assets/cutouts/EJ-100091.webp","bulova-98a162":"assets/cutouts/EJ-100092.webp","bulova-98a185":"assets/cutouts/EJ-100093.webp","bulova-96a339":"assets/cutouts/EJ-100094.webp","bulova-96a338":"assets/cutouts/EJ-100095.webp","bulova-98a293":"assets/cutouts/EJ-100096.webp","bulova-98a292":"assets/cutouts/EJ-100097.webp","bulova-96c134":"assets/cutouts/EJ-100098.webp","bulova-98c126":"assets/cutouts/EJ-100099.webp","bulova-96a285":"assets/cutouts/EJ-100100.webp","bulova-97b235":"assets/cutouts/EJ-100102.webp","bulova-97b236":"assets/cutouts/EJ-100104.webp","bulova-96b484":"assets/cutouts/EJ-100105.webp","bulova-97b244":"assets/cutouts/EJ-100106.webp","bulova-96a334":"assets/cutouts/EJ-100107.webp","bulova-96a333":"assets/cutouts/EJ-100108.webp","bulova-97a205":"assets/cutouts/EJ-100109.webp","bulova-96a346":"assets/cutouts/EJ-100110.webp","bulova-97a204":"assets/cutouts/EJ-100111.webp","bulova-97b198":"assets/cutouts/EJ-100112.webp","bulova-96x166":"assets/cutouts/EJ-100113.webp","bulova-96b461":"assets/cutouts/EJ-100114.webp","bulova-96b406":"assets/cutouts/EJ-100115.webp","bulova-97b243":"assets/cutouts/EJ-100116.webp","bulova-98a261":"assets/cutouts/EJ-100117.webp","bulova-97a158":"assets/cutouts/EJ-100118.webp","bulova-96a337":"assets/cutouts/EJ-100119.webp","bulova-97b170":"assets/cutouts/EJ-100120.webp","bulova-98b430":"assets/cutouts/EJ-100121.webp","bulova-96b338":"assets/cutouts/EJ-100122.webp","bulova-98b385":"assets/cutouts/EJ-100123.webp","bulova-97d123":"assets/cutouts/EJ-100124.webp","bulova-96a330":"assets/cutouts/EJ-100126.webp","bulova-96a187":"assets/cutouts/EJ-100127.webp","bulova-97a161":"assets/cutouts/EJ-100128.webp","bulova-97a162":"assets/cutouts/EJ-100129.webp","bulova-96b404":"assets/cutouts/EJ-100130.webp","bulova-96b402":"assets/cutouts/EJ-100131.webp","bulova-96a275":"assets/cutouts/EJ-100132.webp","bulova-97a203":"assets/cutouts/EJ-100133.webp","bulova-98a338":"assets/cutouts/EJ-100134.webp","bulova-97a182":"assets/cutouts/EJ-100135.webp","bulova-96a270":"assets/cutouts/EJ-100136.webp","bulova-98a284":"assets/cutouts/EJ-100137.webp","bulova-97b234":"assets/cutouts/EJ-100138.webp","bulova-96b427":"assets/cutouts/EJ-100139.webp","bulova-98b422":"assets/cutouts/EJ-100140.webp","bulova-96b427a":"assets/cutouts/EJ-100141.webp","bulova-96b469":"assets/cutouts/EJ-100142.webp","bulova-96c125":"assets/cutouts/EJ-100143.webp","bulova-97b242":"assets/cutouts/EJ-100144.webp","bulova-96l353":"assets/cutouts/EJ-100148.webp","bulova-97l189":"assets/cutouts/EJ-100149.webp","bulova-96a344":"assets/cutouts/EJ-100150.webp","bulova-97a208":"assets/cutouts/EJ-100151.webp","bulova-96b440":"assets/cutouts/EJ-100152.webp","bulova-97b237":"assets/cutouts/EJ-100153.webp","bulova-98b458":"assets/cutouts/EJ-100154.webp","bulova-97b223":"assets/cutouts/EJ-100155.webp","bulova-97b246":"assets/cutouts/EJ-100156.webp","bulova-96b439":"assets/cutouts/EJ-100157.webp","bulova-98b462":"assets/cutouts/EJ-100158.webp","bulova-97a206":"assets/cutouts/EJ-100159.webp","bulova-96b459":"assets/cutouts/EJ-100162.webp","bulova-96b401":"assets/cutouts/EJ-100163.webp","bulova-97a202":"assets/cutouts/EJ-100164.webp","bulova-97b230":"assets/cutouts/EJ-100165.webp","bulova-96b015":"assets/cutouts/EJ-100166.webp","bulova-96a169":"assets/cutouts/EJ-100168.webp","bulova-96b443":"assets/cutouts/EJ-100169.webp","bulova-96b442":"assets/cutouts/EJ-100170.webp","bulova-97d108":"assets/cutouts/EJ-100172.webp","bulova-96b261":"assets/cutouts/EJ-100173.webp","bulova-98e113":"assets/cutouts/EJ-100174.webp","bulova-98c121":"assets/cutouts/EJ-100175.webp","bulova-98d103":"assets/cutouts/EJ-100176.webp","bulova-96b441":"assets/cutouts/EJ-100178.webp","bulova-97b225":"assets/cutouts/EJ-100179.webp","bulova-97b247":"assets/cutouts/EJ-100180.webp","bulova-96b485":"assets/cutouts/EJ-100181.webp","bulova-98a187":"assets/cutouts/EJ-100182.webp","bulova-98a325":"assets/cutouts/EJ-100183.webp","bulova-98a335":"assets/cutouts/EJ-100185.webp","bulova-98k112":"assets/cutouts/EJ-100186.webp","bulova-44b136":"assets/cutouts/EJ-100187.webp","bulova-43b182":"assets/cutouts/EJ-100188.webp","bulova-44b133":"assets/cutouts/EJ-100189.webp","bulova-43b179":"assets/cutouts/EJ-100190.webp","bulova-44b129":"assets/cutouts/EJ-100191.webp","bulova-44b130":"assets/cutouts/EJ-100192.webp","bulova-43b178":"assets/cutouts/EJ-100193.webp","bulova-44b128":"assets/cutouts/EJ-100195.webp","bulova-45d111":"assets/cutouts/EJ-100196.webp","bulova-43d108":"assets/cutouts/EJ-100197.webp","bulova-45d108":"assets/cutouts/EJ-100198.webp","bulova-45c116":"assets/cutouts/EJ-100199.webp","bulova-43k101":"assets/cutouts/EJ-100200.webp","bulova-43c124":"assets/cutouts/EJ-100201.webp","bulova-45b152":"assets/cutouts/EJ-100203.webp","bulova-44b126":"assets/cutouts/EJ-100204.webp","bulova-44a123":"assets/cutouts/EJ-100205.webp","bulova-43a158":"assets/cutouts/EJ-100206.webp","bulova-44b121":"assets/cutouts/EJ-100209.webp","bulova-44b118":"assets/cutouts/EJ-100210.webp","bulova-45b149":"assets/cutouts/EJ-100211.webp","bulova-43b174":"assets/cutouts/EJ-100212.webp","bulova-44b132":"assets/cutouts/EJ-100214.webp","bulova-43b181":"assets/cutouts/EJ-100216.webp","bulova-96b486":"assets/cutouts/EJ-100217.webp","bulova-43k102":"assets/cutouts/EJ-100218.webp","bulova-44b131":"assets/cutouts/EJ-100219.webp","bulova-43b176":"assets/cutouts/EJ-100220.webp","bulova-bvp1048-wsaasap":"assets/cutouts/EJ-100221.webp","bulova-45c121":"assets/cutouts/EJ-100222.webp","bulova-43c125":"assets/cutouts/EJ-100223.webp","bulova-43c126":"assets/cutouts/EJ-100224.webp","bulova-44c113":"assets/cutouts/EJ-100225.webp","bulova-bvp1055-wsaa":"assets/cutouts/EJ-100226.webp","bulova-bvp1071-wssc4":"assets/cutouts/EJ-100229.webp","bulova-bvp1072-wssc4":"assets/cutouts/EJ-100230.webp","bulova-bvp1070-wsaa":"assets/cutouts/EJ-100232.webp","bulova-bvp1079-wmmaa":"assets/cutouts/EJ-100233.webp","bulova-bvp1075-wmmna":"assets/cutouts/EJ-100234.webp","bulova-bvb1159-ansna":"assets/cutouts/EJ-100237.webp","bulova-bvb1154-bostna":"assets/cutouts/EJ-100238.webp","bulova-97a195":"assets/cutouts/EJ-100246.webp","bulova-98j119":"assets/cutouts/EJ-100249.webp","bulova-98b452":"assets/cutouts/EJ-100252.webp","bulova-96a336":"assets/cutouts/EJ-100256.webp","bulova-97b224":"assets/cutouts/EJ-100271.webp","bulova-96a304":"assets/cutouts/EJ-100272.webp","bulova-97a178":"assets/cutouts/EJ-100273.webp","bulova-97a175":"assets/cutouts/EJ-100275.webp","bulova-96b472":"assets/cutouts/EJ-100281.webp","bulova-45a153":"assets/cutouts/EJ-100298.webp","bulova-44a121":"assets/cutouts/EJ-100303.webp","bulova-bt107":"assets/cutouts/EJ-100328.webp","bulova-97l191":"assets/cutouts/EJ-100329.webp","bulova-96p252":"assets/cutouts/EJ-100346.webp","bulova-96p241":"assets/cutouts/EJ-100348.webp","bulova-96l324":"assets/cutouts/EJ-100353.webp","bulova-96p248":"assets/cutouts/EJ-100354.webp","bulova-96x168":"assets/cutouts/EJ-100359.webp","bulova-98l306":"assets/cutouts/EJ-100362.webp","bulova-98r330":"assets/cutouts/EJ-100368.webp","bulova-96r256":"assets/cutouts/EJ-100369.webp","bulova-97l204":"assets/cutouts/EJ-100374.webp","bulova-96p229":"assets/cutouts/EJ-100386.webp","bulova-97r104":"assets/cutouts/EJ-100390.webp","bulova-98b355":"assets/cutouts/EJ-100247.webp","bulova-98b356":"assets/cutouts/EJ-100248.webp","bulova-98b358":"assets/cutouts/EJ-100251.webp","bulova-98b402":"assets/cutouts/EJ-100245.webp","bulova-98d183":"assets/cutouts/EJ-100250.webp","bulova-98b428":"assets/cutouts/EJ-100253.webp","bulova-98b447":"assets/cutouts/EJ-100254.webp","bulova-96b350":"assets/cutouts/EJ-100255.webp","bulova-96a335":"assets/cutouts/EJ-100257.webp","bulova-98a313":"assets/cutouts/EJ-100258.webp","bulova-96b431":"assets/cutouts/EJ-100259.webp","bulova-98a226":"assets/cutouts/EJ-100260.webp","bulova-98b472":"assets/cutouts/EJ-100261.webp","bulova-96b174":"assets/cutouts/EJ-100262.webp","bulova-98a179":"assets/cutouts/EJ-100263.webp","bulova-98b408":"assets/cutouts/EJ-100264.webp","bulova-96a314":"assets/cutouts/EJ-100265.webp","bulova-96a297":"assets/cutouts/EJ-100266.webp","bulova-97a180":"assets/cutouts/EJ-100267.webp","bulova-98b323":"assets/cutouts/EJ-100268.webp","bulova-96b296":"assets/cutouts/EJ-100269.webp","bulova-98a295":"assets/cutouts/EJ-100270.webp","bulova-96a292":"assets/cutouts/EJ-100274.webp","bulova-96a310":"assets/cutouts/EJ-100276.webp","bulova-96a345":"assets/cutouts/EJ-100277.webp","bulova-96b470":"assets/cutouts/EJ-100278.webp","bulova-96b436":"assets/cutouts/EJ-100279.webp","bulova-97b232":"assets/cutouts/EJ-100280.webp","bulova-96k112":"assets/cutouts/EJ-100282.webp","bulova-97b231":"assets/cutouts/EJ-100283.webp","bulova-96b455":"assets/cutouts/EJ-100284.webp","bulova-98a139":"assets/cutouts/EJ-100285.webp","bulova-98a324":"assets/cutouts/EJ-100287.webp","bulova-96k115":"assets/cutouts/EJ-100288.webp","bulova-45b161":"assets/cutouts/EJ-100289.webp","bulova-43d107":"assets/cutouts/EJ-100290.webp","bulova-45d107":"assets/cutouts/EJ-100291.webp","bulova-45b150":"assets/cutouts/EJ-100292.webp","bulova-45b147":"assets/cutouts/EJ-100293.webp","bulova-43b161":"assets/cutouts/EJ-100295.webp","bulova-44c112":"assets/cutouts/EJ-100296.webp","bulova-43a159":"assets/cutouts/EJ-100299.webp","bulova-43b158":"assets/cutouts/EJ-100301.webp","bulova-45a152":"assets/cutouts/EJ-100302.webp","bulova-45c118":"assets/cutouts/EJ-100304.webp","bulova-45c119":"assets/cutouts/EJ-100305.webp","bulova-45k000":"assets/cutouts/EJ-100306.webp","bulova-9s22003st":"assets/cutouts/EJ-100309.webp","bulova-9s20018st":"assets/cutouts/EJ-100310.webp","bulova-9s22008st":"assets/cutouts/EJ-100311.webp","bulova-9s22008gt":"assets/cutouts/EJ-100312.webp","bulova-9s20011":"assets/cutouts/EJ-100313.webp","bulova-9s20012":"assets/cutouts/EJ-100314.webp","bulova-9s20009":"assets/cutouts/EJ-100315.webp","bulova-9s20008":"assets/cutouts/EJ-100316.webp","bulova-9s20021st":"assets/cutouts/EJ-100317.webp","bulova-9s22007rt":"assets/cutouts/EJ-100318.webp","bulova-9s20022st":"assets/cutouts/EJ-100319.webp","bulova-9s22007st":"assets/cutouts/EJ-100320.webp","bulova-9s22007gt":"assets/cutouts/EJ-100321.webp","bulova-9s22006rt":"assets/cutouts/EJ-100323.webp","bulova-9s20017st":"assets/cutouts/EJ-100324.webp","bulova-9s22006gt":"assets/cutouts/EJ-100325.webp","bulova-9s22006st":"assets/cutouts/EJ-100326.webp","bulova-bvb1091-wsna":"assets/cutouts/EJ-100327.webp","bulova-97l205":"assets/cutouts/EJ-100336.webp","bulova-97l180":"assets/cutouts/EJ-100337.webp","bulova-97p140":"assets/cutouts/EJ-100338.webp","bulova-97p172":"assets/cutouts/EJ-100339.webp","bulova-97p164":"assets/cutouts/EJ-100340.webp","bulova-44l267":"assets/cutouts/EJ-100341.webp","bulova-97l187":"assets/cutouts/EJ-100344.webp","bulova-97p163":"assets/cutouts/EJ-100347.webp","bulova-97l192":"assets/cutouts/EJ-100352.webp","bulova-96l243":"assets/cutouts/EJ-100355.webp","bulova-96l276":"assets/cutouts/EJ-100356.webp","bulova-97l176":"assets/cutouts/EJ-100357.webp","bulova-98x143":"assets/cutouts/EJ-100358.webp","bulova-98l321":"assets/cutouts/EJ-100360.webp","bulova-96l311":"assets/cutouts/EJ-100361.webp","bulova-98r301":"assets/cutouts/EJ-100364.webp","bulova-96l341":"assets/cutouts/EJ-100365.webp","bulova-97p180":"assets/cutouts/EJ-100366.webp","bulova-96l330":"assets/cutouts/EJ-100370.webp","bulova-97l186":"assets/cutouts/EJ-100371.webp","bulova-98l308":"assets/cutouts/EJ-100372.webp","bulova-97l203":"assets/cutouts/EJ-100373.webp","bulova-96p181":"assets/cutouts/EJ-100375.webp","bulova-98p170":"assets/cutouts/EJ-100376.webp","bulova-96l339":"assets/cutouts/EJ-100377.webp","bulova-97l179":"assets/cutouts/EJ-100378.webp","bulova-97p150":"assets/cutouts/EJ-100379.webp","bulova-96p249":"assets/cutouts/EJ-100380.webp","bulova-96p250":"assets/cutouts/EJ-100381.webp","bulova-98r297":"assets/cutouts/EJ-100383.webp","bulova-96r253":"assets/cutouts/EJ-100384.webp","bulova-97l190":"assets/cutouts/EJ-100385.webp","bulova-96r257":"assets/cutouts/EJ-100387.webp","bulova-98r302":"assets/cutouts/EJ-100388.webp","bulova-96r254":"assets/cutouts/EJ-100389.webp","bulova-97r103":"assets/cutouts/EJ-100391.webp","bulova-97r105":"assets/cutouts/EJ-100394.webp","bulova-96l331":"assets/cutouts/EJ-100395.webp","bulova-98l320":"assets/cutouts/EJ-100396.webp","bulova-96l338":"assets/cutouts/EJ-100397.webp","bulova-97l181":"assets/cutouts/EJ-100398.webp","bulova-98r249":"assets/cutouts/EJ-100400.webp","bulova-97p173":"assets/cutouts/EJ-100401.webp","bulova-98p235":"assets/cutouts/EJ-100405.webp","bulova-98p234":"assets/cutouts/EJ-100406.webp","bulova-98r299":"assets/cutouts/EJ-100407.webp","bulova-96p263":"assets/cutouts/EJ-100408.webp","bulova-97p184":"assets/cutouts/EJ-100409.webp","bulova-98p237":"assets/cutouts/EJ-100410.webp","bulova-97l184":"assets/cutouts/EJ-100411.webp","bulova-97l202":"assets/cutouts/EJ-100412.webp","bulova-97l201":"assets/cutouts/EJ-100413.webp","bulova-98p115":"assets/cutouts/EJ-100414.webp","bulova-96p209":"assets/cutouts/EJ-100415.webp","bulova-97p141":"assets/cutouts/EJ-100416.webp","bulova-98p188":"assets/cutouts/EJ-100417.webp","bulova-97l155":"assets/cutouts/EJ-100418.webp","bulova-97l188":"assets/cutouts/EJ-100420.webp","bulova-96l333":"assets/cutouts/EJ-100421.webp","bulova-43l228":"assets/cutouts/EJ-100422.webp","bulova-44l271":"assets/cutouts/EJ-100423.webp","bulova-44l268":"assets/cutouts/EJ-100424.webp","bulova-43l226":"assets/cutouts/EJ-100425.webp","bulova-43l225":"assets/cutouts/EJ-100426.webp","bulova-45l193":"assets/cutouts/EJ-100427.webp","bulova-44l276":"assets/cutouts/EJ-100428.webp","bulova-44l226":"assets/cutouts/EJ-100429.webp","bulova-43l223":"assets/cutouts/EJ-100430.webp","bulova-43m125":"assets/cutouts/EJ-100431.webp","bulova-44x100":"assets/cutouts/EJ-100433.webp","bulova-44x101":"assets/cutouts/EJ-100434.webp","bulova-44l270":"assets/cutouts/EJ-100435.webp","bulova-44l269":"assets/cutouts/EJ-100436.webp","bulova-43l227":"assets/cutouts/EJ-100437.webp","bulova-43m124":"assets/cutouts/EJ-100442.webp","bulova-43l203":"assets/cutouts/EJ-100444.webp","bulova-43l224":"assets/cutouts/EJ-100446.webp","bulova-43l202":"assets/cutouts/EJ-100447.webp","bulova-44l275":"assets/cutouts/EJ-100448.webp","bulova-43l230":"assets/cutouts/EJ-100449.webp","bulova-43l229":"assets/cutouts/EJ-100450.webp","bulova-44m117":"assets/cutouts/EJ-100452.webp","bulova-97p171":"assets/cutouts/EJ-100454.webp","bulova-98r295":"assets/cutouts/EJ-100455.webp","bulova-98r294":"assets/cutouts/EJ-100456.webp","bulova-98r234":"assets/cutouts/EJ-100457.webp","bulova-98p227":"assets/cutouts/EJ-100458.webp","bulova-96m153":"assets/cutouts/EJ-100459.webp","bulova-96l286":"assets/cutouts/EJ-100460.webp","bulova-96l291":"assets/cutouts/EJ-100461.webp","bulova-98x138":"assets/cutouts/EJ-100462.webp","bulova-97p125":"assets/cutouts/EJ-100464.webp","bulova-98r266":"assets/cutouts/EJ-100465.webp","bulova-98m105":"assets/cutouts/EJ-100466.webp","bulova-98p119":"assets/cutouts/EJ-100467.webp","bulova-43m123":"assets/cutouts/EJ-100470.webp","bulova-45l171":"assets/cutouts/EJ-100471.webp","bulova-43x104":"assets/cutouts/EJ-100473.webp","bulova-45l167":"assets/cutouts/EJ-100476.webp","bulova-44l274":"assets/cutouts/EJ-100477.webp","bulova-9s16004st":"assets/cutouts/EJ-100479.webp","bulova-9s16006st":"assets/cutouts/EJ-100480.webp","bulova-9s16008st":"assets/cutouts/EJ-100481.webp","bulova-9s16001st":"assets/cutouts/EJ-100483.webp","bulova-9s16009st":"assets/cutouts/EJ-100484.webp","bulova-9s16002st":"assets/cutouts/EJ-100485.webp","bulova-9s16005st":"assets/cutouts/EJ-100486.webp","bulova-9s16007st":"assets/cutouts/EJ-100487.webp","bulova-9s18003gt":"assets/cutouts/EJ-100488.webp","bulova-9s18003st":"assets/cutouts/EJ-100489.webp","bulova-9s16003st":"assets/cutouts/EJ-100490.webp","michele-mww33d000006":"assets/cutouts/EJ-100491.webp","michele-mww21h000002":"assets/cutouts/EJ-100492.webp","michele-mww06e000145":"assets/cutouts/EJ-100493.webp","michele-mww06a000776":"assets/cutouts/EJ-100494.webp","michele-mww33d000003":"assets/cutouts/EJ-100495.webp","michele-mww06d000172":"assets/cutouts/EJ-100496.webp","michele-mww33d000002":"assets/cutouts/EJ-100497.webp","michele-mww06d000173":"assets/cutouts/EJ-100498.webp","michele-mww06g000052":"assets/cutouts/EJ-100499.webp","michele-mww06g000003":"assets/cutouts/EJ-100500.webp","michele-mww33b000010":"assets/cutouts/EJ-100501.webp","michele-mww06e000146":"assets/cutouts/EJ-100502.webp","michele-deco-sport-mid-navy-leather-watch-13":"assets/cutouts/EJ-100503.webp","michele-deco-mid-two-tone-18k-gold-plated-diamon-14":"assets/cutouts/EJ-100504.webp","michele-deco-two-tone-18k-gold-plated-diamond-di-15":"assets/cutouts/EJ-100505.webp","michele-sporty-sport-sail-white-silicone-watch-16":"assets/cutouts/EJ-100506.webp","michele-deco-sport-chronograph-gold-plated-white-17":"assets/cutouts/EJ-100507.webp","michele-deco-sport-mid-tort-brown-leather-watch-18":"assets/cutouts/EJ-100508.webp","michele-deco-madison-mid-two-tone-18k-gold-plate-19":"assets/cutouts/EJ-100509.webp","michele-deco-sport-mid-ruby-red-leather-watch-20":"assets/cutouts/EJ-100510.webp","michele-deco-sport-chronograph-gold-tone-vintage-21":"assets/cutouts/EJ-100511.webp","michele-deco-sport-mid-gold-plated-lush-green-le-22":"assets/cutouts/EJ-100512.webp","michele-sporty-sport-sail-two-tone-peony-silicon-23":"assets/cutouts/EJ-100513.webp","michele-deco-sport-mid-gold-tone-black-silicone--24":"assets/cutouts/EJ-100514.webp","michele-mww06d000171":"assets/cutouts/EJ-100515.webp","michele-mww06d000174":"assets/cutouts/EJ-100516.webp","michele-deco-park-18k-gold-plated-watch-27":"assets/cutouts/EJ-100517.webp","michele-deco-stainless-steel-diamond-watch-28":"assets/cutouts/EJ-100518.webp","michele-deco-diamond-madison-mid-noir-watch-29":"assets/cutouts/EJ-100519.webp","michele-mww33b000008":"assets/cutouts/EJ-100520.webp","michele-deco-madison-diamond-two-tone-18k-gold-p-31":"assets/cutouts/EJ-100521.webp","michele-meggie-two-tone-18k-gold-plated-diamond--32":"assets/cutouts/EJ-100522.webp","michele-deco-sport-chronograph-stainless-steel-b-33":"assets/cutouts/EJ-100523.webp","michele-deco-madison-two-tone-18k-gold-plated-di-34":"assets/cutouts/EJ-100524.webp","michele-deco-sport-mid-stainless-steel-pink-sili-35":"assets/cutouts/EJ-100525.webp","michele-deco-madison-mini-black-leather-watch-36":"assets/cutouts/EJ-100526.webp","michele-mww06g000002":"assets/cutouts/EJ-100527.webp","michele-deco-sport-mid-two-tone-white-silicone-w-38":"assets/cutouts/EJ-100528.webp","michele-deco-park-18k-gold-plated-watch-39":"assets/cutouts/EJ-100529.webp","michele-deco-madison-mini-lush-green-leather-wat-40":"assets/cutouts/EJ-100530.webp","michele-mww21h000001":"assets/cutouts/EJ-100531.webp","michele-deco-madison-mini-navy-leather-watch-42":"assets/cutouts/EJ-100532.webp","michele-mww21h000003":"assets/cutouts/EJ-100533.webp","michele-special-edition-serein-oval-diamond-18k--44":"assets/cutouts/EJ-100534.webp","michele-mww33d000001":"assets/cutouts/EJ-100535.webp","michele-deco-stainless-steel-diamond-watch-46":"assets/cutouts/EJ-100536.webp","michele-mww06d000177":"assets/cutouts/EJ-100537.webp","michele-mww06a000777":"assets/cutouts/EJ-100538.webp","michele-deco-mid-two-tone-18k-gold-plated-diamon-49":"assets/cutouts/EJ-100539.webp","michele-limited-edition-coquette-pave-18k-gold-p-50":"assets/cutouts/EJ-100540.webp","michele-mww06e000144":"assets/cutouts/EJ-100541.webp","michele-special-edition-deco-madison-mini-18k-tw-52":"assets/cutouts/EJ-100542.webp","michele-mww06g000001":"assets/cutouts/EJ-100543.webp","michele-deco-mid-stainless-steel-diamond-dial-wa-54":"assets/cutouts/EJ-100544.webp","michele-deco-18k-gold-plated-diamond-dial-watch-55":"assets/cutouts/EJ-100545.webp","michele-deco-madison-mid-18k-gold-plated-diamond-56":"assets/cutouts/EJ-100546.webp","michele-mww33b000009":"assets/cutouts/EJ-100547.webp","michele-special-edition-coquette-diamond-stainle-58":"assets/cutouts/EJ-100548.webp","michele-deco-mid-stainless-steel-diamond-watch-59":"assets/cutouts/EJ-100549.webp","michele-deco-madison-mid-stainless-steel-diamond-60":"assets/cutouts/EJ-100550.webp","michele-deco-madison-mini-ruby-red-leather-watch-61":"assets/cutouts/EJ-100551.webp","michele-limited-edition-meggie-mini-diamond-zebr-62":"assets/cutouts/EJ-100552.webp","michele-limited-edition-serein-oval-diamond-pave-63":"assets/cutouts/EJ-100553.webp","michele-deco-park-black-leather-watch-64":"assets/cutouts/EJ-100554.webp","michele-meggie-18k-gold-plated-diamond-watch-65":"assets/cutouts/EJ-100555.webp","michele-special-edition-deco-mid-charmante-diamo-66":"assets/cutouts/EJ-100556.webp","michele-limited-edition-meggie-mini-diamond-leop-67":"assets/cutouts/EJ-100557.webp","michele-deco-madison-stainless-diamond-dial-watc-68":"assets/cutouts/EJ-100558.webp","michele-mww33b000019":"assets/cutouts/EJ-100559.webp","michele-special-edition-coquette-diamond-stainle-70":"assets/cutouts/EJ-100560.webp","michele-special-edition-deco-madison-mid-pav-two-71":"assets/cutouts/EJ-100561.webp","michele-meggie-diamond-stainless-steel-watch-72":"assets/cutouts/EJ-100562.webp","michele-deco-madison-mini-diamond-stainless-stee-73":"assets/cutouts/EJ-100563.webp","michele-deco-madison-mid-pav-roman-black-watch-74":"assets/cutouts/EJ-100564.webp","bulova-9s22004st":"assets/cutouts/EJ-100308.webp"};
+      var EJ_DEADFIX_WIRING = {"bulova-97l177":"assets/bulova-sutton.jpg","bulova-97p166":"assets/bulova-sutton.jpg","bulova-98l330":"assets/bulova-sutton.jpg","bulova-98l328":"assets/bulova-sutton.jpg","bulova-96l343":"assets/bulova-rubaiyat.jpg","bulova-98p218":"assets/bulova-sutton.jpg","bulova-98p216":"assets/bulova-sutton.jpg","bulova-97l185":"assets/bulova-rubaiyat.jpg"};
+      PRODUCTS.forEach(function (p) {
+        var ejDead = EJ_DEADFIX_WIRING[p.id];
+        if (ejDead) { p.image = ejDead; p.gallery = [ejDead]; return; }
+        var ejCut = EJ_CUTOUT_WIRING[p.id];
+        if (!ejCut) return;
+        p.cutout = ejCut;
+        var ejRest = [];
+        (p.gallery || []).forEach(function (src) {
+          if (src !== ejCut && ejRest.indexOf(src) === -1) ejRest.push(src);
+        });
+        p.gallery = [ejCut].concat(ejRest);
+        p.image = ejCut;
+      });
+
       var IMAGES = {
         heroRing: "assets/hero-ring.jpg", catRings: "assets/cat-rings.jpg", catNecklaces: "assets/cat-necklaces.jpg",
         catBracelets: "assets/cat-bracelets.jpg", catTimepieces: "assets/cat-timepieces.jpg", catEarrings: "assets/cat-earrings.jpg",
@@ -2838,7 +2879,7 @@ var PRODUCTS = [
       }
 
       function sectionIntroHtml(key, src) {
-        return '<div class="wrap intro-top"><div class="intro-frame">'
+        return '<div class="wrap intro-top"><div class="intro-frame' + (key === "home" ? " intro-frame-home" : "") + '">'
           + '<video id="introVideo" muted playsinline autoplay preload="auto" poster="' + (SECTION_POSTERS[key] || "") + '" aria-label="Elevate Jewels — section introduction video"><source src="' + src + '" type="video/mp4" /></video>'
           + logoEndCardHtml()
           + logoOpenCardHtml()
@@ -3368,8 +3409,10 @@ var PRODUCTS = [
         opts = opts || {};
         var wished = isWished(p.id);
         var added = inCart(p.id);
+        var cardGallery = Array.from(new Set([p.image].concat(p.gallery || [])));
         return '<article class="pcard ' + (opts.frosted ? "sale-glass" : "glass-soft") + (p.isWatch ? " pave-watch" : "") + '">' 
-          + '<a href="#/item/' + p.id + '" style="display:block"><div class="ph"><img src="' + p.image + '" alt="' + esc(p.name) + '" loading="lazy" width="1200" height="1200" />'
+          + '<a href="#/item/' + p.id + '" style="display:block" onclick="return EJ.cardClickGuard(event,\'' + p.id + '\')"><div class="ph" data-card-ph="' + p.id + '" ontouchstart="EJ.cardSwipeStart(event,\'' + p.id + '\')" ontouchend="EJ.cardSwipeEnd(event,\'' + p.id + '\')"><img src="' + p.image + '" alt="' + esc(p.name) + '" loading="lazy" width="1200" height="1200" />'
+          + (cardGallery.length > 1 ? '<span class="card-counter" data-card-counter="' + p.id + '">1 / ' + cardGallery.length + '</span>' : "")
           + (p.oneOfOne ? '<span class="ofo">One of one</span>' : "") + "</div></a>"
           + '<button type="button" class="wish' + (wished ? " on" : "") + '" aria-label="' + (wished ? "Remove from wishlist" : "Add to wishlist") + '" aria-pressed="' + wished + '" onclick="EJ.toggleWish(this,\'' + p.id + '\')">' + icon("heart", 16) + "</button>"
           + '<div class="bd">'
@@ -3927,8 +3970,10 @@ var PRODUCTS = [
             u.rate = 0.97;
             u.pitch = 1.0;
             u.onstart = function () {
+              var ejFirstStart = !started;
               started = true;
               if (watchdog) { clearTimeout(watchdog); watchdog = null; }
+              if (ejFirstStart && opts.onstart) { try { opts.onstart(); } catch (e) {} }
             };
             u.onend = function () { idx++; next(); };
             u.onerror = function (e) {
@@ -4654,7 +4699,7 @@ var PRODUCTS = [
         root.innerHTML = '<div class="trending-overlay" onclick="EJ.closeOverlays()"></div>'
           + '<div class="trending-preview" role="dialog" aria-label="' + esc(p.name) + '">'
           + '<button type="button" class="icon-btn" aria-label="Close product preview" style="position:absolute;right:0.75rem;top:0.75rem;z-index:10;border:1px solid var(--border);background:var(--popover)" onclick="EJ.closeOverlays()">' + icon("x", 16) + "</button>"
-          + '<div style="min-width:0;padding:1rem"><div style="position:relative;aspect-ratio:1;overflow:hidden;border-radius:0.375rem;background:#fff;border:1px solid color-mix(in oklab, var(--gold) 40%, transparent)">'
+          + '<div style="min-width:0;padding:1rem"><div style="position:relative;aspect-ratio:1;overflow:hidden;border-radius:0.375rem;background:#fff;border:1px solid color-mix(in oklab, var(--gold) 40%, transparent);touch-action:pan-y" ontouchstart="EJ.pvSwipeStart(event)" ontouchend="EJ.pvSwipeEnd(event)">'
           + st.gallery.map(function (src, i) { return '<img src="' + src + '" alt="' + (i === st.active ? esc(p.name) + " — image " + (i + 1) : "") + '" loading="lazy" style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain;padding:1rem;background:#fff;transition:opacity .3s;opacity:' + (i === st.active ? 1 : 0) + '" />'; }).join("")
           + (st.gallery.length > 1 ? '<button type="button" class="icon-btn" aria-label="Previous product image" style="position:absolute;left:0.5rem;top:50%;transform:translateY(-50%);border:1px solid var(--border);background:var(--popover)" onclick="EJ.pvNav(-1)">' + icon("chevL", 16) + '</button><button type="button" class="icon-btn" aria-label="Next product image" style="position:absolute;right:0.5rem;top:50%;transform:translateY(-50%);border:1px solid var(--border);background:var(--popover)" onclick="EJ.pvNav(1)">' + icon("chevR", 16) + "</button>" : "")
           + "</div>"
@@ -4673,6 +4718,20 @@ var PRODUCTS = [
       };
       EJ.pvNav = function (d) { var st = EJ._pv; st.active = (st.active + d + st.gallery.length) % st.gallery.length; EJ.renderPreview(); };
       EJ.pvSet = function (i) { EJ._pv.active = i; EJ.renderPreview(); };
+      EJ.pvSwipeStart = function (ev) {
+        var t = ev.touches && ev.touches[0];
+        if (t) EJ._pvSwipe = { x: t.clientX, y: t.clientY };
+      };
+      EJ.pvSwipeEnd = function (ev) {
+        var st = EJ._pvSwipe;
+        EJ._pvSwipe = null;
+        if (!st || !EJ._pv) return;
+        var t = ev.changedTouches && ev.changedTouches[0];
+        if (!t) return;
+        var dx = t.clientX - st.x, dy = t.clientY - st.y;
+        if (Math.abs(dx) < 40 || Math.abs(dx) <= Math.abs(dy)) return;
+        EJ.pvNav(dx < 0 ? 1 : -1);
+      };
       EJ.pvAdd = function () { addToCart(EJ._pv.p.id); toast("Added to your bag", EJ._pv.p.name); EJ.renderPreview(); };
       EJ._scanHidden = false;
       EJ._scanBannerHtml = function () {
@@ -5271,8 +5330,9 @@ var PRODUCTS = [
         var h = '<div class="wrap" style="padding-top:2rem;padding-bottom:3rem">';
         h += '<section class="piece-hero"><div class="grid" style="display:grid;gap:2.5rem">';
         /* Gallery */
-        h += '<div><div class="item-main" id="itemMain" onclick="EJ.zoomToggle(event)"><img id="itemMainImg" src="' + gallery[0] + '" alt="' + esc(p.name) + '" width="1600" height="1500" /><span class="zoom-badge" id="zoomBadge">Hover &amp; click to zoom</span></div>'
-          + (gallery.length > 1 ? '<div style="margin-top:0.75rem;display:flex;gap:0.75rem;overflow-x:auto">' + gallery.map(function (src, i) {
+        h += '<div><div class="item-main" id="itemMain" onclick="EJ.zoomToggle(event)" ontouchstart="EJ.itemSwipeStart(event)" ontouchend="EJ.itemSwipeEnd(event)"><img id="itemMainImg" src="' + gallery[0] + '" alt="' + esc(p.name) + '" width="1600" height="1500" /><span class="zoom-badge" id="zoomBadge">Hover &amp; click to zoom</span></div>'
+          + (gallery.length > 1 ? '<div id="itemGalleryCounter" class="ej-gallery-counter" aria-live="polite">1 / ' + gallery.length + '</div>' : "")
+          + (gallery.length > 1 ? '<div id="itemThumbs" style="margin-top:0.75rem;display:flex;gap:0.75rem;overflow-x:auto">' + gallery.map(function (src, i) {
             return '<button type="button" onclick="EJ.gallerySet(' + i + ')" aria-pressed="' + (i === 0) + '" style="width:5rem;height:5rem;flex-shrink:0;overflow:hidden;border-radius:0.25rem;border:1px solid ' + (i === 0 ? "var(--gold)" : "var(--border)") + ';padding:0"><img src="' + src + '" alt="' + (i ? "View " + (i + 1) : "Main view") + '" loading="lazy" style="width:100%;height:100%;object-fit:contain;padding:0.35rem;background:#fff" /></button>';
           }).join("") + "</div>" : "") + "</div>";
         /* Details */
@@ -5286,7 +5346,7 @@ var PRODUCTS = [
           + '<a class="btn-ghost" href="' + EJ._bespokeLink(p) + '">' + icon("wand", 14) + "Customize this piece</a></div>"
           + '<p style="margin-top:1rem;font-size:0.9375rem;line-height:1.7;color:color-mix(in oklab, var(--foreground) 85%, transparent)">' + esc(p.description) + "</p></div>";
         /* narration */
-        h += '<div class="glass-soft" style="margin-top:1.5rem;border-radius:0.25rem;padding:1rem"><div style="display:flex;flex-wrap:wrap;align-items:center;gap:0.75rem"><span class="readaloud-btn" id="narrBtn" onclick="EJ.narrPlay()">' + icon("volume", 16) + 'AI Audio Guide</span><span style="font-size:0.75rem;color:var(--muted-foreground)" id="narrStatus"></span></div><div id="narrText" style="margin-top:0.75rem;font-size:0.875rem;line-height:1.7"></div></div>';
+        h += '<div class="glass-soft" style="margin-top:1.5rem;border-radius:0.25rem;padding:1rem"><div style="display:flex;flex-wrap:wrap;align-items:center;gap:0.75rem"><span class="readaloud-btn" id="narrBtn" onclick="EJ.narrPlay()">' + icon("volume", 16) + 'AI Audio Guide</span><span id="narrSpin" class="narr-spin" aria-hidden="true"></span><span style="font-size:0.75rem;color:var(--muted-foreground)" id="narrStatus"></span></div></div>';
         /* spec grid */
         var specs = [["Metal & casting", p.metal], ["Stone", p.stone], ["Carat & colour", p.carat], ["Discipline", category.name], ["Type", subName || category.name], ["Certification", p.certification], ["Provenance", era ? era.name + ", " + era.years : "Made at " + v.name]];
         if (p.maker) specs.splice(3, 0, ["Maker", p.maker + " — via PAVÉ Jewelry & Watches"]);
@@ -5331,10 +5391,91 @@ var PRODUCTS = [
       EJ.gallerySet = function (i) {
         var gallery = EJ._gallery;
         var img = document.getElementById("itemMainImg");
-        if (img && gallery) { img.src = gallery[i]; }
+        if (!gallery || !gallery.length) return;
+        i = ((i % gallery.length) + gallery.length) % gallery.length;
+        EJ._galleryIndex = i;
+        if (img) { img.src = gallery[i]; }
+        var counter = document.getElementById("itemGalleryCounter");
+        if (counter) counter.textContent = (i + 1) + " / " + gallery.length;
+        var strip = document.getElementById("itemThumbs");
+        if (strip) {
+          var btns = strip.querySelectorAll("button");
+          for (var k = 0; k < btns.length; k++) {
+            btns[k].setAttribute("aria-pressed", k === i ? "true" : "false");
+            btns[k].style.border = "1px solid " + (k === i ? "var(--gold)" : "var(--border)");
+          }
+        }
         EJ.exitZoom();
       };
+      /* Finger swipe on the item main photo (2026-11-12): a horizontal
+         swipe flips through the gallery; the click that follows a real
+         swipe is swallowed so it never triggers the zoom toggle. */
+      EJ.itemSwipeStart = function (ev) {
+        var t = ev.touches && ev.touches[0];
+        if (t) EJ._itemSwipe = { x: t.clientX, y: t.clientY };
+      };
+      EJ.itemSwipeEnd = function (ev) {
+        var st = EJ._itemSwipe;
+        EJ._itemSwipe = null;
+        if (!st) return;
+        var t = ev.changedTouches && ev.changedTouches[0];
+        if (!t) return;
+        var dx = t.clientX - st.x, dy = t.clientY - st.y;
+        if (Math.abs(dx) < 40 || Math.abs(dx) <= Math.abs(dy)) return;
+        var gal = EJ._gallery || [];
+        if (gal.length < 2) return;
+        EJ._swipeSuppress = Date.now() + 500;
+        EJ.gallerySet((EJ._galleryIndex || 0) + (dx < 0 ? 1 : -1));
+      };
+      /* Finger swipe on product-card photos (2026-11-12): cycles the
+         card's own [main + angles] in place with a counter overlay; a
+         real swipe suppresses the card link's click, a plain tap still
+         opens the piece. */
+      EJ._cardIdx = {};
+      EJ._cardSuppress = {};
+      EJ.cardGalleryFor = function (id) {
+        var p = findProduct(id);
+        if (!p) return [];
+        return Array.from(new Set([p.image].concat(p.gallery || [])));
+      };
+      EJ.cardClickGuard = function (ev, id) {
+        var t = EJ._cardSuppress[id];
+        if (t && Date.now() < t) {
+          delete EJ._cardSuppress[id];
+          if (ev && ev.preventDefault) ev.preventDefault();
+          return false;
+        }
+        return true;
+      };
+      EJ.cardSwipeStart = function (ev, id) {
+        var t = ev.touches && ev.touches[0];
+        if (t) EJ._cardSwipe = { id: id, x: t.clientX, y: t.clientY };
+      };
+      EJ.cardSwipeEnd = function (ev, id) {
+        var st = EJ._cardSwipe;
+        EJ._cardSwipe = null;
+        if (!st || st.id !== id) return;
+        var t = ev.changedTouches && ev.changedTouches[0];
+        if (!t) return;
+        var dx = t.clientX - st.x, dy = t.clientY - st.y;
+        if (Math.abs(dx) < 40 || Math.abs(dx) <= Math.abs(dy)) return;
+        var gal = EJ.cardGalleryFor(id);
+        if (gal.length < 2) return;
+        var idx = EJ._cardIdx[id] || 0;
+        idx = (idx + (dx < 0 ? 1 : -1) + gal.length) % gal.length;
+        EJ._cardIdx[id] = idx;
+        var ph = ev.currentTarget;
+        if (ph) {
+          var img = ph.querySelector("img");
+          if (img) img.src = gal[idx];
+          var c = ph.querySelector("[data-card-counter]");
+          if (c) c.textContent = (idx + 1) + " / " + gal.length;
+        }
+        EJ._cardSuppress[id] = Date.now() + 500;
+        if (ev.preventDefault) ev.preventDefault();
+      };
       EJ.zoomToggle = function (ev) {
+        if (EJ._swipeSuppress && Date.now() < EJ._swipeSuppress) { EJ._swipeSuppress = 0; return; }
         var main = document.getElementById("itemMain");
         var img = document.getElementById("itemMainImg");
         var badge = document.getElementById("zoomBadge");
@@ -5381,84 +5522,78 @@ var PRODUCTS = [
         location.hash = "#/connect?tab=ateliers&thread=" + t.id;
         return false;
       };
+      /* AI voice button (owner, 2026-11-12): voice ONLY — no transcript,
+         no text panel. A small spinner sits next to the button while the
+         voice prepares and hides the moment speech starts; the button
+         becomes a clear Stop while speaking. The script is composed
+         ONLY from the piece's own data — never invented. For watches the
+         PAVE fields carry movement/model text: the movement line is
+         spoken as-is, the carat field (which repeats "Model …") and the
+         certification field (which repeats maker + model) are not
+         misread as a stone weight or a certificate. */
+      EJ._narrScript = function (p, v) {
+        var parts = [];
+        parts.push("This is a really good option.");
+        parts.push("I'll give you my AI recommendation \u2014 here are the AI details regarding this item.");
+        parts.push("This is the " + p.name + ".");
+        if (p.maker) parts.push("It is by " + p.maker + ", via PAV\u00c9 Jewelry & Watches.");
+        else if (v && v.name) parts.push("It is offered by " + v.name + ".");
+        if (p.model) parts.push("The model is " + p.model + ".");
+        if (p.metal) parts.push("It is made in " + p.metal + ".");
+        if (p.stone === "Pure metalwork") parts.push("It is pure metalwork, with no centre stone.");
+        else if (p.stone) {
+          if (p.isWatch) parts.push(p.stone + ".");
+          else parts.push("The stone: " + p.stone + (p.carat ? ", " + p.carat : "") + ".");
+        }
+        if (!p.isWatch && p.certification) parts.push("Certification: " + p.certification + ".");
+        if (p.oneOfOne) parts.push("This piece is one of one.");
+        parts.push(p.price > 0 ? "Priced at " + fmt(p.price) + "." : "Its price is to confirm.");
+        return parts.join(" ");
+      };
       EJ.narrPlay = function () {
         var p = EJ._item;
-        var v = findVendor(p.vendor);
-        var lines = narrationLines(p, v);
+        if (!p) return;
         var btn = document.getElementById("narrBtn");
-        var textEl = document.getElementById("narrText");
         var statusEl = document.getElementById("narrStatus");
+        var spin = document.getElementById("narrSpin");
+        if (EJ._narr && EJ._narr.active) { EJ.narrStop(); return; }
         if (!("speechSynthesis" in window)) {
-          textEl.innerHTML = "";
-          statusEl.textContent = "Voice isn't available on this device — the written guide is below.";
-          lines.forEach(function (line) {
-            var par = document.createElement("p");
-            par.textContent = line;
-            textEl.appendChild(par);
-          });
+          if (statusEl) statusEl.textContent = "Voice isn't available on this device.";
           return;
         }
-        if (EJ._narr && EJ._narr.active) { EJ.narrStop(); return; }
-        var state = EJ._narr = { active: true, raf: 0 };
-        btn.innerHTML = icon("square", 16) + "Stop";
-        textEl.innerHTML = "";
-        var fullText = lines.join(" ");
-        /* karaoke: words fade in at ~15 chars/sec */
-        var spans = [];
-        lines.forEach(function (line) {
-          var par = document.createElement("p");
-          line.split(/(\s+)/).forEach(function (w) {
-            if (!w) return;
-            var s = document.createElement("span");
-            s.textContent = w;
-            s.style.opacity = "0.15";
-            par.appendChild(s);
-            spans.push(s);
-          });
-          textEl.appendChild(par);
-        });
-        var start = performance.now();
-        var total = fullText.length;
-        (function tick() {
-          if (!state.active) return;
-          var shown = Math.floor(((performance.now() - start) / 1000) * 15);
-          var acc = 0;
-          for (var i = 0; i < spans.length; i++) {
-            acc += spans[i].textContent.length;
-            spans[i].style.opacity = acc <= shown ? "1" : "0.15";
+        var v = findVendor(p.vendor) || {};
+        var script = EJ._narrScript(p, v);
+        if (statusEl) statusEl.textContent = "";
+        var state = EJ._narr = { active: true };
+        if (btn) btn.innerHTML = icon("square", 16) + "Stop";
+        if (spin) spin.style.display = "inline-block";
+        function resetBtn() {
+          if (spin) spin.style.display = "none";
+          if (btn) btn.innerHTML = icon("volume", 16) + "AI Audio Guide";
+        }
+        var started = EJ.speak(script, {
+          onstart: function () { if (spin) spin.style.display = "none"; },
+          onend: function () { if (!state.active) return; state.active = false; resetBtn(); },
+          onerror: function () {
+            if (!state.active) return;
+            state.active = false;
+            resetBtn();
+            if (statusEl) statusEl.textContent = "Voice isn't available on this device.";
           }
-          if (shown < total + 60 && state.active) state.raf = requestAnimationFrame(tick);
-          else if (state.active) { state.active = false; btn.innerHTML = icon("volume", 16) + "AI Audio Guide"; }
-        })();
-        function onEnd() {
-          if (!state.active) return;
+        });
+        if (started === false) {
           state.active = false;
-          spans.forEach(function (s) { s.style.opacity = "1"; });
-          btn.innerHTML = icon("volume", 16) + "AI Audio Guide";
+          resetBtn();
+          if (statusEl) statusEl.textContent = "Voice isn't available on this device.";
         }
-        /* Speech genuinely unavailable on this device (no voice ever
-           loaded, or the device accepted the call but stayed silent):
-           say so here in the guide itself, and leave the full tour on
-           screen as text — never a silent nothing. */
-        function onFail() {
-          if (!state.active) return;
-          state.active = false;
-          cancelAnimationFrame(state.raf);
-          spans.forEach(function (s) { s.style.opacity = "1"; });
-          btn.innerHTML = icon("volume", 16) + "AI Audio Guide";
-          statusEl.textContent = "Voice isn't available on this device — the written guide is below.";
-        }
-        /* The guide speaks through the shared human-lady engine:
-           best natural female voice, in short chunks, rate 0.97. */
-        EJ.speak(fullText, { onend: onEnd, onerror: onFail });
       };
       EJ.narrStop = function () {
         stopHumanVoice();
-        if (EJ._narr) { EJ._narr.active = false; cancelAnimationFrame(EJ._narr.raf); }
+        if (EJ._narr) EJ._narr.active = false;
         var btn = document.getElementById("narrBtn");
-        var textEl = document.getElementById("narrText");
+        var spin = document.getElementById("narrSpin");
         if (btn) btn.innerHTML = icon("volume", 16) + "AI Audio Guide";
-        if (textEl) textEl.querySelectorAll("span").forEach(function (s) { s.style.opacity = "1"; });
+        if (spin) spin.style.display = "none";
       };
       function stoneSwitchHtml(p) {
         var o = EJ._stoneOrigin || "natural";
@@ -9784,6 +9919,7 @@ var PRODUCTS = [
           name = "item"; param = seg[1];
           var p = findProduct(seg[1]);
           EJ._gallery = p ? Array.from(new Set([p.image].concat(p.gallery || []))) : [];
+          EJ._galleryIndex = 0;
           if (!EJ._item || EJ._item.id !== seg[1]) EJ._stoneOrigin = "natural";
           html = pageItem(seg[1]);
         }
