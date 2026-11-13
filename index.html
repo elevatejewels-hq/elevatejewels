@@ -5547,7 +5547,7 @@ var PRODUCTS = [
         }
         if (!p.isWatch && p.certification) parts.push("Certification: " + p.certification + ".");
         if (p.oneOfOne) parts.push("This piece is one of one.");
-        parts.push(p.price > 0 ? "Priced at " + fmt(p.price) + "." : "Its price is to confirm.");
+        /* The voice never names the price (owner rule, 2026-11-12): prices change and go on sale; the spoken details stay price-free. */
         return parts.join(" ");
       };
       EJ.narrPlay = function () {
@@ -5557,12 +5557,6 @@ var PRODUCTS = [
         var statusEl = document.getElementById("narrStatus");
         var spin = document.getElementById("narrSpin");
         if (EJ._narr && EJ._narr.active) { EJ.narrStop(); return; }
-        if (!("speechSynthesis" in window)) {
-          if (statusEl) statusEl.textContent = "Voice isn't available on this device.";
-          return;
-        }
-        var v = findVendor(p.vendor) || {};
-        var script = EJ._narrScript(p, v);
         if (statusEl) statusEl.textContent = "";
         var state = EJ._narr = { active: true };
         if (btn) btn.innerHTML = icon("square", 16) + "Stop";
@@ -5571,23 +5565,55 @@ var PRODUCTS = [
           if (spin) spin.style.display = "none";
           if (btn) btn.innerHTML = icon("volume", 16) + "AI Audio Guide";
         }
-        var started = EJ.speak(script, {
-          onstart: function () { if (spin) spin.style.display = "none"; },
-          onend: function () { if (!state.active) return; state.active = false; resetBtn(); },
-          onerror: function () {
-            if (!state.active) return;
+        function failToSpeech() {
+          /* Fallback only: the device voice reads the same price-free script
+             if this piece's recorded voice cannot play. */
+          if (!state.active) return;
+          if (!("speechSynthesis" in window)) {
+            state.active = false;
+            resetBtn();
+            if (statusEl) statusEl.textContent = "Voice isn't available on this device.";
+            return;
+          }
+          var v = findVendor(p.vendor) || {};
+          var started = EJ.speak(EJ._narrScript(p, v), {
+            onstart: function () { if (spin) spin.style.display = "none"; },
+            onend: function () { if (!state.active) return; state.active = false; resetBtn(); },
+            onerror: function () {
+              if (!state.active) return;
+              state.active = false;
+              resetBtn();
+              if (statusEl) statusEl.textContent = "Voice isn't available on this device.";
+            }
+          });
+          if (started === false) {
             state.active = false;
             resetBtn();
             if (statusEl) statusEl.textContent = "Voice isn't available on this device.";
           }
-        });
-        if (started === false) {
-          state.active = false;
-          resetBtn();
-          if (statusEl) statusEl.textContent = "Voice isn't available on this device.";
         }
+        try {
+          var a = new Audio("assets/voice/" + p.id + ".mp3");
+          state.audio = a;
+          a.addEventListener("playing", function () { if (spin) spin.style.display = "none"; });
+          a.addEventListener("ended", function () { if (!state.active) return; state.active = false; resetBtn(); });
+          a.addEventListener("error", function () {
+            if (state.audio !== a) return;
+            state.audio = null;
+            failToSpeech();
+          });
+          var pr = a.play();
+          if (pr && pr.catch) pr.catch(function () {
+            if (state.active && state.audio === a) { state.audio = null; failToSpeech(); }
+          });
+        } catch (e) { failToSpeech(); }
       };
+
       EJ.narrStop = function () {
+        if (EJ._narr && EJ._narr.audio) {
+          try { EJ._narr.audio.pause(); EJ._narr.audio.removeAttribute("src"); EJ._narr.audio.load(); } catch (e) {}
+          EJ._narr.audio = null;
+        }
         stopHumanVoice();
         if (EJ._narr) EJ._narr.active = false;
         var btn = document.getElementById("narrBtn");
