@@ -5359,6 +5359,12 @@ var PRODUCTS = [
         if (p.stone.toLowerCase() !== "pure metalwork") h += stoneSwitchHtml(p);
         /* ring sizer — demo video directly beside the sizer details */
         if (p.category === "rings") h += '<div style="margin-top:2rem">' + ringSizerComboHtml() + "</div>";
+        /* buy now — straight to the full checkout with this piece */
+        h += '<div style="margin-top:2rem">'
+          + (p.price > 0
+            ? '<button type="button" class="btn-gold" style="width:100%;padding:1rem 1.25rem;font-size:1rem" onclick="EJ.buyNow(\'' + p.id + '\')">' + icon("card", 18) + "Buy now · " + fmt(p.price) + "</button>"
+            : '<button type="button" class="btn-ghost" style="width:100%;padding:1rem 1.25rem" onclick="EJ.buyNow(\'' + p.id + '\')>Buy now · Price to confirm</button>')
+          + "</div>";
         /* actions */
         h += '<div style="margin-top:2rem;display:grid;grid-template-columns:1fr 1fr;gap:0.75rem">'
           + '<button type="button" class="btn-gold" onclick="EJ.itemToggleCart(this)" id="itemCartBtn">' + (added ? icon("check", 16) + "In your selection" : icon("bag", 16) + "Add to selection") + "</button>"
@@ -6964,9 +6970,9 @@ var PRODUCTS = [
           + '<div class="calc-row"><dt style="color:var(--muted-foreground)">Insured courier</dt><dd style="margin:0">' + fmt(t.courier) + "</dd></div>"
           + '<div class="calc-row"><dt style="color:var(--muted-foreground)">Transit insurance</dt><dd style="margin:0">' + fmt(t.insurance) + "</dd></div>"
           + '<div class="calc-row" style="border-top:1px solid var(--border);padding-top:0.5rem;font-weight:500"><dt>Total</dt><dd style="margin:0">' + fmt(t.total) + "</dd></div></dl>"
-          + '<a class="btn-gold" style="width:100%;margin-top:1.25rem" href="#/checkout">Review checkout</a>'
+          + '<a class="btn-gold" style="width:100%;margin-top:1.25rem" href="#/checkout">Checkout</a>'
           + '<a class="btn-ghost" style="width:100%;margin-top:0.5rem" href="#/shop">Keep browsing</a>'
-          + '<p style="margin-top:1rem;display:flex;gap:0.5rem;font-size:0.75rem;line-height:1.65;color:var(--muted-foreground)">' + icon("shield", 16) + "Checkout is a preview. No payment is taken. Confirm availability and purchase terms with the atelier.</p></aside></div>"
+          + '<p style="margin-top:1rem;display:flex;gap:0.5rem;font-size:0.75rem;line-height:1.65;color:var(--muted-foreground)">' + icon("shield", 16) + "Secure checkout — pay by card, pay by bank and save 2%, use an Elevate gift card, or check out with quick pay.</p></aside></div>"
           + "<style>@media(min-width:1024px){.cart-cols{grid-template-columns:1.6fr 1fr}}</style></div>";
         return h;
       }
@@ -6974,98 +6980,431 @@ var PRODUCTS = [
       EJ.cartQtySet = function (id, v) { setCartQty(id, parseInt(v, 10) || 1); EJ.route(true); };
       EJ.cartRemove = function (id) { removeFromCart(id); EJ.route(true); };
 
-      /* ---------- Checkout (src/routes/checkout.tsx) ---------- */
+      /* ---------- Checkout (src/routes/checkout.tsx) ----------
+         Full-page checkout: contact + shipping details, an order
+         summary, and four ways to pay — credit/debit card, pay by
+         bank (save 2%), an Elevate gift card, or quick pay. Placing
+         an order records it in the on-device order register
+         (ej-orders, the same session-storage pattern as the
+         customer accounts) under a sequential ORD- number, clears
+         the bag, and shows a confirmation with the order's status.
+         Gift cards are validated against — and redeemed from — the
+         shared Store House register (EJ._gcCards), exactly as the
+         tracking page and the staff desk read it. Courier and
+         insurance come from cartTotals(), unchanged. */
+
+      /* PAYMENTS CONFIG — the single wiring point for a live card
+         processor. Today NO processor is connected: processor is
+         null and publishableKey is empty, so card and quick-pay
+         orders are recorded with status "Payment pending" and the
+         confirmation tells the customer the store will email a
+         secure payment link to complete the card payment. A card
+         is never charged by this page and a card/quick-pay order
+         is never shown as paid. TO GO LIVE (Stripe): set
+         processor: "stripe" and publishableKey to the Stripe
+         publishable key, create the PaymentIntent on the Elevate
+         back end, and confirm it inside EJ.ckPlace at the
+         EJ_PAYMENTS check before the order is recorded.
+         SECURITY: card details live only in page memory while the
+         customer types (EJ._ck). They are never written to
+         storage, never put into the order record (only brand and
+         last four digits are kept), and never sent anywhere. */
+      var EJ_PAYMENTS = { processor: null, publishableKey: "" };
+
+      /* ----- Pure payment helpers (no DOM — unit-tested) ----- */
+      function ckRound2(n) { return Math.round((+n || 0) * 100) / 100; }
+      function ckDigits(s) { return String(s == null ? "" : s).replace(/\D/g, ""); }
+      function ckLuhn(num) {
+        var d = ckDigits(num);
+        if (d.length < 13 || d.length > 19) return false;
+        var sum = 0, alt = false;
+        for (var i = d.length - 1; i >= 0; i--) {
+          var n = d.charCodeAt(i) - 48;
+          if (n < 0 || n > 9) return false;
+          if (alt) { n *= 2; if (n > 9) n -= 9; }
+          sum += n; alt = !alt;
+        }
+        return sum % 10 === 0;
+      }
+      function ckCardBrand(num) {
+        var d = ckDigits(num);
+        if (/^4/.test(d)) return "Visa";
+        if (/^(5[1-5]|2[2-7])/.test(d)) return "Mastercard";
+        if (/^3[47]/.test(d)) return "American Express";
+        if (/^(6011|65|64[4-9])/.test(d)) return "Discover";
+        return "Card";
+      }
+      function ckFormatCardNumber(v) {
+        var d = ckDigits(v).slice(0, 19);
+        var parts = [], i;
+        if (/^3[47]/.test(d)) {
+          if (d.length > 0) parts.push(d.slice(0, 4));
+          if (d.length > 4) parts.push(d.slice(4, 10));
+          if (d.length > 10) parts.push(d.slice(10, 15));
+        } else {
+          for (i = 0; i < d.length; i += 4) parts.push(d.slice(i, i + 4));
+        }
+        return parts.join(" ");
+      }
+      function ckExpiryOk(v, now) {
+        var m = String(v || "").replace(/\s/g, "").match(/^(\d{2})\/(\d{2})$/);
+        if (!m) return false;
+        var mo = parseInt(m[1], 10), yr = 2000 + parseInt(m[2], 10);
+        if (mo < 1 || mo > 12) return false;
+        var end = new Date(yr, mo, 0, 23, 59, 59, 999);
+        return end >= (now ? new Date(now) : new Date());
+      }
+      function ckBankSavings(total) { return ckRound2(Math.max(0, +total || 0) * 0.02); }
+      /* The one money path for the page and the order record.
+         t is a cartTotals() result; opts: { method, gcBalance
+         (the applied card's balance, or null), remainderMethod }.
+         The gift card applies first, up to its balance; a bank
+         remainder (or a bank order) then saves 2% of what is
+         actually paid by bank. */
+      function ckComputeTotals(t, opts) {
+        var total = ckRound2(t.subtotal + t.courier + t.insurance);
+        var gcApplied = 0;
+        if (opts.gcBalance != null && opts.gcBalance > 0) gcApplied = Math.min(ckRound2(opts.gcBalance), total);
+        var afterGc = ckRound2(total - gcApplied);
+        var effMethod = opts.method;
+        if (gcApplied > 0 && afterGc > 0 && opts.method === "giftcard") effMethod = opts.remainderMethod || "card";
+        var bankSavings = effMethod === "bank" ? ckBankSavings(afterGc) : 0;
+        var due = ckRound2(afterGc - bankSavings);
+        return { subtotal: t.subtotal, courier: t.courier, insurance: t.insurance, total: total, gcApplied: gcApplied, bankSavings: bankSavings, due: due, effMethod: effMethod };
+      }
+
+      /* ----- Gift-card register (shared with the tracking page
+         and the Store House desk — one array, one seed) ----- */
+      function ckGcCards() {
+        return EJ._gcCards || (EJ._gcCards = [
+          { code: "GC-100101", balance: 250, status: "Active" },
+          { code: "GC-100102", balance: 500, status: "Active" },
+          { code: "GC-100103", balance: 75, status: "Active" },
+          { code: "GC-100104", balance: 0, status: "Redeemed" }
+        ]);
+      }
+      function ckFindGiftCard(code) {
+        var c = String(code || "").trim().toUpperCase();
+        if (!c) return null;
+        var cards = ckGcCards();
+        for (var i = 0; i < cards.length; i++) { if (cards[i].code.toUpperCase() === c) return cards[i]; }
+        return null;
+      }
+
+      /* ----- Order register (device-local, session storage) ----- */
+      function ckOrders() {
+        if (!EJ._orders) EJ._orders = ejStore("ej-orders") || [];
+        return EJ._orders;
+      }
+      function ckOrdersSave() { ejStoreSet("ej-orders", EJ._orders || []); }
+      function ckNextOrderId() {
+        var seq = (ejStore("ej-ordseq") || 100000) + 1;
+        ejStoreSet("ej-ordseq", seq);
+        return "ORD-" + seq;
+      }
+
+      /* ----- Checkout page state (page memory only; the card
+         fields in here are never persisted anywhere) ----- */
+      function ckState() {
+        var ck = EJ._ck;
+        if (!ck) {
+          ck = EJ._ck = { name: "", email: "", phone: "", address: "", city: "", state: "", zip: "",
+            method: "card", cardNumber: "", cardExpiry: "", cardCvc: "", cardName: "", cardZip: "",
+            gcCode: "", gc: null, gcMsg: "", remainderMethod: "card", quickPay: "", errors: {}, placed: null };
+          if (EJ._user) { ck.name = EJ._user.name || ""; ck.email = EJ._user.email || ""; }
+        }
+        return ck;
+      }
+      var CK_IN = "width:100%;border:1px solid var(--border);border-radius:0.25rem;padding:0.75rem 1rem;font:inherit;font-size:0.875rem;background:transparent";
+      var CK_IN_ERR = "width:100%;border:1px solid #b3261e;border-radius:0.25rem;padding:0.75rem 1rem;font:inherit;font-size:0.875rem;background:transparent";
+      function ckLabel(label, inner, err) {
+        return '<label style="display:block"><span style="font-size:0.8125rem;font-weight:500">' + label + "</span>"
+          + '<span style="display:block;margin-top:0.375rem">' + inner + "</span>"
+          + (err ? '<span style="display:block;margin-top:0.375rem;font-size:0.75rem;color:#b3261e">' + esc(err) + "</span>" : "") + "</label>";
+      }
+      function ckTotalsFor(ck) {
+        return ckComputeTotals(cartTotals(), { method: ck.method, gcBalance: ck.gc ? ck.gc.balance : null, remainderMethod: ck.remainderMethod });
+      }
+      function ckCardFieldsHtml(ck) {
+        var e = ck.errors || {};
+        return '<div style="display:grid;gap:0.75rem">'
+          + ckLabel("Card number", '<span style="position:relative;display:block"><input id="ckCardNum" placeholder="1234 5678 9012 3456" inputmode="numeric" autocomplete="cc-number" value="' + esc(ck.cardNumber) + '" oninput="EJ.ckCardNum(this)" style="' + (e.cardNumber ? CK_IN_ERR : CK_IN) + '" /><span id="ckCardBrand" style="position:absolute;right:0.875rem;top:50%;transform:translateY(-50%);font-size:0.75rem;color:var(--gold)">' + (ck.cardNumber ? esc(ckCardBrand(ck.cardNumber)) : "") + "</span></span>", e.cardNumber)
+          + '<div style="display:grid;gap:0.75rem" class="ck-card2">'
+          + ckLabel("Expiry (MM/YY)", '<input placeholder="MM/YY" inputmode="numeric" autocomplete="cc-exp" value="' + esc(ck.cardExpiry) + '" oninput="EJ.ckExpiryInput(this)" style="' + (e.cardExpiry ? CK_IN_ERR : CK_IN) + '" />', e.cardExpiry)
+          + ckLabel("Security code (CVC)", '<input placeholder="CVC" inputmode="numeric" autocomplete="cc-csc" value="' + esc(ck.cardCvc) + '" oninput="EJ.ckField(\'cardCvc\',this.value)" style="' + (e.cardCvc ? CK_IN_ERR : CK_IN) + '" />', e.cardCvc)
+          + "</div>"
+          + ckLabel("Name on card", '<input placeholder="Full name on the card" autocomplete="cc-name" value="' + esc(ck.cardName) + '" oninput="EJ.ckField(\'cardName\',this.value)" style="' + (e.cardName ? CK_IN_ERR : CK_IN) + '" />', e.cardName)
+          + ckLabel("Billing ZIP code", '<input placeholder="ZIP code" inputmode="numeric" autocomplete="postal-code" value="' + esc(ck.cardZip) + '" oninput="EJ.ckField(\'cardZip\',this.value)" style="' + (e.cardZip ? CK_IN_ERR : CK_IN) + '" />', e.cardZip)
+          + '<p style="display:flex;gap:0.5rem;font-size:0.75rem;line-height:1.65;color:var(--muted-foreground)">' + icon("lock", 14) + "Your card details are used only to complete this payment. They are never stored on this device or kept with your order.</p>"
+          + "</div>";
+      }
+      function ckQuickPayHtml(ck) {
+        var qpBtn = "flex:1;display:flex;align-items:center;justify-content:center;gap:0.5rem;border-radius:0.375rem;padding:0.875rem 1rem;font:inherit;font-size:0.9375rem;font-weight:500;cursor:pointer;min-height:3rem";
+        return '<div style="display:flex;flex-wrap:wrap;gap:0.75rem">'
+          + '<button type="button" aria-pressed="' + (ck.quickPay === "Apple Pay") + '" onclick="EJ.ckQuick(\'Apple Pay\')" style="' + qpBtn + ';background:#000;color:#fff;border:1px solid #000' + (ck.quickPay === "Apple Pay" ? ";outline:2px solid var(--gold);outline-offset:2px" : "") + '">Apple&nbsp;Pay</button>'
+          + '<button type="button" aria-pressed="' + (ck.quickPay === "Google Pay") + '" onclick="EJ.ckQuick(\'Google Pay\')" style="' + qpBtn + ';background:#fff;color:#1f1f1f;border:1px solid var(--border)' + (ck.quickPay === "Google Pay" ? ";outline:2px solid var(--gold);outline-offset:2px" : "") + '"><span style="font-weight:600"><span style="color:#4285f4">G</span> <span style="color:#1f1f1f">Pay</span></span></button>'
+          + "</div>"
+          + '<p style="margin-top:0.75rem;font-size:0.75rem;line-height:1.65;color:var(--muted-foreground)">Choose your quick pay wallet, then place the order below — we will send a secure link to confirm the payment in your wallet. Nothing is charged yet.</p>';
+      }
+      function ckItemsHtml(items) {
+        return items.map(function (it) {
+          return '<div style="display:flex;align-items:center;gap:1rem;border-bottom:1px solid var(--border);padding:0.75rem 0"><img src="' + it.image + '" alt="" loading="lazy" style="width:3.5rem;height:3.5rem;border-radius:0.25rem;object-fit:contain;background:#fff;padding:0.3rem;border:1px solid var(--border)" /><div style="min-width:0;flex:1"><p style="font-size:0.875rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + esc(it.name) + '</p><p style="font-size:11px;color:var(--muted-foreground)">Qty ' + it.qty + " · " + fmt2(it.price) + ' each</p></div><span style="font-size:0.875rem;color:var(--gold)">' + fmt2(it.price * it.qty) + "</span></div>";
+        }).join("");
+      }
+      function ckTotalsLinesHtml(totals, placedOrder) {
+        var h = '<dl style="display:flex;flex-direction:column;gap:0.5rem;font-size:0.875rem">'
+          + '<div class="calc-row"><dt style="color:var(--muted-foreground)">Pieces</dt><dd style="margin:0">' + fmt2(totals.subtotal) + "</dd></div>"
+          + '<div class="calc-row"><dt style="color:var(--muted-foreground)">Insured courier</dt><dd style="margin:0">' + fmt2(totals.courier) + "</dd></div>"
+          + '<div class="calc-row"><dt style="color:var(--muted-foreground)">Transit insurance</dt><dd style="margin:0">' + fmt2(totals.insurance) + "</dd></div>";
+        if (totals.gcApplied > 0) h += '<div class="calc-row"><dt style="color:var(--gold)">Gift card applied' + (placedOrder && placedOrder.giftCard ? " (" + esc(placedOrder.giftCard.code) + ")" : "") + '</dt><dd style="margin:0;color:var(--gold)">−' + fmt2(totals.gcApplied) + "</dd></div>";
+        if (totals.bankSavings > 0) h += '<div class="calc-row"><dt style="color:var(--gold)">Bank payment savings (2%)</dt><dd style="margin:0;color:var(--gold)">−' + fmt2(totals.bankSavings) + "</dd></div>";
+        h += "</dl>"
+          + '<div style="margin-top:1rem;display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--border);padding-top:1rem"><span style="font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted-foreground)">' + (placedOrder ? "Total due" : "Total") + '</span><span style="font-size:1.25rem;color:var(--gold)">' + fmt2(totals.due) + "</span></div>";
+        return h;
+      }
       function pageCheckout() {
-        var t = cartTotals();
-        var ck = EJ._ck || (EJ._ck = { stage: "delivery", name: "", email: "", address: "", city: "", postcode: "", country: "United States", method: "card", cardNumber: "", cardExpiry: "", cardCvc: "", placed: null });
+        var ck = ckState();
+        /* A placed order's confirmation stays up while the bag is
+           empty; as soon as a new piece goes into the bag, the
+           checkout starts fresh for it (contact details are kept). */
+        if (ck.placed && S.cart.length) ck.placed = null;
         var h = '<div class="wrap" style="padding-top:2.5rem;padding-bottom:3.5rem">';
         if (ck.placed) {
-          h += '<section class="glass" style="border-radius:0.25rem;padding:2.5rem;text-align:center;max-width:40rem;margin:2rem auto 0"><span style="display:inline-grid;place-items:center;width:3.5rem;height:3.5rem;border-radius:999px;border:1px solid color-mix(in oklab, var(--gold) 40%, transparent);color:var(--gold)">' + icon("check", 22) + '</span><h1 style="margin-top:1.25rem;font-size:1.875rem">Order confirmed</h1><p style="margin-top:1rem;font-size:0.875rem;line-height:1.7;color:var(--muted-foreground)">Reference ' + esc(ck.placed.reference) + ". Each atelier has been notified and will confirm dispatch within one working day. Your concierge will follow the courier personally.</p>"
-            + '<div style="margin-top:2rem;display:flex;flex-wrap:wrap;justify-content:center;gap:0.75rem"><a class="btn-gold" href="#/connect?tab=ateliers">Message your ateliers</a><a class="btn-ghost" href="#/shop">Continue browsing</a></div></section></div>';
+          var o = ck.placed;
+          h += '<section class="glass" style="border-radius:0.25rem;padding:2.5rem;max-width:44rem;margin:0 auto">'
+            + '<div style="text-align:center"><span style="display:inline-grid;place-items:center;width:3.5rem;height:3.5rem;border-radius:999px;border:1px solid color-mix(in oklab, var(--gold) 40%, transparent);color:var(--gold)">' + icon("check", 22) + '</span>'
+            + '<h1 style="margin-top:1.25rem;font-size:1.875rem">Order placed</h1>'
+            + '<p style="margin-top:0.75rem;font-size:0.9375rem">Order number <strong style="color:var(--gold)">' + esc(o.id) + '</strong></p>'
+            + '<p style="margin-top:0.5rem"><span class="sub-chip">' + esc(o.status) + "</span></p></div>"
+            + '<div style="margin-top:2rem">' + ckItemsHtml(o.items) + "</div>"
+            + '<div style="margin-top:1.5rem">' + ckTotalsLinesHtml(o, o) + "</div>"
+            + '<p style="margin-top:1.5rem;font-size:0.875rem;line-height:1.7;color:var(--muted-foreground)">' + ckNextStepsHtml(o) + "</p>"
+            + '<p style="margin-top:1rem;font-size:0.875rem;line-height:1.7;color:var(--muted-foreground)">Delivering to ' + esc(o.customer.name) + ", " + esc(o.customer.address) + ", " + esc(o.customer.city) + ", " + esc(o.customer.state) + " " + esc(o.customer.zip) + ". A copy of this order is saved on this device.</p>"
+            + '<div style="margin-top:2rem;display:flex;flex-wrap:wrap;justify-content:center;gap:0.75rem"><a class="btn-gold" href="#/shop">Continue browsing</a><button type="button" class="btn-ghost" onclick="EJ.openLive()">Message the concierge</button></div></section></div>';
           return h;
         }
         if (!S.cart.length) {
           h += '<div style="max-width:40rem;margin:0 auto;padding:3rem 0;text-align:center"><p style="font-size:0.875rem;color:var(--muted-foreground)">There is nothing to check out yet.</p><a class="btn-gold" style="margin-top:1.5rem" href="#/shop">Browse the collections</a></div></div>';
           return h;
         }
-        var savings = ck.method === "zelle" ? zelleSavings(t.subtotal) : 0;
-        var finalTotal = t.total - savings;
-        var stageIdx = { delivery: 0, payment: 1, review: 2 }[ck.stage];
-        var inputStyle = "width:100%;border:1px solid var(--border);border-radius:0.25rem;padding:0.75rem 1rem;font:inherit;font-size:0.875rem;background:transparent";
+        var totals = ckTotalsFor(ck);
+        var e = ck.errors || {};
+        var items = S.cart.map(function (l) {
+          var p = findProduct(l.id);
+          if (p) return { id: l.id, name: l.customSummary ? "Custom design — " + p.name : p.name, image: p.image, price: linePrice(l), qty: l.qty };
+          if (l.customName) return { id: l.id, name: l.customName, image: l.customImage || "", price: linePrice(l), qty: l.qty };
+          return { id: l.id, name: l.id, image: "", price: linePrice(l), qty: l.qty };
+        });
         h += crumbsHtml([{ label: "Home", href: "#/" }, { label: "Selection", href: "#/cart" }, { label: "Checkout" }]);
         h += '<div style="margin-top:1.5rem"></div>' + sectionHeading({ eyebrow: "Secure & insured", title: "Checkout" });
-        h += '<div class="cart-cols" style="margin-top:2.5rem;display:grid;gap:1.5rem"><section class="glass" style="border-radius:0.25rem;padding:1.5rem">'
-          + '<div style="display:flex;gap:0.5rem">' + ["Delivery", "Payment", "Review"].map(function (s2, i2) {
-            return '<div style="flex:1;border-bottom:2px solid ' + (i2 <= stageIdx ? "var(--gold)" : "var(--border)") + ";padding-bottom:0.75rem;font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:" + (i2 <= stageIdx ? "var(--gold)" : "var(--muted-foreground)") + '">' + (i2 + 1) + ". " + s2 + "</div>";
+        h += '<div class="cart-cols" style="margin-top:2.5rem;display:grid;gap:1.5rem"><section class="glass" style="border-radius:0.25rem;padding:1.5rem">';
+        /* contact + shipping */
+        h += '<p class="eyebrow">Contact &amp; shipping</p>'
+          + '<div style="margin-top:1.25rem;display:grid;gap:0.75rem">'
+          + ckLabel("Full name", '<input placeholder="Full name" autocomplete="name" value="' + esc(ck.name) + '" oninput="EJ.ckField(\'name\',this.value)" style="' + (e.name ? CK_IN_ERR : CK_IN) + '" />', e.name)
+          + '<div style="display:grid;gap:0.75rem" class="ck-card2">'
+          + ckLabel("Email", '<input placeholder="Email address" type="email" autocomplete="email" value="' + esc(ck.email) + '" oninput="EJ.ckField(\'email\',this.value)" style="' + (e.email ? CK_IN_ERR : CK_IN) + '" />', e.email)
+          + ckLabel("Phone", '<input placeholder="Phone number" type="tel" autocomplete="tel" value="' + esc(ck.phone) + '" oninput="EJ.ckField(\'phone\',this.value)" style="' + (e.phone ? CK_IN_ERR : CK_IN) + '" />', e.phone)
+          + "</div>"
+          + ckLabel("Street address", '<input placeholder="Street address" autocomplete="street-address" value="' + esc(ck.address) + '" oninput="EJ.ckField(\'address\',this.value)" style="' + (e.address ? CK_IN_ERR : CK_IN) + '" />', e.address)
+          + '<div style="display:grid;gap:0.75rem" class="ck-addr">'
+          + ckLabel("City", '<input placeholder="City" autocomplete="address-level2" value="' + esc(ck.city) + '" oninput="EJ.ckField(\'city\',this.value)" style="' + (e.city ? CK_IN_ERR : CK_IN) + '" />', e.city)
+          + ckLabel("State", '<input placeholder="State" autocomplete="address-level1" value="' + esc(ck.state) + '" oninput="EJ.ckField(\'state\',this.value)" style="' + (e.state ? CK_IN_ERR : CK_IN) + '" />', e.state)
+          + ckLabel("ZIP code", '<input placeholder="ZIP code" inputmode="numeric" autocomplete="postal-code" value="' + esc(ck.zip) + '" oninput="EJ.ckField(\'zip\',this.value)" style="' + (e.zip ? CK_IN_ERR : CK_IN) + '" />', e.zip)
+          + "</div>"
+          + '<p style="font-size:11px;color:var(--muted-foreground)">A signature is required on delivery. Identification is checked against the name above.</p></div>';
+        /* payment methods */
+        var methods = [
+          ["card", "card", "Credit / Debit Card", "Pay securely by card"],
+          ["bank", "building", "Pay by Bank — Save 2%", "Bank transfer · 2% off what you pay by bank"],
+          ["giftcard", "gift", "Elevate Gift Card", "Use your gift card balance"],
+          ["quickpay", "fingerprint", "Quick Pay", "Apple Pay / Google Pay"]
+        ];
+        h += '<p class="eyebrow" style="margin-top:2.25rem">Payment method</p>'
+          + '<div style="margin-top:1.25rem;display:grid;gap:0.75rem" class="ck-methods">'
+          + methods.map(function (m) {
+            var on = ck.method === m[0];
+            return '<button type="button" aria-pressed="' + on + '" onclick="EJ.ckMethod(\'' + m[0] + '\')" style="display:flex;align-items:center;gap:0.875rem;text-align:left;border-radius:0.375rem;padding:1rem 1.125rem;font:inherit;cursor:pointer;background:' + (on ? "color-mix(in oklab, var(--gold) 7%, transparent)" : "transparent") + ";border:" + (on ? "1.5px solid var(--gold)" : "1px solid var(--border)") + '">'
+              + '<span style="flex-shrink:0;display:grid;place-items:center;width:2.25rem;height:2.25rem;border-radius:999px;border:1px solid ' + (on ? "var(--gold)" : "var(--border)") + ';color:var(--gold)">' + icon(m[1], 17) + "</span>"
+              + '<span style="min-width:0"><span style="display:block;font-size:0.9375rem;font-weight:500">' + m[2] + '</span><span style="display:block;margin-top:0.125rem;font-size:0.75rem;color:var(--muted-foreground)">' + m[3] + "</span></span>"
+              + '<span style="margin-left:auto;flex-shrink:0;width:1.125rem;height:1.125rem;border-radius:999px;border:1.5px solid ' + (on ? "var(--gold)" : "var(--border)") + ";display:grid;place-items:center\">" + (on ? '<span style="width:0.55rem;height:0.55rem;border-radius:999px;background:var(--gold)"></span>' : "") + "</span></button>";
           }).join("") + "</div>";
-        if (ck.stage === "delivery") {
-          h += '<div style="margin-top:2rem;display:grid;gap:0.75rem">'
-            + '<input placeholder="Full name" value="' + esc(ck.name) + '" oninput="EJ.ckField(\'name\',this.value)" style="' + inputStyle + '" />'
-            + '<input placeholder="Email" type="email" value="' + esc(ck.email) + '" oninput="EJ.ckField(\'email\',this.value)" style="' + inputStyle + '" />'
-            + '<input placeholder="Street address" value="' + esc(ck.address) + '" oninput="EJ.ckField(\'address\',this.value)" style="' + inputStyle + '" />'
-            + '<div style="display:grid;gap:0.75rem" class="ck-addr"><input placeholder="City" value="' + esc(ck.city) + '" oninput="EJ.ckField(\'city\',this.value)" style="' + inputStyle + '" /><input placeholder="Postcode" value="' + esc(ck.postcode) + '" oninput="EJ.ckField(\'postcode\',this.value)" style="' + inputStyle + '" /><input placeholder="Country" value="' + esc(ck.country) + '" oninput="EJ.ckField(\'country\',this.value)" style="' + inputStyle + '" /></div>'
-            + '<p style="padding-top:0.5rem;font-size:11px;color:var(--muted-foreground)">A signature is required on delivery. Identification is checked against the name above.</p></div>';
-        } else if (ck.stage === "payment") {
-          var methods = [["zelle", "Zelle · Save 2%"], ["card", "Card"], ["wire", "Bank wire"], ["escrow", "Escrow"]];
-          h += '<div style="margin-top:2rem;display:grid;gap:0.5rem" class="ck-methods">' + methods.map(function (m) {
-            return '<button type="button" aria-pressed="' + (ck.method === m[0]) + '" class="mode-chip' + (ck.method === m[0] ? " active" : "") + '" style="padding:0.75rem" onclick="EJ.ckMethod(\'' + m[0] + '\')">' + m[1] + "</button>";
-          }).join("") + "</div>";
-          if (ck.method === "zelle") h += '<div style="margin-top:0.75rem">' + zellePanelHtml(t.subtotal) + "</div>";
-          else if (ck.method === "card") {
-            h += '<div style="margin-top:0.75rem;display:grid;gap:0.75rem">'
-              + '<input placeholder="Card number" value="' + esc(ck.cardNumber) + '" oninput="EJ.ckField(\'cardNumber\',this.value)" style="' + inputStyle + '" />'
-              + '<div style="display:grid;gap:0.75rem" class="ck-card2"><input placeholder="MM / YY" value="' + esc(ck.cardExpiry) + '" oninput="EJ.ckField(\'cardExpiry\',this.value)" style="' + inputStyle + '" /><input placeholder="CVC" value="' + esc(ck.cardCvc) + '" oninput="EJ.ckField(\'cardCvc\',this.value)" style="' + inputStyle + '" /></div></div>';
-          } else if (ck.method === "wire") {
-            h += '<p style="margin-top:0.75rem;font-size:0.75rem;line-height:1.65;color:var(--muted-foreground)">Wire instructions are issued by the concierge desk once the order is reviewed. Pieces are held for five days.</p>';
+        /* method panels */
+        h += '<div style="margin-top:1.25rem">';
+        if (ck.method === "card") {
+          h += ckCardFieldsHtml(ck);
+        } else if (ck.method === "bank") {
+          h += '<div class="glass-soft" style="border-radius:0.25rem;padding:1.25rem"><p style="font-size:0.9375rem;font-weight:500">Pay by bank and save 2%</p>'
+            + '<p style="margin-top:0.5rem;font-size:0.875rem;line-height:1.7;color:var(--muted-foreground)">Pay by secure bank transfer and save 2% on the amount you pay by bank'
+            + (totals.bankSavings > 0 ? ' — <strong style="color:var(--gold)">you save ' + fmt2(totals.bankSavings) + " on this order</strong>" : "")
+            + '. Place your order now and we will email our verified bank details to <strong style="color:var(--foreground)">' + esc(ck.email || "your email") + '</strong>; your pieces are held for five days while the transfer is on its way.</p></div>';
+        } else if (ck.method === "giftcard") {
+          if (ck.gc) {
+            h += '<div class="glass-soft" style="border-radius:0.25rem;padding:1.25rem"><div style="display:flex;flex-wrap:wrap;align-items:center;gap:0.75rem"><span style="color:var(--gold)">' + icon("gift", 18) + '</span><p style="font-size:0.9375rem;font-weight:500">' + esc(ck.gc.code) + ' applied</p><span class="sub-chip">Balance ' + fmt2(ck.gc.balance) + '</span><button type="button" class="btn-ghost" style="margin-left:auto;padding:0.5rem 1rem" onclick="EJ.ckGcRemove()">Remove</button></div>'
+              + '<p style="margin-top:0.75rem;font-size:0.875rem;line-height:1.7;color:var(--muted-foreground)">' + fmt2(totals.gcApplied) + " of your gift card goes toward this order"
+              + (totals.due > 0 ? ", leaving " + fmt2(ckRound2(totals.total - totals.gcApplied)) + " to pay by another method below." : " — it covers the full total.") + "</p></div>";
+            if (totals.due > 0 || totals.total - totals.gcApplied > 0) {
+              var rem = [["card", "Card"], ["bank", "Bank — save 2%"], ["quickpay", "Quick Pay"]];
+              h += '<p style="margin-top:1.25rem;font-size:0.8125rem;font-weight:500">Pay the remaining ' + fmt2(ckRound2(totals.total - totals.gcApplied)) + " with</p>"
+                + '<div style="margin-top:0.625rem;display:flex;flex-wrap:wrap;gap:0.5rem">' + rem.map(function (r2) {
+                  return '<button type="button" aria-pressed="' + (ck.remainderMethod === r2[0]) + '" class="mode-chip' + (ck.remainderMethod === r2[0] ? " active" : "") + '" style="padding:0.625rem 1rem" onclick="EJ.ckRemainder(\'' + r2[0] + '\')">' + r2[1] + "</button>";
+                }).join("") + "</div>"
+                + '<div style="margin-top:1rem">'
+                + (ck.remainderMethod === "card" ? ckCardFieldsHtml(ck)
+                  : ck.remainderMethod === "bank" ? '<p style="font-size:0.875rem;line-height:1.7;color:var(--muted-foreground)">The remainder is paid by bank transfer — and the 2% bank savings applies to it, as shown in your total. We will email our verified bank details after you place the order.</p>'
+                  : ckQuickPayHtml(ck))
+                + "</div>";
+            }
           } else {
-            h += '<p style="margin-top:0.75rem;font-size:0.75rem;line-height:1.65;color:var(--muted-foreground)">Funds are held by a third-party escrow agent and released only after you confirm receipt and inspection.</p>';
+            h += ckLabel("Gift card code", '<span style="display:flex;gap:0.5rem"><input placeholder="GC-100102" autocapitalize="characters" autocomplete="off" spellcheck="false" value="' + esc(ck.gcCode) + '" oninput="EJ.ckField(\'gcCode\',this.value)" style="' + (ck.gcMsg ? CK_IN_ERR : CK_IN) + '" /><button type="button" class="btn-gold" style="flex-shrink:0" onclick="EJ.ckGcApply()">Apply</button></span>', ck.gcMsg || "")
+              + '<p style="margin-top:0.75rem;font-size:0.75rem;line-height:1.65;color:var(--muted-foreground)">Enter the full code from your Elevate gift card. Its balance is applied toward your total; any remainder can be paid by card, bank or quick pay.</p>';
           }
-        } else {
-          h += '<div style="margin-top:2rem;display:flex;flex-direction:column;gap:1rem">'
-            + S.cart.map(function (l) {
-              var p = findProduct(l.id) || (l.customName ? { id: l.id, name: l.customName, image: l.customImage || "", vendor: "" } : null);
-              if (!p) return "";
-              var v = p.vendor ? findVendor(p.vendor) : null;
-              return '<div style="display:flex;align-items:center;gap:1rem;border-bottom:1px solid var(--border);padding-bottom:1rem"><img src="' + p.image + '" alt="' + esc(p.name) + '" loading="lazy" style="width:3.5rem;height:3.5rem;border-radius:0.25rem;object-fit:contain;background:#fff;padding:0.3rem;border:1px solid var(--border)" /><div style="min-width:0;flex:1"><p style="font-size:0.875rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + esc(l.customSummary ? "Custom design — " + p.name : p.name) + '</p><p style="font-size:11px;color:var(--muted-foreground)">' + esc(l.customSummary || (v ? v.name : "")) + '</p></div><span style="font-size:0.875rem;color:var(--gold)">' + fmt(linePrice(l) * l.qty) + "</span></div>";
-            }).join("")
-            + '<p style="font-size:0.75rem;line-height:1.65;color:var(--muted-foreground)">Delivering to ' + esc(ck.name || "—") + ", " + esc(ck.address || "—") + ", " + esc(ck.city) + " " + esc(ck.postcode) + ", " + esc(ck.country) + ". Paying by " + (ck.method === "card" ? "card" : ck.method) + ".</p></div>";
+        } else if (ck.method === "quickpay") {
+          h += ckQuickPayHtml(ck);
         }
-        h += '<div style="margin-top:2rem;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:0.75rem;border-top:1px solid var(--border);padding-top:1.5rem">'
-          + '<button type="button" class="btn-ghost" ' + (stageIdx === 0 ? "disabled style=\"opacity:0.5\"" : 'onclick="EJ.ckBack()"') + ">Back</button>"
-          + (ck.stage !== "review"
-            ? '<button type="button" class="btn-gold" onclick="EJ.ckNext()">Continue</button>'
-            : ck.method === "zelle"
-              ? '<button type="button" class="btn-gold" onclick="EJ.openLive()">Contact us to pay with Zelle</button>'
-              : '<button type="button" class="btn-gold" onclick="EJ.ckPlace()">Place demo order · ' + fmt(finalTotal) + "</button>")
+        h += "</div>";
+        /* place order */
+        h += '<div style="margin-top:2rem;border-top:1px solid var(--border);padding-top:1.5rem">'
+          + '<button type="button" class="btn-gold" style="width:100%;padding:1rem 1.25rem;font-size:1rem" onclick="EJ.ckPlace()">Place order · ' + fmt2(totals.due) + "</button>"
+          + '<p style="margin-top:0.875rem;display:flex;gap:0.5rem;font-size:0.75rem;line-height:1.65;color:var(--muted-foreground)">' + icon("shieldCheck", 15) + "Every piece ships fully insured with a signature on delivery. You will see your order number and exactly what happens next on the confirmation screen.</p>"
           + "</div></section>";
-        h += '<aside class="glass" style="border-radius:0.25rem;padding:1.5rem;align-self:start"><p class="eyebrow">Order</p>'
-          + '<dl style="margin-top:1.25rem;display:flex;flex-direction:column;gap:0.75rem;font-size:0.875rem">'
-          + '<div class="calc-row"><dt style="color:var(--muted-foreground)">Pieces</dt><dd style="margin:0">' + fmt(t.subtotal) + "</dd></div>"
-          + '<div class="calc-row"><dt style="color:var(--muted-foreground)">Courier (' + t.houses + ' ateliers)</dt><dd style="margin:0">' + fmt(t.courier) + "</dd></div>"
-          + '<div class="calc-row"><dt style="color:var(--muted-foreground)">Transit insurance</dt><dd style="margin:0">' + fmt(t.insurance) + "</dd></div></dl>"
-          + (savings > 0 ? '<div style="margin-top:1rem;display:flex;justify-content:space-between;gap:0.75rem;font-size:0.875rem"><span>Zelle savings (2%)</span><span>−' + fmt2(savings) + "</span></div>" : "")
-          + '<div style="margin-top:1.25rem;display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--border);padding-top:1.25rem"><span style="font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted-foreground)">Total</span><span style="font-size:1.25rem;color:var(--gold)">' + fmt2(finalTotal) + "</span></div>"
-          + '<div style="margin-top:1.5rem">' + zellePanelHtml(t.subtotal) + "</div>"
-          + "</aside></div><style>@media(min-width:1024px){.cart-cols{grid-template-columns:1.5fr 1fr}}@media(min-width:640px){.ck-addr{grid-template-columns:1fr 1fr 1fr}.ck-card2{grid-template-columns:1fr 1fr}.ck-methods{grid-template-columns:1fr 1fr}}</style></div>";
+        /* summary */
+        h += '<aside class="glass" style="border-radius:0.25rem;padding:1.5rem;align-self:start"><p class="eyebrow">Order summary</p>'
+          + '<div style="margin-top:0.75rem">' + ckItemsHtml(items) + "</div>"
+          + '<div style="margin-top:1.25rem">' + ckTotalsLinesHtml(totals, null) + "</div>"
+          + "</aside></div>"
+          + "<style>@media(min-width:1024px){.cart-cols{grid-template-columns:1.5fr 1fr}}@media(min-width:640px){.ck-addr{grid-template-columns:1fr 1fr 1fr}.ck-card2{grid-template-columns:1fr 1fr}.ck-methods{grid-template-columns:1fr 1fr}}</style></div>";
         return h;
       }
-      function zellePanelHtml(pieceSubtotal) {
-        var savings = zelleSavings(pieceSubtotal);
-        return '<div class="zelle-panel" aria-label="Pay with Zelle and save 2 percent"><h3 style="font-size:1.5rem;font-family:var(--font-display)">Pay with Zelle—save 2%</h3>'
-          + '<p style="margin-top:0.75rem;font-size:0.875rem;line-height:1.65;color:var(--muted-foreground)">Save <strong style="color:var(--foreground)">' + fmt2(savings) + '</strong> on your pieces, including current sale prices. Contact us to confirm availability and receive verified Zelle payment details. Delivery and insurance are not discounted.</p>'
-          + '<div style="margin-top:0.75rem;display:flex;flex-wrap:wrap;gap:0.5rem"><a class="btn-ghost" href="' + PHONE_TEL + '">' + icon("phone", 16) + "Call " + PHONE_DISPLAY + '</a><button type="button" class="btn-ghost" onclick="EJ.openLive()">' + icon("message", 16) + 'Request payment help</button></div>'
-          + '<p style="margin-top:0.75rem;font-size:0.75rem;color:var(--muted-foreground)">Choosing Zelle does not send payment or confirm an order.</p></div>';
+      function ckNextStepsHtml(o) {
+        var email = esc(o.customer.email);
+        if (o.giftCard && o.due <= 0) {
+          return "Your gift card covered the full amount" + (o.giftCard.balanceAfter != null ? " — the remaining balance on " + esc(o.giftCard.code) + " is " + fmt2(o.giftCard.balanceAfter) : "") + ". Our store will confirm your order and prepare your pieces for insured delivery. We will email updates to " + email + ".";
+        }
+        if (o.effMethod === "bank") {
+          return "Next step: we will email our verified bank transfer details to " + email + ". Your 2% bank savings is already in the total above" + (o.giftCard ? ", and your gift card credit has been applied" : "") + ". Your pieces are held for five days while the transfer is on its way; they ship as soon as it arrives.";
+        }
+        if (o.effMethod === "quickpay") {
+          return "Next step: card payments are completed through our secure payment page. We will email a secure " + (o.quickPay ? esc(o.quickPay) + " " : "") + "payment link to " + email + " within one working day" + (o.giftCard ? "; your gift card credit has already been applied above" : "") + ". No payment has been taken yet, and your pieces are reserved for you in the meantime.";
+        }
+        return "Next step: card payments are completed through our secure payment page. We will email a secure payment link to " + email + " within one working day" + (o.giftCard ? "; your gift card credit has already been applied above" : "") + ". No charge has been made yet, and your pieces are reserved for you in the meantime.";
       }
-      EJ.ckField = function (k, v) { EJ._ck[k] = v; };
-      EJ.ckStage = function (s) { EJ._ck.stage = s; EJ.route(true); };
-      EJ.ckNext = function () { var order = ["delivery", "payment", "review"]; var i = order.indexOf(EJ._ck.stage); if (i < 2) EJ._ck.stage = order[i + 1]; EJ.route(true); };
-      EJ.ckBack = function () { var order = ["delivery", "payment", "review"]; var i = order.indexOf(EJ._ck.stage); if (i > 0) EJ._ck.stage = order[i - 1]; EJ.route(true); };
-      EJ.ckMethod = function (m) { EJ._ck.method = m; EJ.route(true); };
+      EJ.ckField = function (k, v) { var ck = ckState(); ck[k] = v; if (ck.errors && ck.errors[k]) delete ck.errors[k]; };
+      EJ.ckCardNum = function (inp) {
+        var ck = ckState();
+        ck.cardNumber = ckFormatCardNumber(inp.value);
+        inp.value = ck.cardNumber;
+        var b = document.getElementById("ckCardBrand");
+        if (b) b.textContent = ckDigits(ck.cardNumber).length >= 2 ? ckCardBrand(ck.cardNumber) : "";
+        if (ck.errors && ck.errors.cardNumber) delete ck.errors.cardNumber;
+      };
+      EJ.ckExpiryInput = function (inp) {
+        var d = ckDigits(inp.value).slice(0, 4);
+        var out = d.length > 2 ? d.slice(0, 2) + "/" + d.slice(2) : d;
+        ckState().cardExpiry = out;
+        inp.value = out;
+      };
+      EJ.ckMethod = function (m) { var ck = ckState(); ck.method = m; ck.errors = {}; EJ.route(true); };
+      EJ.ckRemainder = function (m) { var ck = ckState(); ck.remainderMethod = m; EJ.route(true); };
+      EJ.ckQuick = function (w) { var ck = ckState(); ck.quickPay = w; EJ.route(true); };
+      EJ.ckGcApply = function () {
+        var ck = ckState();
+        var code = (ck.gcCode || "").trim();
+        var card = code ? ckFindGiftCard(code) : null;
+        if (!code) { ck.gc = null; ck.gcMsg = "Enter your gift card code first."; }
+        else if (!card) { ck.gc = null; ck.gcMsg = "We could not find that gift card code. Check the full code and try again."; }
+        else if (card.status !== "Active") { ck.gc = null; ck.gcMsg = "This gift card is " + String(card.status).toLowerCase() + " and cannot be used for payment."; }
+        else if (!(card.balance > 0)) { ck.gc = null; ck.gcMsg = "This gift card has no remaining balance."; }
+        else { ck.gc = { code: card.code, balance: card.balance }; ck.gcMsg = ""; toast("Gift card applied", card.code + " · balance " + fmt2(card.balance)); }
+        EJ.route(true);
+      };
+      EJ.ckGcRemove = function () { var ck = ckState(); ck.gc = null; ck.gcMsg = ""; EJ.route(true); };
       EJ.ckPlace = function () {
-        EJ._ck.placed = { reference: "EJ-" + (10000 + Math.floor(Math.random() * 90000)) };
+        var ck = ckState();
+        if (!S.cart.length) return;
+        var totals = ckTotalsFor(ck);
+        var errors = {};
+        if (!ck.name.trim()) errors.name = "Enter the full name for delivery.";
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(ck.email.trim())) errors.email = "Enter a valid email address.";
+        if (ckDigits(ck.phone).length < 10) errors.phone = "Enter a 10-digit phone number.";
+        if (!ck.address.trim()) errors.address = "Enter the street address.";
+        if (!ck.city.trim()) errors.city = "Enter the city.";
+        if (!ck.state.trim()) errors.state = "Enter the state.";
+        if (!/^\d{5}(-\d{4})?$/.test(ck.zip.trim())) errors.zip = "Enter a valid ZIP code.";
+        if (totals.due > 0 && totals.effMethod === "card") {
+          if (!ckLuhn(ck.cardNumber)) errors.cardNumber = "Enter a valid card number.";
+          if (!ckExpiryOk(ck.cardExpiry)) errors.cardExpiry = "Enter a valid expiry date in the future (MM/YY).";
+          if (!/^\d{3,4}$/.test(ckDigits(ck.cardCvc))) errors.cardCvc = "Enter the 3–4 digit security code.";
+          if (!ck.cardName.trim()) errors.cardName = "Enter the name on the card.";
+          if (!/^\d{5}(-\d{4})?$/.test(ck.cardZip.trim())) errors.cardZip = "Enter the billing ZIP code.";
+        }
+        if (totals.due > 0 && totals.effMethod === "quickpay" && !ck.quickPay) errors.quickpay = "Choose Apple Pay or Google Pay above.";
+        ck.errors = errors;
+        if (Object.keys(errors).length) {
+          EJ.route(true);
+          window.scrollTo(0, 0);
+          toast("A few details are missing", "Please review the highlighted fields and try again.");
+          return;
+        }
+        /* With a live processor configured (EJ_PAYMENTS), the card
+           or quick-pay payment would be confirmed here, before the
+           order is recorded; with none configured the order is
+           recorded as "Payment pending" and a secure payment link
+           follows by email — see the EJ_PAYMENTS note above. */
+        var items = S.cart.map(function (l) {
+          var p = findProduct(l.id);
+          if (p) return { id: l.id, name: l.customSummary ? "Custom design — " + p.name : p.name, image: p.image, price: linePrice(l), qty: l.qty };
+          if (l.customName) return { id: l.id, name: l.customName, image: l.customImage || "", price: linePrice(l), qty: l.qty };
+          return { id: l.id, name: l.id, image: "", price: linePrice(l), qty: l.qty };
+        });
+        var status;
+        if (totals.due <= 0 && totals.gcApplied > 0) status = "Gift card applied — awaiting store confirmation";
+        else if (totals.effMethod === "bank") status = "Awaiting bank payment";
+        else status = "Payment pending";
+        var order = { id: ckNextOrderId(), at: new Date().toISOString(), items: items,
+          subtotal: totals.subtotal, courier: totals.courier, insurance: totals.insurance, total: totals.total,
+          bankSavings: totals.bankSavings, gcApplied: totals.gcApplied, due: totals.due,
+          method: ck.method, effMethod: totals.effMethod, status: status,
+          customer: { name: ck.name.trim(), email: ck.email.trim(), phone: ck.phone.trim(), address: ck.address.trim(), city: ck.city.trim(), state: ck.state.trim(), zip: ck.zip.trim() } };
+        if (totals.effMethod === "card" && totals.due > 0) { order.cardBrand = ckCardBrand(ck.cardNumber); order.cardLast4 = ckDigits(ck.cardNumber).slice(-4); }
+        if (totals.effMethod === "quickpay") order.quickPay = ck.quickPay || "Quick Pay";
+        if (ck.gc && totals.gcApplied > 0) {
+          var entry = ckFindGiftCard(ck.gc.code);
+          var after = null;
+          if (entry) {
+            entry.balance = ckRound2(entry.balance - totals.gcApplied);
+            if (entry.balance <= 0) { entry.balance = 0; entry.status = "Redeemed"; }
+            after = entry.balance;
+            if (typeof beHasSession === "function" && beHasSession() && EJ.backend && EJ.backend.redeemGiftcard) EJ.backend.redeemGiftcard(entry.code, totals.gcApplied);
+          }
+          order.giftCard = { code: ck.gc.code, applied: totals.gcApplied, balanceAfter: after };
+        }
+        var orders = ckOrders();
+        orders.unshift(order);
+        ckOrdersSave();
+        ck.placed = order;
+        ck.gc = null; ck.gcCode = ""; ck.gcMsg = "";
+        ck.cardNumber = ""; ck.cardExpiry = ""; ck.cardCvc = "";
+        ck.errors = {};
         S.cart = [];
         EJ.updateChrome();
-        EJ.route(true);
+        EJ.route();
+      };
+      /* Buy now — straight from a piece page to the full checkout
+         with that piece in the bag. A piece without a confirmed
+         price cannot be checked out; it goes to the atelier
+         enquiry instead, with the reason said out loud. */
+      EJ.buyNow = function (id) {
+        var p = findProduct(id);
+        if (!p) return;
+        if (!(p.price > 0)) {
+          toast("Price to confirm", "This piece does not have a confirmed price yet — the atelier will confirm it for you.");
+          EJ.itemInquire();
+          return;
+        }
+        if (!inCart(id)) { S.cart.push({ id: id, qty: 1 }); EJ.updateChrome(); }
+        if ((window.location.hash || "") === "#/checkout") EJ.route();
+        else window.location.hash = "#/checkout";
       };
 
       /* ---------- Auth (src/routes/auth.tsx) ----------
