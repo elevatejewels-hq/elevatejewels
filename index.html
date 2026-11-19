@@ -3119,14 +3119,27 @@ var PRODUCTS = [
       );
 
       /* Seller pieces submitted by email (owner direction, 2026-11-18):
-         ten pieces from a marketplace seller, listed Active for
+         eleven pieces from a marketplace seller, listed Active for
          everyone under the Crown Marketplace brand — no seller brand
-         name is shown. The email gave presentation instructions only:
-         no prices and no metal/stone specifications, so price stays 0
-         (Price to confirm everywhere) and the descriptions state only
-         what the photographs plainly show. Photos were cleaned per the
-         seller's request: marketing graphics, prices and the company
-         name cropped/retouched away; pieces themselves untouched. */
+         name is shown. The email gave presentation instructions only,
+         so the descriptions state only what the photographs plainly
+         show; photos were cleaned per the seller's request: marketing
+         graphics and the company name cropped/retouched away; pieces
+         themselves untouched. Update (owner direction, 2026-11-19):
+         five pieces — the oval tennis necklace, the pear-halo tennis
+         necklaces, the mixed-cut bracelet, the charm necklaces and
+         the baguette heart necklaces — carry real prices and the
+         owner's styled presentation photos as their main images (see
+         EJ_SELLER_PHOTO_WIRING below): $2,800 / $1,800 / $1,650 /
+         $2,600 read exactly as printed on the seller's own submitted
+         graphics, and $3,600 for the heart necklaces from the owner's
+         details card — the seller's graphic for that piece (NCK-2737)
+         shows the same $3,600 under a struck-through $4,000, and the
+         card's metal (yellow & yellow-white gold) and 1.8CT are now
+         recorded on its entry. The bracelet, held on 2026-11-18
+         because its only seller photo shows a person, is added with
+         the owner's styled photo only. The remaining pieces stay
+         price 0 (Price to confirm). */
       var MARKET_VENDOR = pwEnsureBrandVendor("elevate");
       PRODUCTS.push(
       {
@@ -3136,14 +3149,14 @@ var PRODUCTS = [
         brandId: "elevate",
         category: "necklaces",
         subcategory: "rivieres",
-        price: 0,
-        image: "assets/seller-pieces/piece-02.jpg",
-        gallery: ["assets/seller-pieces/piece-02.jpg"],
+        price: 2800,
+        image: "assets/seller-pieces/piece-02-style.jpg",
+        gallery: ["assets/seller-pieces/piece-02-style.jpg", "assets/seller-pieces/piece-02-style-silver.jpg", "assets/seller-pieces/piece-02.jpg"],
         metal: "Yellow-gold tone",
         stone: "Diamonds",
         carat: "",
         certification: "",
-        description: "A tennis necklace in a yellow-gold tone: oval-cut diamonds in a continuous line around the neck, finishing in an emerald-cut link and a pear-cut diamond drop. Photographed on a dark display neck. Offered through the Elevate Jewels marketplace. The price is to confirm — please enquire with the atelier."
+        description: "A tennis necklace in a yellow-gold tone: oval-cut diamonds in a continuous line around the neck, finishing in an emerald-cut link and a pear-cut diamond drop. Shown in a styled presentation; the seller's original photograph on a dark display neck is included among the additional views. Offered through the Elevate Jewels marketplace."
       },
       {
         id: "mp-layered-marquise-necklaces",
@@ -3168,14 +3181,14 @@ var PRODUCTS = [
         brandId: "elevate",
         category: "necklaces",
         subcategory: "rivieres",
-        price: 0,
-        image: "assets/seller-pieces/piece-04.jpg",
-        gallery: ["assets/seller-pieces/piece-04.jpg"],
+        price: 1800,
+        image: "assets/seller-pieces/piece-04-style.jpg",
+        gallery: ["assets/seller-pieces/piece-04-style.jpg", "assets/seller-pieces/piece-04.jpg"],
         metal: "Yellow-gold and white tones",
         stone: "Diamonds",
         carat: "",
         certification: "",
-        description: "Tennis necklaces of round diamonds, each centred with a pear-cut diamond in a halo of smaller stones — pictured in yellow-gold and white tones layered together on a dark display neck. Offered through the Elevate Jewels marketplace. The price is to confirm — please enquire with the atelier."
+        description: "Tennis necklaces of round diamonds, each centred with a pear-cut diamond in a halo of smaller stones — pictured in yellow-gold and white tones layered together. Shown in a styled presentation; the seller's original photograph on a dark display neck is included among the additional views. Offered through the Elevate Jewels marketplace."
       },
       {
         id: "mp-graduated-diamond-chokers",
@@ -3248,14 +3261,14 @@ var PRODUCTS = [
         brandId: "elevate",
         category: "necklaces",
         subcategory: "statement",
-        price: 0,
-        image: "assets/seller-pieces/piece-09.jpg",
-        gallery: ["assets/seller-pieces/piece-09.jpg"],
-        metal: "Yellow-gold and white tones",
+        price: 3600,
+        image: "assets/seller-pieces/piece-09-style.jpg",
+        gallery: ["assets/seller-pieces/piece-09-style.jpg", "assets/seller-pieces/piece-09.jpg"],
+        metal: "Yellow & yellow-white gold",
         stone: "Diamonds",
-        carat: "",
+        carat: "1.8",
         certification: "",
-        description: "Necklaces on snake chains whose fronts are a fringe of heart-shaped settings, each holding baguette-cut diamonds — pictured in white and yellow-gold tones layered together. Offered through the Elevate Jewels marketplace. The price is to confirm — please enquire with the atelier."
+        description: "Necklaces on snake chains whose fronts are a fringe of heart-shaped settings, each holding baguette-cut diamonds — pictured in yellow and yellow-white gold layered together. Offered through the Elevate Jewels marketplace."
       },
       {
         id: "mp-marquise-necklaces-pear-drops",
@@ -3274,20 +3287,36 @@ var PRODUCTS = [
         description: "Marquise-cut diamonds in a flowing line that gathers into pear-cut diamond drops — pictured in white and yellow-gold tones layered together on the display neck. Offered through the Elevate Jewels marketplace. The price is to confirm — please enquire with the atelier."
       },
       {
+        id: "mp-mixed-cut-diamond-bracelet",
+        name: "Mixed-Cut Diamond Bracelet",
+        vendor: MARKET_VENDOR,
+        brandId: "elevate",
+        category: "bracelets",
+        subcategory: "tennis",
+        price: 1650,
+        image: "assets/seller-pieces/piece-11-style.jpg",
+        gallery: ["assets/seller-pieces/piece-11-style.jpg"],
+        metal: "White tone",
+        stone: "Diamonds",
+        carat: "",
+        certification: "",
+        description: "A line bracelet in a white tone set with large fancy-cut diamonds — emerald, pear, oval and marquise cuts alternating along the wrist. Offered through the Elevate Jewels marketplace."
+      },
+      {
         id: "mp-layered-diamond-charm-necklaces",
         name: "Layered Diamond Charm Necklaces",
         vendor: MARKET_VENDOR,
         brandId: "elevate",
         category: "necklaces",
         subcategory: "chains",
-        price: 0,
-        image: "assets/seller-pieces/piece-12.jpg",
-        gallery: ["assets/seller-pieces/piece-12.jpg"],
+        price: 2600,
+        image: "assets/seller-pieces/piece-12-style.jpg",
+        gallery: ["assets/seller-pieces/piece-12-style.jpg", "assets/seller-pieces/piece-12-style-silver.jpg", "assets/seller-pieces/piece-12.jpg"],
         metal: "Yellow-gold and white tones",
         stone: "Diamonds",
         carat: "",
         certification: "",
-        description: "Diamond line necklaces finished with small square and marquise drop charms along the front — pictured in yellow-gold and white tones layered together on a black display neck. Offered through the Elevate Jewels marketplace. The price is to confirm — please enquire with the atelier."
+        description: "Diamond line necklaces finished with small square and marquise drop charms along the front — pictured in yellow-gold and white tones layered together. Shown in a styled presentation; the seller's original photograph on a black display neck is included among the additional views. Offered through the Elevate Jewels marketplace."
       }
       );
 
@@ -3346,6 +3375,25 @@ var PRODUCTS = [
         });
         p.gallery = [ejCut].concat(ejRest);
         p.image = ejCut;
+      });
+
+      /* Seller-piece styled photo sets (owner direction, 2026-11-19):
+         five marketplace pieces carry the owner's styled presentation
+         photos as their main image, with the further styled views and
+         the seller's own cleaned photo as swipe angles — wired in by
+         product id AFTER the single-photo normalisation above, the
+         same pattern as the brand galleries and the cut-outs, so the
+         sets survive on the detail page and in the quick preview. */
+      var EJ_SELLER_PHOTO_WIRING = {
+        "mp-oval-tennis-necklace-pear-drop": ["assets/seller-pieces/piece-02-style.jpg", "assets/seller-pieces/piece-02-style-silver.jpg", "assets/seller-pieces/piece-02.jpg"],
+        "mp-tennis-necklaces-pear-halo": ["assets/seller-pieces/piece-04-style.jpg", "assets/seller-pieces/piece-04.jpg"],
+        "mp-baguette-heart-necklaces": ["assets/seller-pieces/piece-09-style.jpg", "assets/seller-pieces/piece-09.jpg"],
+        "mp-mixed-cut-diamond-bracelet": ["assets/seller-pieces/piece-11-style.jpg"],
+        "mp-layered-diamond-charm-necklaces": ["assets/seller-pieces/piece-12-style.jpg", "assets/seller-pieces/piece-12-style-silver.jpg", "assets/seller-pieces/piece-12.jpg"]
+      };
+      PRODUCTS.forEach(function (p) {
+        var ejSet = EJ_SELLER_PHOTO_WIRING[p.id];
+        if (ejSet && ejSet.length) { p.image = ejSet[0]; p.gallery = ejSet.slice(); }
       });
 
       var IMAGES = {
