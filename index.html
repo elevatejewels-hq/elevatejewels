@@ -7303,7 +7303,7 @@ var PRODUCTS = [
           + (gallery.length > 1 ? '<div id="itemGalleryCounter" class="ej-gallery-counter" aria-live="polite">1 / ' + gallery.length + '</div>' : "")
           + (gallery.length > 1 ? '<div id="itemThumbs" style="margin-top:0.75rem;display:flex;gap:0.75rem;overflow-x:auto">' + gallery.map(function (src, i) {
             return '<button type="button" onclick="EJ.gallerySet(' + i + ')" aria-pressed="' + (i === 0) + '" style="width:5rem;height:5rem;flex-shrink:0;overflow:hidden;border-radius:0.25rem;border:1px solid ' + (i === 0 ? "var(--gold)" : "var(--border)") + ';padding:0"><img src="' + src + '" alt="' + (i ? "View " + (i + 1) : "Main view") + '" loading="lazy" style="width:100%;height:100%;object-fit:contain;padding:0.35rem;background:#fff" /></button>';
-          }).join("") + "</div>" : "") + "</div>";
+          }).join("") + "</div>" : "") + '<div style="display:flex;justify-content:flex-end;margin-top:0.75rem"><button type="button" class="vrs-open-btn" onclick="EJ.vrsOpen(\'' + p.id + '\')">View In Real Size</button></div>' + "</div>";
         /* Details */
         h += '<div style="min-width:0"><header style="min-width:0">'
           + '<div style="display:flex;flex-wrap:wrap;align-items:center;gap:1rem"><a href="#/our-world" style="display:inline-flex;max-width:100%;transition:transform .2s" onmouseover="this.style.transform=\'scale(1.02)\'" onmouseout="this.style.transform=\'\'" aria-label="Visit Our World">' + brandLogoHTML(v.name) + "</a>"
@@ -7686,6 +7686,207 @@ var PRODUCTS = [
         if (note) note.textContent = "Saved on this device — " + describeRing(profile) + ".";
         toast("Ring size saved", describeRing(profile));
       };
+
+      /* === VRS-BLOCK-START (View In Real Size — owner spec 2026-11-19) ===
+         The product-view "View In Real Size" flow. It reuses the ring
+         sizer's calibration maths (a bank card is 85.6 mm wide;
+         pxPerMm = cardPx / 85.6) and the site's dialog (EJ.openDialog:
+         dimmed scrim + ivory dialog card).
+
+         Saved calibration: once a visitor calibrates, the scale is kept
+         in localStorage ("ej-realsize-cal-v1": {pxPerMm, cardPx, at ISO
+         date}). Later visits on the same device skip calibration and go
+         straight to the true-size view; a quiet "Recalibrate" link in
+         that view re-enters calibration and overwrites the saved value.
+
+         Sizing data: EJ_SIZE_WIRING carries the REGULAR size for every
+         LLG Custom Jewels piece (the standard dimension for that design
+         type, in mm — see the audit notes for the table) plus the four
+         Custom Studio designs. No sizing is assigned to PAVE or seller
+         pieces: for timepieces the flow reads a case size only when the
+         piece's own listing states one; every other piece without data
+         gets the honest "we don't know this piece's exact size yet"
+         view instead of a claimed true size. The feature is on ALL
+         pieces, lab-grown included, with no stone-origin labelling. */
+      var EJ_VRS_CAL_KEY = "ej-realsize-cal-v1";
+      var EJ_SIZE_WIRING = {"llg-aquamarine-and-diamond-pendant-necklace":[11,"Regular size for this design — the pendant is about 11 mm across."],"llg-asscher-cut-solitaire-ring":[8,"Regular size for this design — the ring's face is about 8 mm across; your ring is made to your own size."],"llg-baguette-and-pear-alternating-diamond-necklace":[100,"Regular size for this design — 16 in (41 cm) necklace; the front span it shows when worn is about 100 mm across."],"llg-baguette-diamond-hoop-earrings":[32,"Regular size for this design — the pair as shown spans about 32 mm; each hoop is about 20 mm across."],"llg-bezel-set-diamond-line-bracelet":[58,"Regular size for this design — 7 in (18 cm) bracelet, shown as the loop it forms on the wrist, about 58 mm across."],"llg-bezel-set-solitaire-ring":[8,"Regular size for this design — the ring's face is about 8 mm across; your ring is made to your own size."],"llg-bezel-solitaire-necklace":[8,"Regular size for this design — the pendant is about 8 mm across."],"llg-black-diamond-tennis-bracelet":[58,"Regular size for this design — 7 in (18 cm) bracelet, shown as the loop it forms on the wrist, about 58 mm across."],"llg-braided-gold-band":[19,"Regular size for this design — shown as the full ring, about 19 mm across (US 7)."],"llg-cathedral-solitaire-ring":[8,"Regular size for this design — the ring's face is about 8 mm across; your ring is made to your own size."],"llg-classic-gold-hoop-earrings":[40,"Regular size for this design — the pair as shown spans about 40 mm; each hoop is about 25 mm across."],"llg-cluster-studs":[26,"Regular size for this design — the pair as shown spans about 26 mm; each stud is about 12 mm across."],"llg-cultured-pearl-strand-necklace":[110,"Regular size for this design — 16 in (41 cm) strand, shown as the loop it forms, about 110 mm across."],"llg-cushion-cut-diamond-stud-earrings":[18,"Regular size for this design — the pair as shown spans about 18 mm; each stud is about 7 mm across."],"llg-cushion-cut-diamond-tennis-bracelet":[58,"Regular size for this design — 7 in (18 cm) bracelet, shown as the loop it forms on the wrist, about 58 mm across."],"llg-cushion-cut-diamond-tennis-necklace":[100,"Regular size for this design — 16 in (41 cm) necklace; the front span it shows when worn is about 100 mm across."],"llg-cushion-solitaire-ring":[8,"Regular size for this design — the ring's face is about 8 mm across; your ring is made to your own size."],"llg-diamond-accent-hinged-gold-bangle":[65,"Regular size for this design — a standard bangle, about 65 mm across (medium)."],"llg-diamond-butterfly-pendant-necklace":[16,"Regular size for this design — the pendant is about 16 mm across."],"llg-diamond-butterfly-ring":[15,"Regular size for this design — the ring's face is about 15 mm across; your ring is made to your own size."],"llg-diamond-bypass-ring":[11,"Regular size for this design — the ring's face is about 11 mm across; your ring is made to your own size."],"llg-diamond-chandelier-earrings":[30,"Regular size for this design — the pair as shown spans about 30 mm; each earring drops about 45 mm."],"llg-diamond-circle-pendant":[16,"Regular size for this design — the pendant is about 16 mm across."],"llg-diamond-cluster-bangle":[65,"Regular size for this design — a standard bangle, about 65 mm across (medium)."],"llg-diamond-cluster-drop-earrings":[22,"Regular size for this design — the pair as shown spans about 22 mm; each earring drops about 30 mm."],"llg-diamond-cluster-line-bracelet":[58,"Regular size for this design — 7 in (18 cm) bracelet, shown as the loop it forms on the wrist, about 58 mm across."],"llg-diamond-cluster-studs":[24,"Regular size for this design — the pair as shown spans about 24 mm; each stud is about 11 mm across."],"llg-diamond-drop-earrings":[20,"Regular size for this design — the pair as shown spans about 20 mm; each earring drops about 25 mm."],"llg-diamond-floral-cluster-pendant":[15,"Regular size for this design — the pendant is about 15 mm across."],"llg-diamond-horseshoe-pendant-necklace":[13,"Regular size for this design — the pendant is about 13 mm across."],"llg-diamond-huggie-hoops":[22,"Regular size for this design — the pair as shown spans about 22 mm; each hoop is about 14 mm across."],"llg-diamond-jacket-earrings":[26,"Regular size for this design — the pair as shown spans about 26 mm; each stud is about 12 mm across."],"llg-diamond-knot-bangle":[65,"Regular size for this design — a standard bangle, about 65 mm across (medium)."],"llg-diamond-lariat-necklace":[40,"Regular size for this design — the lariat's drop front spans about 40 mm across."],"llg-diamond-solitaire-bracelet":[58,"Regular size for this design — 7 in (18 cm) bracelet, shown as the loop it forms on the wrist, about 58 mm across."],"llg-diamond-station-necklace":[100,"Regular size for this design — 16 in (41 cm) necklace; the front span it shows when worn is about 100 mm across."],"llg-diamond-stud-earrings":[18,"Regular size for this design — the pair as shown spans about 18 mm; each stud is about 7 mm across."],"llg-diamond-sunburst-pendant-necklace":[18,"Regular size for this design — the pendant is about 18 mm across."],"llg-diamond-teardrop-cluster-necklace":[14,"Regular size for this design — the pendant is about 14 mm across."],"llg-diamond-tennis-bracelet":[58,"Regular size for this design — 7 in (18 cm) bracelet, shown as the loop it forms on the wrist, about 58 mm across."],"llg-diamond-tennis-drop-earrings":[18,"Regular size for this design — the pair as shown spans about 18 mm; each earring drops about 35 mm."],"llg-diamond-terminal-open-cuff-bangle":[65,"Regular size for this design — a standard bangle, about 65 mm across (medium)."],"llg-diamond-twist-bangle":[65,"Regular size for this design — a standard bangle, about 65 mm across (medium)."],"llg-diamond-waterfall-cascade-necklace":[85,"Regular size for this design — a cascade bib front; the front span it shows when worn is about 85 mm across."],"llg-diamond-wave-band-ring":[19,"Regular size for this design — shown as the full ring, about 19 mm across (US 7)."],"llg-double-halo-diamond-ring":[14,"Regular size for this design — the ring's face is about 14 mm across; your ring is made to your own size."],"llg-emerald-cut-diamond-stud-earrings":[18,"Regular size for this design — the pair as shown spans about 18 mm; each stud is about 7 mm across."],"llg-emerald-cut-diamond-tennis-bracelet":[58,"Regular size for this design — 7 in (18 cm) bracelet, shown as the loop it forms on the wrist, about 58 mm across."],"llg-emerald-cut-diamond-tennis-necklace":[100,"Regular size for this design — 16 in (41 cm) necklace; the front span it shows when worn is about 100 mm across."],"llg-emerald-cut-halo-ring":[12,"Regular size for this design — the ring's face is about 12 mm across; your ring is made to your own size."],"llg-emerald-cut-solitaire-ring":[8,"Regular size for this design — the ring's face is about 8 mm across; your ring is made to your own size."],"llg-five-stone-diamond-link-bracelet":[58,"Regular size for this design — 7 in (18 cm) bracelet, shown as the loop it forms on the wrist, about 58 mm across."],"llg-five-stone-diamond-ring":[17,"Regular size for this design — the ring's face is about 17 mm across; your ring is made to your own size."],"llg-floating-solitaire-necklace":[7,"Regular size for this design — the pendant is about 7 mm across."],"llg-full-eternity-band":[20,"Regular size for this design — shown as the full ring, about 20 mm across (US 7)."],"llg-gold-ball-stud-earrings":[16,"Regular size for this design — the pair as shown spans about 16 mm; each stud is about 6 mm across."],"llg-graduated-diamond-tennis-bracelet":[58,"Regular size for this design — 7 in (18 cm) bracelet, shown as the loop it forms on the wrist, about 58 mm across."],"llg-half-eternity-band":[20,"Regular size for this design — shown as the full ring, about 20 mm across (US 7)."],"llg-halo-diamond-stud-earrings":[24,"Regular size for this design — the pair as shown spans about 24 mm; each stud is about 10 mm across."],"llg-heart-cut-diamond-tennis-necklace":[100,"Regular size for this design — 16 in (41 cm) necklace; the front span it shows when worn is about 100 mm across."],"llg-heart-cut-solitaire-ring":[8,"Regular size for this design — the ring's face is about 8 mm across; your ring is made to your own size."],"llg-hidden-halo-solitaire-ring":[9,"Regular size for this design — the ring's face is about 9 mm across; your ring is made to your own size."],"llg-inside-out-diamond-hoops":[35,"Regular size for this design — the pair as shown spans about 35 mm; each hoop is about 22 mm across."],"llg-marquise-cut-diamond-tennis-bracelet":[58,"Regular size for this design — 7 in (18 cm) bracelet, shown as the loop it forms on the wrist, about 58 mm across."],"llg-marquise-cut-diamond-tennis-necklace":[100,"Regular size for this design — 16 in (41 cm) necklace; the front span it shows when worn is about 100 mm across."],"llg-marquise-diamond-stud-earrings":[18,"Regular size for this design — the pair as shown spans about 18 mm; each stud is about 7 mm across."],"llg-marquise-petal-flower-stud-earrings":[28,"Regular size for this design — the pair as shown spans about 28 mm; each stud is about 12 mm across."],"llg-marquise-solitaire-ring":[9,"Regular size for this design — the ring's face is about 9 mm across; your ring is made to your own size."],"llg-morganite-and-diamond-pendant-necklace":[11,"Regular size for this design — the pendant is about 11 mm across."],"llg-multi-strand-diamond-necklace":[95,"Regular size for this design — 16 in (41 cm) strands; the front span it shows when worn is about 95 mm across."],"llg-oval-cut-diamond-tennis-necklace":[100,"Regular size for this design — 16 in (41 cm) necklace; the front span it shows when worn is about 100 mm across."],"llg-oval-diamond-stud-earrings":[18,"Regular size for this design — the pair as shown spans about 18 mm; each stud is about 7 mm across."],"llg-oval-halo-ring":[12,"Regular size for this design — the ring's face is about 12 mm across; your ring is made to your own size."],"llg-oval-solitaire-ring":[8,"Regular size for this design — the ring's face is about 8 mm across; your ring is made to your own size."],"llg-paperclip-link-diamond-bracelet":[58,"Regular size for this design — 7 in (18 cm) bracelet, shown as the loop it forms on the wrist, about 58 mm across."],"llg-pave-diamond-bangle":[65,"Regular size for this design — a standard bangle, about 65 mm across (medium)."],"llg-pave-diamond-dome-earrings":[26,"Regular size for this design — the pair as shown spans about 26 mm; each hoop is about 16 mm across."],"llg-pave-dome-ring":[14,"Regular size for this design — the ring's face is about 14 mm across; your ring is made to your own size."],"llg-pave-shank-solitaire-ring":[8,"Regular size for this design — the ring's face is about 8 mm across; your ring is made to your own size."],"llg-pave-stacking-band":[19,"Regular size for this design — shown as the full ring, about 19 mm across (US 7)."],"llg-pear-cut-diamond-stud-earrings":[18,"Regular size for this design — the pair as shown spans about 18 mm; each stud is about 7 mm across."],"llg-pear-cut-diamond-tennis-bracelet":[58,"Regular size for this design — 7 in (18 cm) bracelet, shown as the loop it forms on the wrist, about 58 mm across."],"llg-pear-cut-halo-ring":[12,"Regular size for this design — the ring's face is about 12 mm across; your ring is made to your own size."],"llg-pear-drop-pendant":[7,"Regular size for this design — the pendant is about 7 mm across. (about 13 mm long)"],"llg-pear-solitaire-ring":[8,"Regular size for this design — the ring's face is about 8 mm across; your ring is made to your own size."],"llg-pearl-strand-bracelet":[56,"Regular size for this design — 7 in (18 cm) bracelet, shown as the loop it forms on the wrist, about 56 mm across."],"llg-princess-cut-diamond-stud-earrings":[18,"Regular size for this design — the pair as shown spans about 18 mm; each stud is about 7 mm across."],"llg-princess-cut-solitaire-ring":[8,"Regular size for this design — the ring's face is about 8 mm across; your ring is made to your own size."],"llg-radiant-cut-solitaire-ring":[8,"Regular size for this design — the ring's face is about 8 mm across; your ring is made to your own size."],"llg-riviera-graduated-diamond-necklace":[100,"Regular size for this design — 17 in (43 cm) graduated rivière; the front span it shows when worn is about 100 mm across."],"llg-round-halo-ring":[12,"Regular size for this design — the ring's face is about 12 mm across; your ring is made to your own size."],"llg-ruby-and-diamond-tennis-bracelet":[58,"Regular size for this design — 7 in (18 cm) bracelet, shown as the loop it forms on the wrist, about 58 mm across."],"llg-sapphire-and-diamond-drop-earrings":[20,"Regular size for this design — the pair as shown spans about 20 mm; each earring drops about 28 mm."],"llg-sapphire-and-diamond-tennis-bracelet":[58,"Regular size for this design — 7 in (18 cm) bracelet, shown as the loop it forms on the wrist, about 58 mm across."],"llg-sapphire-and-diamond-tennis-necklace":[100,"Regular size for this design — 16 in (41 cm) necklace; the front span it shows when worn is about 100 mm across."],"llg-sapphire-and-diamond-three-stone-ring":[15,"Regular size for this design — the ring's face is about 15 mm across; your ring is made to your own size."],"llg-single-row-diamond-bangle":[65,"Regular size for this design — a standard bangle, about 65 mm across (medium)."],"llg-six-prong-solitaire-ring":[8,"Regular size for this design — the ring's face is about 8 mm across; your ring is made to your own size."],"llg-split-shank-solitaire-ring":[8,"Regular size for this design — the ring's face is about 8 mm across; your ring is made to your own size."],"llg-three-stone-drop-pendant":[12,"Regular size for this design — the pendant is about 12 mm across."],"llg-three-stone-ring":[15,"Regular size for this design — the ring's face is about 15 mm across; your ring is made to your own size."],"st-bangle":[65,"Regular size for this design — a standard bangle, about 65 mm across (medium)."],"st-lariat":[40,"Regular size for this design — the lariat's drop front spans about 40 mm across."],"st-pendant":[8,"Regular size for this design — the pendant is about 8 mm across."],"st-ring":[17,"Regular size for this design — the ring's face is about 17 mm across; your ring is made to your own size."]};
+      PRODUCTS.forEach(function (p) {
+        var ejSize = EJ_SIZE_WIRING[p.id];
+        if (ejSize && typeof p.sizeMm !== "number") { p.sizeMm = ejSize[0]; p.sizeNote = ejSize[1]; }
+      });
+      EJ.vrsSizeFor = function (p) {
+        if (!p) return null;
+        if (typeof p.sizeMm === "number" && p.sizeMm > 0) return { mm: p.sizeMm, note: p.sizeNote || "", source: "data" };
+        var w = EJ_SIZE_WIRING[p.id];
+        if (w) return { mm: w[0], note: w[1], source: "data" };
+        if (p.category === "timepieces" && !/strap|winder/i.test(p.name || "")) {
+          var text = [p.metal, p.carat, p.description].filter(Boolean).join(" ");
+          var m = text.match(/(\d{2}(?:\.\d+)?)\s*mm\s*case(?!\s*sizes)/i)
+            || text.match(/case[^0-9]{0,16}(\d{2}(?:\.\d+)?)\s*mm/i)
+            || text.match(/(\d{2}(?:\.\d+)?)\s*mm\s*diameter/i);
+          if (m) {
+            var mm = parseFloat(m[1]);
+            if (mm >= 15 && mm <= 60) return { mm: mm, note: "Case size as listed for this piece: " + mm + " mm.", source: "listing" };
+          }
+        }
+        return null;
+      };
+      EJ.vrsCalLoad = function () {
+        try {
+          var raw = window.localStorage.getItem(EJ_VRS_CAL_KEY);
+          if (!raw) return null;
+          var c = JSON.parse(raw);
+          if (c && typeof c.pxPerMm === "number" && c.pxPerMm >= 1.8 && c.pxPerMm <= 7 && c.at) {
+            return { pxPerMm: c.pxPerMm, cardPx: (typeof c.cardPx === "number" ? c.cardPx : Math.round(c.pxPerMm * 85.6)), at: c.at };
+          }
+        } catch (e) {}
+        return null;
+      };
+      EJ.vrsCalSave = function (cardPx) {
+        var pxPerMm = cardPx / 85.6;
+        try {
+          window.localStorage.setItem(EJ_VRS_CAL_KEY, JSON.stringify({ pxPerMm: pxPerMm, cardPx: cardPx, at: new Date().toISOString() }));
+        } catch (e) {}
+        if (S.ringProfile) S.ringProfile.pxPerMm = pxPerMm;
+        return pxPerMm;
+      };
+      EJ._vrsRingSizes = [15.7, 16.5, 17.3, 18.1, 18.9, 19.7];
+      EJ._vrsRingsHtml = function (pxPerMm) {
+        return EJ._vrsRingSizes.map(function (d) {
+          var px = Math.round(d * pxPerMm);
+          return '<div style="text-align:center;flex-shrink:0"><div class="vrs-ring-circ" data-mm="' + d + '" style="width:' + px + 'px;height:' + px + 'px;margin:0 auto;border:2px solid var(--gold);border-radius:999px;background:color-mix(in oklab, var(--gold) 8%, transparent)"></div><p style="margin-top:0.35rem;font-size:0.68rem;line-height:1.45;color:var(--muted-foreground)">US ' + usSize(d) + "<br>" + d.toFixed(1) + " mm</p></div>";
+        }).join("");
+      };
+      EJ.vrsOpen = function (id) {
+        var p = findProduct(id) || (typeof studioAnyById === "function" ? studioAnyById(id) : null);
+        if (!p) return;
+        var cal = EJ.vrsCalLoad();
+        var fallback = (S.ringProfile && S.ringProfile.pxPerMm) ? S.ringProfile.pxPerMm : null;
+        EJ._vrs = {
+          pieceId: p.id, pct: 0, info: EJ.vrsSizeFor(p),
+          cardPx: cal ? cal.cardPx : (fallback ? Math.round(fallback * 85.6) : 324),
+          pxPerMm: cal ? cal.pxPerMm : (fallback || 324 / 85.6),
+          calibrated: !!cal, calAt: cal ? cal.at : null
+        };
+        if (cal) EJ.vrsRenderSize(); else EJ.vrsRenderCalibrate();
+      };
+      EJ.vrsRenderCalibrate = function () {
+        var st = EJ._vrs; if (!st) return;
+        var p = findProduct(st.pieceId) || PRODUCTS[0];
+        var cardH = Math.round(st.cardPx * 53.98 / 85.6);
+        var body = '<p style="font-size:.92rem;line-height:1.65;color:var(--muted-foreground)">Place your credit card inside the frame and use the slider until the frame matches your card exactly. We remember the scale on this device, so you only do this once.</p>'
+          + '<div style="margin-top:1.25rem;overflow-x:auto;padding-bottom:.25rem"><div id="vrsCardFrame" style="width:' + st.cardPx + 'px;height:' + cardH + 'px;margin:0 auto;border:2px solid #1a73e8;border-radius:10px;position:relative;background:#fff;flex-shrink:0">'
+          + '<div style="position:absolute;left:0;right:0;top:14%;height:16%;background:rgba(26,115,232,.14)"></div>'
+          + '<div style="position:absolute;left:9%;top:44%;width:13%;height:20%;border:1.5px solid rgba(26,115,232,.55);border-radius:3px"></div>'
+          + '<div style="position:absolute;left:9%;bottom:9%;font-family:Roboto,Arial,sans-serif;font-size:.62rem;letter-spacing:.14em;color:#80868b">BANK CARD · 85.6 MM</div>'
+          + "</div></div>"
+          + '<div style="margin-top:1.1rem;display:flex;align-items:center;gap:.8rem"><input type="range" class="vrs-range" id="vrsCardRange" min="200" max="480" step="1" value="' + st.cardPx + '" style="flex:1" aria-label="Card frame size"><span id="vrsCardRead" style="font-family:Roboto,Arial,sans-serif;font-size:.75rem;color:#80868b;white-space:nowrap">' + st.cardPx + " px</span></div>"
+          + '<div style="margin-top:1.6rem;border-top:1px solid var(--border);padding-top:1.1rem"><p style="font-family:Roboto,Arial,sans-serif;font-weight:500;font-size:.85rem">Ring sizer</p><p style="margin-top:.3rem;font-size:.8rem;line-height:1.55;color:var(--muted-foreground)">Place one of your rings over a circle — the circles are drawn at the same calibrated scale as the card frame and move with the slider.</p>'
+          + '<div id="vrsRings" style="margin-top:.9rem;display:flex;flex-wrap:wrap;gap:.9rem;align-items:flex-start">' + EJ._vrsRingsHtml(st.pxPerMm) + "</div></div>"
+          + '<div style="margin-top:1.6rem;display:flex;justify-content:flex-end"><button type="button" class="vrs-blue-btn" id="vrsCalContinue" onclick="EJ.vrsCalConfirm()">Continue</button></div>';
+        EJ.openDialog("First, let\u2019s calibrate your screen", "So we can show " + p.name + " at its true size.", body);
+        var range = document.getElementById("vrsCardRange");
+        if (range) range.addEventListener("input", function () { EJ.vrsCalSlide(parseInt(range.value, 10)); });
+      };
+      EJ.vrsCalSlide = function (px) {
+        var st = EJ._vrs; if (!st || !px) return;
+        st.cardPx = px; st.pxPerMm = px / 85.6;
+        var frame = document.getElementById("vrsCardFrame");
+        if (frame) { frame.style.width = px + "px"; frame.style.height = Math.round(px * 53.98 / 85.6) + "px"; }
+        var read = document.getElementById("vrsCardRead");
+        if (read) read.textContent = px + " px";
+        var circs = document.querySelectorAll(".vrs-ring-circ");
+        for (var i = 0; i < circs.length; i++) {
+          var d = parseFloat(circs[i].getAttribute("data-mm"));
+          var cp = Math.round(d * st.pxPerMm) + "px";
+          circs[i].style.width = cp; circs[i].style.height = cp;
+        }
+      };
+      EJ.vrsCalConfirm = function () {
+        var st = EJ._vrs; if (!st) return;
+        st.pxPerMm = EJ.vrsCalSave(st.cardPx);
+        st.calibrated = true;
+        st.calAt = new Date().toISOString();
+        EJ.vrsRenderSize();
+      };
+      EJ._vrsDeltaText = function () {
+        var st = EJ._vrs; if (!st || !st.info) return "";
+        var mm = st.info.mm * (1 + st.pct / 100);
+        if (st.pct === 0) return "True size · " + mm.toFixed(1) + " mm";
+        return (st.pct > 0 ? "+" : "-") + Math.abs(st.pct) + "% · ≈ " + mm.toFixed(1) + " mm";
+      };
+      EJ._vrsSyncAdj = function () {
+        var st = EJ._vrs; if (!st || !st.info) return;
+        var img = document.getElementById("vrsPieceImg");
+        if (img) img.style.width = (st.info.mm * st.pxPerMm * (1 + st.pct / 100)).toFixed(1) + "px";
+        var d = document.getElementById("vrsDelta");
+        if (d) d.textContent = EJ._vrsDeltaText();
+        var bs = document.getElementById("vrsBtnSmaller"); if (bs) bs.disabled = st.pct <= -50;
+        var bb = document.getElementById("vrsBtnBigger"); if (bb) bb.disabled = st.pct >= 100;
+      };
+      EJ.vrsAdjust = function (d) {
+        var st = EJ._vrs; if (!st) return;
+        st.pct = Math.max(-50, Math.min(100, st.pct + d));
+        EJ._vrsSyncAdj();
+      };
+      EJ.vrsRenderSize = function () {
+        var st = EJ._vrs; if (!st) return;
+        var p = findProduct(st.pieceId) || PRODUCTS[0];
+        st.info = EJ.vrsSizeFor(p);
+        if (!st.info) {
+          var bodyH = '<div style="display:flex;justify-content:center"><img src="' + p.image + '" alt="' + esc(p.name) + '" style="width:280px;max-width:100%;border-radius:.25rem"></div>'
+            + '<div style="margin-top:1.25rem;background:#faf7f1;border:1px solid rgba(184,147,90,.4);border-radius:.5rem;padding:1rem 1.1rem"><p style="font-size:.92rem;line-height:1.6">We don\u2019t know this piece\u2019s exact size yet — ask us and we\u2019ll confirm it for you.</p>'
+            + '<p style="margin-top:.5rem;font-size:.8rem;line-height:1.55;color:var(--muted-foreground)">So we are not showing it at a claimed true size. Your screen calibration is saved on this device, so any piece whose size we know opens at its true size right away.</p></div>'
+            + '<div style="margin-top:1.4rem;display:flex;justify-content:flex-end"><button type="button" class="vrs-blue-btn" onclick="EJ.vrsAskSize()">Ask us to confirm the size</button></div>';
+          EJ.openDialog("View in real size", p.name, bodyH);
+          return;
+        }
+        var calNote = "";
+        if (st.calAt) { try { calNote = new Date(st.calAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }); } catch (e) {} }
+        var w = st.info.mm * st.pxPerMm * (1 + st.pct / 100);
+        var body = '<p style="font-size:.92rem;line-height:1.6;color:var(--muted-foreground)">Your jewelry is now displayed at true calibrated size.</p>'
+          + (st.info.note ? '<p style="margin-top:.35rem;font-size:.8rem;line-height:1.55;color:var(--muted-foreground)">' + esc(st.info.note) + "</p>" : "")
+          + '<div style="margin-top:1.1rem;background:#faf8f5;border:1px solid var(--border);border-radius:.5rem;padding:1.1rem .75rem;overflow-x:auto;text-align:center"><img id="vrsPieceImg" src="' + p.image + '" alt="' + esc(p.name) + '" style="width:' + w.toFixed(1) + 'px;max-width:none"></div>'
+          + '<div style="margin-top:1.1rem;display:flex;justify-content:center;gap:.7rem;flex-wrap:wrap"><button type="button" class="vrs-adj-btn" id="vrsBtnSmaller" onclick="EJ.vrsAdjust(-5)">Customize Smaller</button><button type="button" class="vrs-adj-btn" id="vrsBtnBigger" onclick="EJ.vrsAdjust(5)">Customize Bigger</button></div>'
+          + '<p class="vrs-delta" id="vrsDelta">' + EJ._vrsDeltaText() + "</p>"
+          + '<div style="margin-top:1.3rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap"><span style="font-size:.72rem;color:#80868b">' + (calNote ? "Screen calibrated " + calNote + " · " : "") + '<button type="button" class="vrs-recal" onclick="EJ.vrsRecalibrate()">Recalibrate</button></span>'
+          + '<button type="button" class="vrs-blue-btn" id="vrsContinueBtn" onclick="EJ.vrsContinue()">Continue</button></div>';
+        EJ.openDialog("This is the true size", p.name, body);
+        EJ._vrsSyncAdj();
+      };
+      EJ.vrsRecalibrate = function () { EJ.vrsRenderCalibrate(); };
+      EJ.vrsContinue = function () {
+        var st = EJ._vrs; if (!st) return;
+        var p = findProduct(st.pieceId); if (!p) return;
+        EJ._vrsChoice = { pieceId: p.id, pct: st.pct, mm: st.info ? st.info.mm : null };
+        EJ.closeOverlays();
+        window.location.hash = EJ._bespokeLink(p) + "&vrscale=" + st.pct;
+      };
+      EJ.vrsAskSize = function () {
+        var st = EJ._vrs; if (!st) return;
+        var p = findProduct(st.pieceId); if (!p) return;
+        EJ.closeOverlays();
+        var t = document.getElementById("enquiryText");
+        if (t) t.value = "Please confirm the exact size of the " + p.name + " for me.";
+        if (EJ.itemInquire) EJ.itemInquire();
+      };
+      (function () {
+        var vrsStyle = document.createElement("style");
+        vrsStyle.id = "vrsStyle";
+        vrsStyle.textContent = ".vrs-open-btn{font-family:Roboto,Arial,sans-serif;font-weight:500;font-size:.92rem;color:#b45309;background:#fff;border:1px solid rgba(184,147,90,.55);border-radius:.6rem;padding:.6rem 1.15rem;cursor:pointer;box-shadow:0 1px 2px rgba(60,45,10,.08)}"
+          + ".vrs-open-btn:hover{border-color:#b8935a;background:#faf7f1}"
+          + ".vrs-blue-btn{font-family:Roboto,Arial,sans-serif;font-weight:500;font-size:.95rem;color:#fff;background:#1a73e8;border:0;border-radius:.5rem;padding:.7rem 1.9rem;cursor:pointer}"
+          + ".vrs-blue-btn:hover{background:#1765cc}"
+          + ".vrs-adj-btn{font-family:Roboto,Arial,sans-serif;font-weight:500;font-size:.9rem;color:#b45309;background:#fff;border:1px solid rgba(184,147,90,.55);border-radius:.55rem;padding:.55rem 1.05rem;cursor:pointer}"
+          + ".vrs-adj-btn:disabled{opacity:.4;cursor:default}"
+          + ".vrs-delta{font-size:.68rem;color:#9aa0a6;letter-spacing:.02em;text-align:center;margin-top:.45rem}"
+          + "#vrsPieceImg{transition:width .45s cubic-bezier(.22,.8,.3,1)}"
+          + ".vrs-recal{background:none;border:0;padding:0;font:inherit;color:#80868b;text-decoration:underline;cursor:pointer}"
+          + "input.vrs-range{accent-color:#1a73e8}";
+        document.head.appendChild(vrsStyle);
+      })();
+      /* === VRS-BLOCK-END === */
+
       /* Endless discovery (src/components/discovery.tsx) */
       function discoveryHtml(p) {
         var similar = similarPrice(p);
@@ -8288,8 +8489,15 @@ var PRODUCTS = [
         var caratCh = Math.abs(st.carat - (b.carat || st.carat)) > 0.001;
         var cutCh = st.cutIdx !== b.cutIdx, colorCh = st.colorIdx !== b.colorIdx, clarityCh = st.clarityIdx !== b.clarityIdx;
         var gemCh = caratCh || cutCh || colorCh || clarityCh;
+        var vrsSentence = "";
+        if (st.vrScale !== undefined && st.vrScale !== null && !isNaN(st.vrScale)) {
+          var vrsMm = null;
+          try { var vrsInfo = EJ.vrsSizeFor(p); if (vrsInfo) vrsMm = vrsInfo.mm; } catch (e) {}
+          if (st.vrScale === 0) vrsSentence = " Please keep it at exactly the true size I saw in View in Real Size" + (vrsMm ? " (about " + vrsMm + " mm as shown)" : "") + ".";
+          else vrsSentence = " Please make it " + Math.abs(st.vrScale) + "% " + (st.vrScale > 0 ? "bigger" : "smaller") + " than the size shown in View in Real Size" + (vrsMm ? " — from about " + vrsMm + " mm to about " + (Math.round(vrsMm * (1 + st.vrScale / 100) * 10) / 10) + " mm" : "") + ".";
+        }
         if (!metalCh && !chainCh && !shapeCh && !gemCh) {
-          return "I love this design as it is — the " + p.name + " in " + st.metal + ", " + st.carat.toFixed(2) + " ct. Please make mine just like this.";
+          return "I love this design as it is — the " + p.name + " in " + st.metal + ", " + st.carat.toFixed(2) + " ct. Please make mine just like this." + vrsSentence;
         }
         var parts = [];
         if (metalCh) parts.push(st.metal);
@@ -8301,7 +8509,7 @@ var PRODUCTS = [
         if (clarityCh) parts.push(calc.clarity.label + " clarity");
         if ((metalCh || gemCh) && !caratCh) parts.splice(metalCh ? 1 : 0, 0, st.carat.toFixed(2) + " ct");
         if ((metalCh || gemCh) && !cutCh) parts.push(calc.cut.label + " cut");
-        return "I want to change this piece to " + parts.join(", ") + ".";
+        return "I want to change this piece to " + parts.join(", ") + "." + vrsSentence;
       }
       function studioCalc(st) {
         var anyP = studioAnyById(st.productId) || PRODUCTS[0];
@@ -8414,6 +8622,10 @@ var PRODUCTS = [
           var any0 = (sig && studioAnyById(sig)) || studioDesignById("st-lariat") || PRODUCTS[0];
           EJ._studio = any0.studio ? studioStateForDesign(any0, false) : studioStateFor(any0, false);
         }
+        if (query && query.vrscale !== undefined && query.vrscale !== "" && EJ._studio) {
+          var vrsN = parseInt(query.vrscale, 10);
+          if (!isNaN(vrsN)) EJ._studio.vrScale = Math.max(-50, Math.min(100, vrsN));
+        }
         var st = EJ._studio;
         var p = studioAnyById(st.productId) || PRODUCTS[0];
         st.productId = p.id;
@@ -8459,7 +8671,7 @@ var PRODUCTS = [
           }).join("") + "</div>" : "")
           + '</div><div class="studio-caption"><p class="sc-name">' + esc(p.name) + '</p>'
           + '<p class="sc-line" id="studioSummaryLine">' + esc(studioSummaryLine(st)) + "</p>"
-          + '<p class="sc-note">' + photoNote + "</p></div></section>"
+          + '<p class="sc-note">' + photoNote + "</p>" + (st.vrScale !== undefined && st.vrScale !== null ? '<p class="sc-note" id="studioVrNote">Real-size adjustment: <strong>' + (st.vrScale > 0 ? "+" + st.vrScale + "% bigger" : st.vrScale < 0 ? st.vrScale + "% smaller" : "true size, no change") + '</strong> — chosen in View in Real Size; it is included in your atelier note below.</p>' : "") + "</div></section>"
           /* RIGHT — Gemstone (R2: starts collapsed behind its icon) */
           + '<section class="studio-panel studio-gem' + (st.gemOpen ? " open" : "") + '" id="studioGemPanel" aria-label="Gemstone">'
           + '<button type="button" class="studio-gem-head" aria-expanded="' + !!st.gemOpen + '" aria-controls="studioGemBody" onclick="EJ.studioGemToggle()">'
