@@ -1895,6 +1895,106 @@
 
     <script>
       "use strict";
+      /* ============ third-party tools — the single wiring point ============
+         Fill in a value to switch that tool on; leave it empty and the tool
+         is completely off: nothing is loaded, nothing is sent, and the page
+         behaves exactly as it does with all three empty. The IDs/keys come
+         from the tool accounts and are filled in here only — nowhere else. */
+      var EJ_TOOLS = { clarityId: "zf8z1d34g5", turnstileSiteKey: "", sentryDsn: "https://70483c70051a1a404ca6dbe400cd6c18@o4512448767000576.ingest.us.sentry.io/4512448771457024" };
+
+      /* ---- Microsoft Clarity (only when clarityId is set) ---- */
+      if (EJ_TOOLS.clarityId) {
+        try {
+          (function(c,l,a,r,i,t,y){
+            c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+            t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+            y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+          })(window, document, "clarity", "script", EJ_TOOLS.clarityId);
+        } catch (e) { /* Clarity is optional — it can never break the page */ }
+      }
+
+      /* ---- Sentry error capture (only when sentryDsn is set) ----
+         Standard-library only, the same approach as the WebFlowAI relay:
+         window errors and unhandled promise rejections are POSTed as a
+         minimal event envelope to the DSN's project endpoint. Reporting
+         is fire-and-forget and wrapped so it can never break the page.
+         (turnstileSiteKey stays empty until a widget exists for this
+         domain — no Turnstile code runs yet.) */
+      var EJ_SENTRY = (function(){
+        if (!EJ_TOOLS.sentryDsn) return null;
+        try {
+          var u = new URL(EJ_TOOLS.sentryDsn);
+          var publicKey = u.username;
+          var projectId = u.pathname.replace(/\//g, "");
+          if (!publicKey || !projectId || !u.host) return null;
+          return {
+            dsn: EJ_TOOLS.sentryDsn,
+            publicKey: publicKey,
+            endpoint: u.protocol + "//" + u.host + "/api/" + projectId + "/envelope/"
+          };
+        } catch (e) { return null; }
+      })();
+      var ejSentrySent = 0;
+      function ejReportToSentry(err) {
+        if (!EJ_SENTRY) return;
+        if (ejSentrySent >= 20) return; /* a runaway error loop must not flood the project */
+        try {
+          ejSentrySent++;
+          var bytes = new Uint8Array(16);
+          if (window.crypto && window.crypto.getRandomValues) window.crypto.getRandomValues(bytes);
+          else for (var i = 0; i < 16; i++) bytes[i] = Math.floor(Math.random() * 256);
+          var eventId = "";
+          for (var j = 0; j < 16; j++) eventId += ("0" + bytes[j].toString(16)).slice(-2);
+          var event = {
+            event_id: eventId,
+            timestamp: new Date().toISOString(),
+            platform: "javascript",
+            level: "error",
+            logger: "elevate-site",
+            exception: {
+              values: [{
+                type: (err && err.name) || "Error",
+                value: String((err && err.message) || err)
+              }]
+            }
+          };
+          var eventJson = JSON.stringify(event);
+          var header = JSON.stringify({
+            event_id: eventId,
+            dsn: EJ_SENTRY.dsn,
+            sdk: { name: "elevate-site-stdlib", version: "1.0.0" },
+            sent_at: new Date().toISOString()
+          });
+          var byteLen = eventJson.length;
+          try { byteLen = new Blob([eventJson]).size; } catch (e3) {}
+          var itemHeader = JSON.stringify({ type: "event", length: byteLen });
+          var body = header + "\n" + itemHeader + "\n" + eventJson;
+          var headers = {
+            "Content-Type": "application/x-sentry-envelope",
+            "X-Sentry-Auth": "Sentry sentry_version=7, sentry_client=elevate-site/1.0.0, sentry_key=" + EJ_SENTRY.publicKey
+          };
+          if (window.fetch) {
+            window.fetch(EJ_SENTRY.endpoint, { method: "POST", headers: headers, body: body, keepalive: true }).catch(function(){});
+          } else if (window.XMLHttpRequest) {
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", EJ_SENTRY.endpoint, true);
+            xhr.setRequestHeader("Content-Type", headers["Content-Type"]);
+            xhr.setRequestHeader("X-Sentry-Auth", headers["X-Sentry-Auth"]);
+            xhr.send(body);
+          }
+        } catch (e4) { /* error reporting must never break the page */ }
+      }
+      if (EJ_SENTRY) {
+        window.addEventListener("error", function(event){
+          ejReportToSentry((event && event.error) || new Error((event && event.message) || "Unknown error"));
+        });
+        window.addEventListener("unhandledrejection", function(event){
+          var reason = event && event.reason;
+          ejReportToSentry(reason instanceof Error ? reason : new Error(String(reason)));
+        });
+      }
+      /* ============ end third-party tools ============ */
+
       /* ================= Catalogue — ported verbatim from src/data/catalog.ts ================= */
       function sub(slug, name) { return { slug: slug, name: name }; }
       function g(a, b, c) { return [a, b, c]; }
