@@ -1182,7 +1182,7 @@
       .add-btn:hover { border-color: color-mix(in oklab, var(--gold) 60%, transparent); color: var(--gold); }
       .add-btn.in { border-color: color-mix(in oklab, var(--gold) 60%, transparent); color: var(--gold); }
       .add-btn svg { width: 14px; height: 14px; }
-      .item-main { position: relative; aspect-ratio: 1; overflow: hidden; border-radius: 0.25rem; background: var(--photo-panel); border: 1px solid var(--photo-line); cursor: zoom-in; }
+      .item-main { position: relative; aspect-ratio: 1; overflow: hidden; border-radius: 0.25rem; background: var(--photo-panel); border: 1px solid color-mix(in oklab, var(--gold) 55%, transparent); box-shadow: 0 14px 34px rgba(122, 92, 30, 0.10), 0 2px 8px rgba(122, 92, 30, 0.06); cursor: zoom-in; }
       .item-main img { display: block; width: 100%; height: 100%; object-fit: contain; padding: 1.5rem; transition: transform 0.3s; }
       .item-main.zoomed { cursor: zoom-out; }
       .item-main.zoomed img { transform: scale(2.1); }
@@ -1196,6 +1196,13 @@
       .item-main { touch-action: pan-y; }
       .pcard .ph { touch-action: pan-y; }
       .ej-gallery-counter { margin-top: 0.5rem; font-size: 0.75rem; letter-spacing: 0.14em; color: var(--muted-foreground); text-align: center; }
+      /* Product-page polish (2026-11-20): thumbnail strip edges — the
+         active thumb carries a gold ring over its gold border; inactive
+         thumbs keep a soft neutral edge with a faint warm shadow. The
+         border itself is still set inline by EJ.gallerySet. */
+      #itemThumbs button { box-shadow: 0 1px 3px rgba(122, 92, 30, 0.06); transition: box-shadow .25s ease, border-color .25s ease; }
+      #itemThumbs button:hover { box-shadow: 0 3px 10px rgba(122, 92, 30, 0.12); }
+      #itemThumbs button[aria-pressed="true"] { box-shadow: 0 0 0 1px var(--gold), 0 4px 14px rgba(184, 147, 90, 0.22); }
       .card-counter { position: absolute; right: 0.5rem; bottom: 0.5rem; z-index: 2; background: color-mix(in oklab, var(--foreground) 70%, transparent); color: var(--background); font-size: 10px; letter-spacing: 0.12em; padding: 0.2rem 0.45rem; border-radius: 999px; pointer-events: none; }
       .narr-spin { display: none; width: 14px; height: 14px; flex-shrink: 0; border-radius: 50%; border: 2px solid color-mix(in oklab, var(--gold) 30%, transparent); border-top-color: var(--gold); animation: ej-narr-spin .7s linear infinite; }
       @keyframes ej-narr-spin { to { transform: rotate(360deg); } }
@@ -7303,15 +7310,15 @@ var PRODUCTS = [
           + (gallery.length > 1 ? '<div id="itemGalleryCounter" class="ej-gallery-counter" aria-live="polite">1 / ' + gallery.length + '</div>' : "")
           + (gallery.length > 1 ? '<div id="itemThumbs" style="margin-top:0.75rem;display:flex;gap:0.75rem;overflow-x:auto">' + gallery.map(function (src, i) {
             return '<button type="button" onclick="EJ.gallerySet(' + i + ')" aria-pressed="' + (i === 0) + '" style="width:5rem;height:5rem;flex-shrink:0;overflow:hidden;border-radius:0.25rem;border:1px solid ' + (i === 0 ? "var(--gold)" : "var(--border)") + ';padding:0"><img src="' + src + '" alt="' + (i ? "View " + (i + 1) : "Main view") + '" loading="lazy" style="width:100%;height:100%;object-fit:contain;padding:0.35rem;background:#fff" /></button>';
-          }).join("") + "</div>" : "") + '<div style="display:flex;justify-content:flex-end;margin-top:0.75rem"><button type="button" class="vrs-open-btn" onclick="EJ.vrsOpen(\'' + p.id + '\')">View In Real Size</button></div>' + "</div>";
+          }).join("") + "</div>" : "") + '<div class="vrs-open-row"><button type="button" class="vrs-open-btn" onclick="EJ.vrsOpen(\'' + p.id + '\')"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="2.5" y="9" width="19" height="6.5" rx="1.25"/><path d="M6.25 9v3.25M10.25 9v4M14.25 9v3.25M18.25 9v4"/></svg>View In Real Size</button></div>' + "</div>";
         /* Details */
         h += '<div style="min-width:0"><header style="min-width:0">'
           + '<div style="display:flex;flex-wrap:wrap;align-items:center;gap:1rem"><a href="#/our-world" style="display:inline-flex;max-width:100%;transition:transform .2s" onmouseover="this.style.transform=\'scale(1.02)\'" onmouseout="this.style.transform=\'\'" aria-label="Visit Our World">' + brandLogoHTML(v.name) + "</a>"
           + '<p style="font-size:0.875rem;color:var(--muted-foreground)">Sold by <a href="#/vendor/' + v.slug + '" style="color:var(--foreground);text-decoration:underline;text-underline-offset:4px">' + esc(v.name) + "</a> · " + esc(v.city) + "</p></div>"
           + (era ? '<a href="#/heritage" class="btn-ghost" style="margin-top:1rem;display:inline-flex">Period piece · ' + esc(era.name) + ", " + esc(era.years) + "</a>" : "")
-          + '<h1 style="margin-top:1rem;font-family:var(--font-display);font-size:2.25rem;line-height:1.15;overflow-wrap:anywhere">' + esc(p.name) + "</h1>"
-          + '<div style="margin-top:1rem;display:flex;flex-wrap:wrap;align-items:center;gap:0.75rem"><span style="font-family:var(--font-display);font-size:1.875rem" id="itemPrice">' + priceLabel(p) + "</span>" + (p.oneOfOne ? '<span class="chip-gold">One of one</span>' : "") + "</div></header>"
-          + '<div style="margin-top:2rem;border-top:1px solid var(--border);padding-top:1rem"><div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:0.75rem"><p class="eyebrow">The piece</p>'
+          + '<h1 style="margin-top:0.85rem;font-family:var(--font-display);font-size:2.25rem;line-height:1.15;overflow-wrap:anywhere">' + esc(p.name) + "</h1>"
+          + '<div style="margin-top:0.7rem;display:flex;flex-wrap:wrap;align-items:center;gap:0.75rem"><span style="font-family:var(--font-display);font-size:1.875rem" id="itemPrice">' + priceLabel(p) + "</span>" + (p.oneOfOne ? '<span class="chip-gold">One of one</span>' : "") + "</div></header>"
+          + '<div style="margin-top:1.5rem;border-top:1px solid rgba(184,147,90,.45);padding-top:1rem"><div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:0.75rem"><p class="eyebrow">The piece</p>'
           + '<a class="btn-ghost" href="' + EJ._bespokeLink(p) + '">' + icon("wand", 14) + "Customize this piece</a></div>"
           + '<p style="margin-top:1rem;font-size:0.9375rem;line-height:1.7;color:color-mix(in oklab, var(--foreground) 85%, transparent)">' + esc(p.description) + "</p></div>";
         /* narration */
@@ -7885,8 +7892,12 @@ var PRODUCTS = [
       (function () {
         var vrsStyle = document.createElement("style");
         vrsStyle.id = "vrsStyle";
-        vrsStyle.textContent = ".vrs-open-btn{font-family:Roboto,Arial,sans-serif;font-weight:500;font-size:.92rem;color:#b45309;background:#fff;border:1px solid rgba(184,147,90,.55);border-radius:.6rem;padding:.6rem 1.15rem;cursor:pointer;box-shadow:0 1px 2px rgba(60,45,10,.08)}"
-          + ".vrs-open-btn:hover{border-color:#b8935a;background:#faf7f1}"
+        vrsStyle.textContent = ".vrs-open-row{display:flex;justify-content:flex-end;margin-top:.9rem}"
+          + ".vrs-open-btn{display:inline-flex;align-items:center;gap:.55rem;font-family:Roboto,Arial,sans-serif;font-weight:500;font-size:.92rem;letter-spacing:.01em;color:#b45309;background:linear-gradient(180deg,#ffffff,#fdfaf3) padding-box,linear-gradient(120deg,#8a6a2f 0%,#e9d189 38%,#b8935a 68%,#f2e0a8 100%) border-box;border:2px solid transparent;border-radius:.65rem;padding:.6rem 1.2rem;cursor:pointer;box-shadow:0 2px 6px rgba(122,92,30,.13),0 10px 24px rgba(184,147,90,.15);transition:transform .18s ease,box-shadow .25s ease}"
+          + ".vrs-open-btn svg{width:17px;height:17px;flex:none;fill:none;stroke:#b8935a;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}"
+          + ".vrs-open-btn:hover{transform:translateY(-1px);box-shadow:0 4px 10px rgba(122,92,30,.15),0 16px 30px rgba(184,147,90,.22)}"
+          + ".vrs-open-btn:active{transform:translateY(0);box-shadow:0 2px 6px rgba(122,92,30,.13),0 8px 18px rgba(184,147,90,.14)}"
+          + "@media (max-width:640px){.vrs-open-row{justify-content:stretch}.vrs-open-btn{width:100%;justify-content:center;padding:.78rem 1.2rem}}"
           + ".vrs-blue-btn{font-family:Roboto,Arial,sans-serif;font-weight:500;font-size:.95rem;color:#fff;background:#1a73e8;border:0;border-radius:.5rem;padding:.7rem 1.9rem;cursor:pointer}"
           + ".vrs-blue-btn:hover{background:#1765cc}"
           + ".vrs-adj-btn{font-family:Roboto,Arial,sans-serif;font-weight:500;font-size:.9rem;color:#b45309;background:#fff;border:1px solid rgba(184,147,90,.55);border-radius:.55rem;padding:.55rem 1.05rem;cursor:pointer}"
