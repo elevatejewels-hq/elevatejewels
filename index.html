@@ -8493,7 +8493,7 @@ var PRODUCTS = [
         if (status) status.textContent = "Reading your photo…";
         if (results) results.innerHTML = "";
         var ctrl = ("AbortController" in window) ? new AbortController() : null;
-        var timer = ctrl ? setTimeout(function () { try { ctrl.abort(); } catch (e) { /* noop */ } }, 45000) : null;
+        var timer = ctrl ? setTimeout(function () { try { ctrl.abort(); } catch (e) { /* noop */ } }, 90000) : null;
         fetch(EJ_VISUAL.replace(/\/+$/, "") + "/match", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
