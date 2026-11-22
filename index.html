@@ -6142,6 +6142,7 @@ var PRODUCTS = [
         var sel = 'class="select-filter"';
         var h = '<div class="filter-bar">'
           + '<button type="button" class="icon-btn" aria-label="Filter pieces" title="Filter pieces" style="border:1px solid var(--border);background:var(--popover)" onclick="EJ.gridFilter(\'' + gid + '\')">' + icon("sliders", 16) + "</button>";
+        if (EJ_VISUAL) h += '<button type="button" class="vs-open-btn" onclick="EJ.vsOpen()">' + icon("camera", 15) + "<span>Search by photo</span></button>";
         if (st.filterOpen) {
           h += '<div class="filter-pop"><h3>Refine selection</h3>';
           if (st.showCategoryFilter) {
@@ -8382,6 +8383,205 @@ var PRODUCTS = [
         document.head.appendChild(vrsStyle);
       })();
       /* === VRS-BLOCK-END === */
+
+      /* === VISUAL SEARCH (Search by photo — Gemini Flash) ===
+         A customer uploads a photo of a piece of jewelry; the
+         visual-search back end (EJ_VISUAL) asks Gemini Flash to read
+         the photo and return structured attributes (type, stones,
+         shape, metal, style, keywords); THIS page then scores those
+         attributes against its own PRODUCTS data — already on the
+         page — and shows the best-matching pieces. Only the uploaded
+         photo ever leaves the page; no catalogue data is sent
+         anywhere. While EJ_VISUAL is empty the feature is completely
+         off: the shop toolbar carries no button, nothing is requested,
+         and the shop behaves exactly as before. */
+      var EJ_VISUAL = "https://elevate-visual-search-backend.onrender.com";
+      (function () {
+        var vsStyle = document.createElement("style");
+        vsStyle.id = "vsStyle";
+        vsStyle.textContent = ".vs-open-btn{display:inline-flex;align-items:center;gap:.45rem;font-family:Roboto,Arial,sans-serif;font-weight:500;font-size:.85rem;color:#b45309;background:linear-gradient(180deg,#ffffff,#fdfaf3) padding-box,linear-gradient(120deg,#8a6a2f 0%,#e9d189 38%,#b8935a 68%,#f2e0a8 100%) border-box;border:2px solid transparent;border-radius:.6rem;padding:.42rem .9rem;cursor:pointer;margin-left:.5rem}"
+          + ".vs-open-btn:hover{box-shadow:0 4px 10px rgba(122,92,30,.15)}"
+          + ".vs-pickbtn{display:inline-flex;align-items:center;gap:.5rem;font-family:Roboto,Arial,sans-serif;font-weight:500;font-size:.9rem;color:#b45309;background:#fff;border:1px solid rgba(184,147,90,.55);border-radius:.55rem;padding:.55rem 1.05rem;cursor:pointer}"
+          + ".vs-hint{font-size:.8rem;color:var(--muted-foreground)}"
+          + ".vs-preview{margin-top:1rem;border:1px solid var(--border);border-radius:.5rem;padding:.5rem;background:#fff}"
+          + ".vs-preview img{display:block;max-width:100%;max-height:16rem;margin:0 auto;border-radius:.35rem}"
+          + ".vs-find-btn{font-family:Roboto,Arial,sans-serif;font-weight:500;font-size:.95rem;color:#fff;background:#1a73e8;border:0;border-radius:.5rem;padding:.7rem 1.9rem;cursor:pointer;margin-top:1rem}"
+          + ".vs-find-btn:hover{background:#1765cc}"
+          + ".vs-find-btn:disabled{opacity:.45;cursor:default}"
+          + ".vs-status{margin-top:1rem;font-size:.875rem;color:var(--muted-foreground);line-height:1.55}"
+          + ".vs-grid{margin-top:1.25rem}";
+        document.head.appendChild(vsStyle);
+      })();
+      EJ._vs = null; // { image: <data URL>, mimeType } once a photo is chosen
+      EJ.vsOpen = function () {
+        if (!EJ_VISUAL) return;
+        EJ._vs = null;
+        EJ.openDialog("Search by photo", "Upload a photo of a piece of jewelry and we will find the closest matches in the vault.",
+          '<div class="vs-wrap">'
+          + '<div style="display:flex;flex-wrap:wrap;align-items:center;gap:.75rem"><label class="vs-pickbtn">' + icon("camera", 16) + "Choose a photo"
+          + '<input type="file" id="vsFile" accept="image/*" hidden onchange="EJ.vsFile(this)"></label>'
+          + '<span class="vs-hint">A clear photo of one piece works best. Your photo is sent to our identification service only — never stored.</span></div>'
+          + '<div class="vs-preview" id="vsPreview" hidden><img id="vsImg" alt="Your uploaded piece"></div>'
+          + '<button type="button" class="vs-find-btn" id="vsFind" disabled onclick="EJ.vsFind()">Find matches</button>'
+          + '<p class="vs-status" id="vsStatus" role="status"></p>'
+          + '<div id="vsResults"></div></div>');
+      };
+      EJ.vsSetImage = function (dataUrl, mimeType) {
+        EJ._vs = { image: dataUrl, mimeType: mimeType || "image/jpeg" };
+        var prev = document.getElementById("vsPreview");
+        var img = document.getElementById("vsImg");
+        if (prev && img) { img.src = dataUrl; prev.hidden = false; }
+        var find = document.getElementById("vsFind");
+        if (find) find.disabled = false;
+        var status = document.getElementById("vsStatus");
+        if (status) status.textContent = "";
+        var results = document.getElementById("vsResults");
+        if (results) results.innerHTML = "";
+      };
+      EJ.vsFile = function (input) {
+        var file = input && input.files && input.files[0];
+        if (!file) return;
+        var status = document.getElementById("vsStatus");
+        var reader = new FileReader();
+        reader.onload = function () {
+          var dataUrl = String(reader.result || "");
+          if (!dataUrl) { if (status) status.textContent = "That photo could not be read — please try another."; return; }
+          EJ.vsSetImage(dataUrl, file.type || "image/jpeg");
+          /* Downscale large photos so the request stays light; any
+             failure simply keeps the original image. */
+          try {
+            var img = new Image();
+            img.onload = function () {
+              try {
+                var max = 1024;
+                var w = img.naturalWidth || img.width, h = img.naturalHeight || img.height;
+                if ((w > max || h > max) && w > 0 && h > 0) {
+                  var scale = max / Math.max(w, h);
+                  var canvas = document.createElement("canvas");
+                  canvas.width = Math.round(w * scale);
+                  canvas.height = Math.round(h * scale);
+                  var ctx = canvas.getContext("2d");
+                  if (!ctx) return;
+                  ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                  var small = canvas.toDataURL("image/jpeg", 0.85);
+                  if (small && small.length < dataUrl.length) EJ.vsSetImage(small, "image/jpeg");
+                }
+              } catch (e) { /* keep the original */ }
+            };
+            img.src = dataUrl;
+          } catch (e) { /* keep the original */ }
+        };
+        reader.onerror = function () { if (status) status.textContent = "That photo could not be read — please try another."; };
+        reader.readAsDataURL(file);
+      };
+      EJ.vsSummary = function (a) {
+        var typeNames = { ring: "a ring", necklace: "a necklace", bracelet: "a bracelet", earrings: "earrings", watch: "a watch", other: "a piece of jewelry" };
+        var bits = [typeNames[a.type] || "a piece of jewelry"];
+        if (a.stones) bits.push(a.stones);
+        if (a.shape) bits.push(a.shape);
+        if (a.metal) bits.push("in " + a.metal);
+        if (a.style) bits.push(a.style);
+        return bits.join(" · ");
+      };
+      EJ.vsFind = function () {
+        var status = document.getElementById("vsStatus");
+        var results = document.getElementById("vsResults");
+        var find = document.getElementById("vsFind");
+        if (!EJ_VISUAL) { if (status) status.textContent = "Photo search is not available yet."; return; }
+        if (!EJ._vs || !EJ._vs.image) { if (status) status.textContent = "Choose a photo first."; return; }
+        if (find) find.disabled = true;
+        if (status) status.textContent = "Reading your photo…";
+        if (results) results.innerHTML = "";
+        var ctrl = ("AbortController" in window) ? new AbortController() : null;
+        var timer = ctrl ? setTimeout(function () { try { ctrl.abort(); } catch (e) { /* noop */ } }, 45000) : null;
+        fetch(EJ_VISUAL.replace(/\/+$/, "") + "/match", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ image: EJ._vs.image, mimeType: EJ._vs.mimeType }),
+          signal: ctrl ? ctrl.signal : undefined
+        }).then(function (res) {
+          return res.json().then(function (data) { return { ok: res.ok, data: data }; });
+        }).then(function (out) {
+          if (timer) clearTimeout(timer);
+          if (!out.ok || !out.data || out.data.ok !== true) throw new Error("bad response");
+          if (find) find.disabled = false;
+          var attrs = out.data.attributes;
+          if (!attrs) {
+            if (status) status.textContent = "That photo does not look like a piece of jewelry, so there is nothing to match. Try a clear photo of a ring, necklace, bracelet, earrings or a watch.";
+            return;
+          }
+          var matches = EJ.vsRank(attrs, 12);
+          var summary = EJ.vsSummary(attrs);
+          if (!matches.length) {
+            if (status) status.textContent = "We read your photo as " + summary + " — but nothing in the vault is a close match right now.";
+            return;
+          }
+          if (status) status.textContent = "We read your photo as " + summary + ". Closest matches in the vault:";
+          if (results) results.innerHTML = '<div class="grid-cards vs-grid">' + matches.map(function (p) { return productCard(p); }).join("") + "</div>";
+        }).catch(function () {
+          if (timer) clearTimeout(timer);
+          if (find) find.disabled = false;
+          if (status) status.textContent = "Photo search could not be reached just now — please try again in a moment.";
+        });
+      };
+      /* Scoring: the photo's type gates the pool (a ring photo is matched
+         against rings first and only), then stones, shape, metal, style
+         and keywords rank within the type. Deterministic: catalogue
+         order breaks ties. */
+      var VS_TYPE_CATEGORY = { ring: "rings", necklace: "necklaces", bracelet: "bracelets", earrings: "earrings", watch: "timepieces" };
+      function vsWords(text) {
+        return String(text || "").toLowerCase().split(/[^a-z0-9]+/).filter(function (w) { return w.length > 2; });
+      }
+      function vsHaystack(p) {
+        return [p.name, p.stone, p.carat, p.metal, p.category, p.subcategory, p.maker || "", vendorName(p.vendor), p.description || ""].join(" ").toLowerCase();
+      }
+      function vsScore(p, a) {
+        var hay = vsHaystack(p);
+        var score = 0;
+        vsWords(a.stones).forEach(function (w) {
+          if (["and", "with", "stone", "stones"].indexOf(w) >= 0) return;
+          if (hay.indexOf(w) >= 0) score += 30;
+        });
+        if (a.shape) {
+          var shape = String(a.shape).toLowerCase();
+          if (hay.indexOf(shape) >= 0) score += 25;
+          else vsWords(shape).forEach(function (w) { if (hay.indexOf(w) >= 0) score += 10; });
+        }
+        if (a.metal) {
+          var metal = String(a.metal).toLowerCase();
+          if (hay.indexOf(metal) >= 0) score += 20;
+          else vsWords(metal).forEach(function (w) {
+            if (["gold", "platinum", "silver", "steel"].indexOf(w) >= 0) return;
+            if (hay.indexOf(w) >= 0) score += 8;
+          });
+        }
+        if (a.style && hay.indexOf(String(a.style).toLowerCase()) >= 0) score += 15;
+        if (Array.isArray(a.keywords)) {
+          var kwTotal = 0;
+          a.keywords.forEach(function (k) {
+            var word = String(k || "").toLowerCase();
+            if (word.length > 2 && kwTotal < 48 && hay.indexOf(word) >= 0) { score += 8; kwTotal += 8; }
+          });
+        }
+        return score;
+      }
+      EJ.vsRank = function (attrs, limit) {
+        if (!attrs) return [];
+        var cat = VS_TYPE_CATEGORY[attrs.type] || null;
+        var scored = [];
+        for (var i = 0; i < PRODUCTS.length; i++) {
+          scored.push({ p: PRODUCTS[i], i: i, s: vsScore(PRODUCTS[i], attrs) });
+        }
+        scored.sort(function (x, y) { return (y.s - x.s) || (x.i - y.i); });
+        var pool;
+        if (cat) {
+          pool = scored.filter(function (r) { return r.p.category === cat; });
+        } else {
+          pool = scored.filter(function (r) { return r.s > 0; });
+        }
+        return pool.slice(0, limit || 12).map(function (r) { return r.p; });
+      };
+      /* === VISUAL SEARCH END === */
 
       /* Endless discovery (src/components/discovery.tsx) */
       function discoveryHtml(p) {
