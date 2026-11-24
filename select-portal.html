@@ -1,0 +1,4240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Elevate Select — Sales & Inventory Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-canvas: #FFFFFF;
+    --bg-sidebar: #F0F4F9;
+    --bg-hover: #E3E8EE;
+    --bg-active: #D3E3FD;
+    --text-active: #041E49;
+    --text-primary: #1F1F1F;
+    --text-secondary: #444746;
+    --border-light: #E1E5EA;
+    --accent-gold: #C5A059;
+    --accent-gold-bg: #F9F5EB;
+    --badge-red: #D93025;
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+
+  body {
+    display: flex;
+    height: 100vh;
+    background: linear-gradient(180deg, var(--bg-canvas) 0%, #F8FAFD 100%);
+    color: var(--text-primary);
+    overflow: hidden;
+  }
+
+  /* Slim icon rail (v4 layout: 64px) */
+  .icon-rail {
+    width: 64px;
+    background: var(--bg-sidebar);
+    border-right: 1px solid var(--border-light);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 14px 0;
+    justify-content: space-between;
+    flex-shrink: 0;
+    z-index: 30;
+  }
+
+  .rail-top, .rail-bottom {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .rail-btn {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    border: none;
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s, color 0.15s, transform 0.1s ease;
+    flex-shrink: 0;
+  }
+
+  .rail-btn:hover { background: var(--bg-hover); color: var(--text-primary); }
+  .rail-btn:active { transform: scale(0.94); }
+
+  .rail-btn.active {
+    background: var(--bg-active);
+    color: var(--text-active);
+  }
+
+  /* v4: gold expand chevron riding the Catalog button */
+  .rail-btn .chev {
+    position: absolute;
+    right: -3px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    background: var(--accent-gold);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 6px rgba(122,92,30,.4);
+  }
+  .rail-btn { position: relative; }
+
+  /* v4: white round add button */
+  .rail-btn.plus-btn {
+    background: #fff;
+    border: 1.5px solid var(--border-light);
+    color: var(--text-primary);
+    box-shadow: 0 2px 8px rgba(32,33,36,.1);
+    font-size: 20px;
+  }
+  .rail-btn.plus-btn:hover { border-color: var(--accent-gold); color: var(--accent-gold-dark, #7A5C1E); }
+
+  /* On-demand slide-out drawer (catalogue / gallery / QR / patrol) */
+  .detail-drawer {
+    width: 0;
+    overflow: hidden;
+    background: var(--bg-sidebar);
+    border-right: 1px solid transparent;
+    transition: width 0.22s ease;
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    z-index: 20;
+  }
+
+  .detail-drawer.open {
+    width: 310px;
+    border-right-color: var(--border-light);
+  }
+
+  .drawer-inner {
+    width: 310px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    padding: 16px 12px;
+  }
+
+  .drawer-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    padding: 0 4px;
+    flex-shrink: 0;
+  }
+
+  .drawer-title {
+    font-size: 15px;
+    font-weight: 600;
+  }
+
+  .drawer-section { display: none; flex-direction: column; min-height: 0; flex: 1; overflow-y: auto; }
+  .drawer-section.on { display: flex; }
+  #drawerCatalog { overflow-y: hidden; }
+
+  .drawer-sub {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin: 0 4px 10px;
+    line-height: 1.5;
+  }
+
+  .icon-btn {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    border: none;
+    background: transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    transition: background 0.15s;
+    flex-shrink: 0;
+  }
+
+  .icon-btn:hover {
+    background: var(--bg-hover);
+  }
+
+  .icon-btn.listening {
+    background: #FCE8E6;
+    color: var(--badge-red);
+  }
+
+  .section-header {
+    padding: 16px 6px 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
+
+  .filter-bar {
+    display: grid;
+    grid-template-rows: 0fr;
+    opacity: 0;
+    transition: grid-template-rows 0.25s ease, opacity 0.2s ease;
+  }
+
+  .filter-bar.open {
+    grid-template-rows: 1fr;
+    opacity: 1;
+  }
+
+  .filter-inner {
+    overflow: hidden;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 0 2px;
+    transition: padding-bottom 0.25s ease;
+  }
+
+  .filter-bar.open .filter-inner {
+    padding-bottom: 12px;
+  }
+
+  .filter-select {
+    padding: 7px 10px;
+    border-radius: 12px;
+    border: 1px solid var(--border-light);
+    background: var(--bg-canvas);
+    font-size: 12px;
+    color: var(--text-primary);
+  }
+
+  .catalog-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0 2px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .catalog-row {
+    padding: 8px 10px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+
+  .catalog-row:hover {
+    background: var(--bg-hover);
+  }
+
+  .catalog-row.active {
+    background: var(--bg-active);
+    color: var(--text-active);
+  }
+
+  .thumb-sq {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background: #FAF8F5;
+    border: 1px solid var(--border-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+    overflow: hidden;
+  }
+
+  .thumb-sq img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .item-meta {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .item-id {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .item-title {
+    font-size: 12px;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .status-pill {
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 10px;
+    white-space: nowrap;
+  }
+
+  .pill-active { background: #E6F4EA; color: #137333; }
+  .pill-pending { background: #FEF7E0; color: #B06000; }
+  .pill-oos { background: #F1F3F4; color: #5F6368; }
+  .pill-sold { background: #1F1F1F; color: #FFFFFF; }
+  .pill-approved { background: #E6F4EA; color: #137333; }
+  .pill-rejected { background: #FCE8E6; color: #A50E0E; }
+
+  /* Availability tag (owner's three-state model) */
+  .status-tag {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 6px;
+    border-radius: 8px;
+    margin-top: 2px;
+  }
+
+  .status-in-stock { background: #E6F4EA; color: #137333; }
+  .status-not-in-stock { background: #FCE8E6; color: var(--badge-red); }
+  .status-custom { background: var(--accent-gold-bg); color: #7A5C1E; border: 1px solid var(--accent-gold); }
+  .status-shipping { background: #E8F0FE; color: #174EA6; }
+
+  /* Skeleton shimmer (v4 lookups) */
+  .skel {
+    border-radius: 10px;
+    background: linear-gradient(90deg, #eceae6 25%, #f7f5f1 50%, #eceae6 75%);
+    background-size: 200% 100%;
+    animation: skelShimmer 1.3s infinite linear;
+  }
+  @keyframes skelShimmer { to { background-position: -200% 0; } }
+  .skel-row { height: 14px; margin: 8px 0; }
+  .skel-row.w60 { width: 60%; } .skel-row.w40 { width: 40%; } .skel-row.w80 { width: 80%; }
+
+  /* Focus view (v4 product card) */
+  .focus-breadcrumb { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .avail-badge { border-radius: 999px; padding: 4px 12px; font-size: 12px; font-weight: 600; }
+  .focus-img-wrap { position: relative; border-radius: 20px; overflow: hidden; background: #FAF8F5; border: 1px solid var(--border-light); }
+  .focus-img { width: 100%; max-height: 380px; object-fit: contain; display: block; background: #FAF8F5; }
+  .focus-img-cap {
+    position: absolute; left: 14px; bottom: 12px; background: rgba(255,255,255,.92);
+    border: 1px solid var(--border-light); border-radius: 10px; padding: 6px 12px;
+    font-size: 12px; font-weight: 600; color: var(--text-secondary);
+  }
+  .focus-img-actions { position: absolute; right: 12px; bottom: 12px; display: flex; gap: 8px; }
+  .focus-img-actions .chip-btn { box-shadow: 0 4px 14px rgba(32,33,36,.14); }
+  .qr-tag-row { display: flex; align-items: center; gap: 14px; background: #fff; border: 1px solid var(--border-light); border-radius: 14px; padding: 12px 16px; margin-top: 14px; }
+  .qr-tag-row img { width: 64px; height: 64px; image-rendering: pixelated; border-radius: 6px; }
+  .qr-tag-row .t { font-size: 13px; font-weight: 600; }
+  .qr-tag-row .s { font-size: 12px; color: var(--text-secondary); margin-top: 2px; line-height: 1.45; }
+  .draft-box { background: #F8F9FA; border: 1px solid var(--border-light); border-radius: 12px; padding: 12px 14px; font-size: 13.5px; line-height: 1.55; margin-top: 10px; }
+  .draft-box .acts { display: flex; gap: 8px; margin-top: 10px; }
+
+  /* Gallery view (v4) */
+  .gal-filters { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+  .gal-chip {
+    border: 1.5px solid var(--border-light); background: #fff; color: var(--text-secondary);
+    border-radius: 999px; padding: 7px 14px; font-size: 13px; font-weight: 600; cursor: pointer;
+    font-family: inherit; transition: all .15s ease;
+  }
+  .gal-chip:hover { border-color: var(--accent-blue); color: var(--accent-blue); }
+  .gal-chip.on { background: #202124; border-color: #202124; color: #fff; }
+  .gal-chip.blue.on { background: var(--accent-blue); border-color: var(--accent-blue); }
+  .gal-chip.gold.on { background: var(--accent-gold); border-color: var(--accent-gold); color: #202124; }
+  .gal-view-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 14px; }
+  .gal-card { position: relative; border-radius: 16px; overflow: hidden; border: 2px solid transparent; cursor: pointer; background: #fff; box-shadow: 0 1px 3px rgba(32,33,36,.08); transition: transform .15s ease, border-color .15s ease; }
+  .gal-card:hover { transform: translateY(-2px); }
+  .gal-card.selected { border-color: var(--accent-blue); }
+  .gal-card .ph { height: 140px; background: #FAF8F5; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+  .gal-card .ph img { width: 100%; height: 100%; object-fit: cover; }
+  .gal-card .meta { padding: 9px 11px; }
+  .gal-card .meta .n { font-size: 12.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .gal-card .meta .p { font-size: 12px; color: var(--text-secondary); margin-top: 1px; }
+  .gal-del {
+    position: absolute; top: 8px; right: 8px; width: 30px; height: 30px; border-radius: 50%;
+    background: #fff; border: 1px solid var(--border-light); color: var(--badge-red);
+    display: none; align-items: center; justify-content: center; cursor: pointer; z-index: 3;
+    box-shadow: 0 4px 12px rgba(32,33,36,.18);
+  }
+  .gal-card.selected .gal-del { display: flex; }
+  .gal-del.armed { background: var(--badge-red); color: #fff; border-color: var(--badge-red); }
+
+  /* Modals (v4: sale / inbox / specs) */
+  .modal-backdrop {
+    position: fixed; inset: 0; background: rgba(32,33,36,.45); backdrop-filter: blur(3px);
+    z-index: 250; display: none; align-items: center; justify-content: center; padding: 16px;
+  }
+  .modal-backdrop.on { display: flex; }
+  .modal-card {
+    background: #fff; border-radius: 24px; width: 100%; max-width: 460px; max-height: 88vh;
+    overflow-y: auto; padding: 26px; box-shadow: 0 24px 60px rgba(32,33,36,.3);
+    animation: modalIn .25s cubic-bezier(.2,.9,.3,1.2);
+  }
+  @keyframes modalIn { from { opacity: 0; transform: translateY(14px) scale(.98); } to { opacity: 1; transform: none; } }
+  .modal-card h3 { font-size: 19px; font-weight: 700; margin-bottom: 4px; }
+  .modal-card .sub { font-size: 13px; color: var(--text-secondary); margin-bottom: 16px; line-height: 1.5; }
+  .modal-close { float: right; background: #F1F3F4; border: none; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; color: var(--text-secondary); font-size: 15px; }
+  .dur-chips { display: flex; gap: 8px; flex-wrap: wrap; margin: 6px 0 12px; }
+  .dur-chip { border: 1.5px solid var(--border-light); background: #fff; border-radius: 999px; padding: 6px 13px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; }
+  .dur-chip.on { background: #202124; color: #fff; border-color: #202124; }
+  .date-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .dur-preview { font-size: 13px; font-weight: 600; color: #174EA6; background: #E8F0FE; border-radius: 10px; padding: 9px 12px; margin: 10px 0 14px; }
+  .modal-primary {
+    width: 100%; background: #202124; color: #fff; border: none; border-radius: 999px;
+    padding: 13px; font-size: 14.5px; font-weight: 700; cursor: pointer; font-family: inherit; margin-top: 6px;
+  }
+  .modal-primary:hover { background: #000; }
+  .sale-pill {
+    display: none; align-items: center; gap: 7px; background: #FCE8E6; color: #A50E0E;
+    border-radius: 999px; padding: 6px 13px; font-size: 12.5px; font-weight: 700; white-space: nowrap;
+  }
+  .sale-pill.on { display: inline-flex; }
+  .inbox-empty { text-align: center; padding: 26px 8px; color: var(--text-secondary); font-size: 13.5px; line-height: 1.6; }
+
+  /* Quick Store Actions popover */
+  .batch-pop {
+    position: fixed; left: 76px; bottom: 118px; width: 264px; background: #fff; z-index: 240;
+    border: 1px solid var(--border-light); border-radius: 18px; box-shadow: 0 18px 44px rgba(32,33,36,.22);
+    padding: 8px; display: none; animation: popIn .2s cubic-bezier(.2,.9,.3,1.15);
+  }
+  .batch-pop.on { display: block; }
+  .batch-pop .bp-title { font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--text-secondary); padding: 8px 10px 4px; }
+  .batch-item { display: flex; align-items: center; gap: 11px; width: 100%; text-align: left; background: none; border: none; padding: 10px; border-radius: 12px; cursor: pointer; font-family: inherit; font-size: 13.5px; font-weight: 600; color: var(--text-primary); }
+  .batch-item:hover { background: #F8F9FA; }
+  .batch-item .ic { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .batch-item small { display: block; font-size: 11.5px; font-weight: 500; color: var(--text-secondary); margin-top: 1px; }
+
+  /* Audit log (Settings) */
+  .audit-row { display: flex; align-items: center; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--border-light); }
+  .audit-row:last-child { border-bottom: none; }
+  .audit-row .grow { flex: 1; min-width: 0; }
+  .audit-row .t1 { font-size: 13.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .audit-row .t2 { font-size: 12px; color: var(--text-secondary); margin-top: 1px; }
+  .audit-badge { font-size: 10.5px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; border-radius: 6px; padding: 3px 7px; background: #F1F3F4; color: var(--text-secondary); white-space: nowrap; }
+  .restore-btn { background: #E8F0FE; color: #174EA6; border: none; border-radius: 999px; padding: 7px 13px; font-size: 12.5px; font-weight: 700; cursor: pointer; font-family: inherit; white-space: nowrap; }
+  .restore-btn:hover { background: #D2E3FC; }
+  .patrol-strip { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px; }
+  .patrol-strip .pm { background: #F8F9FA; border: 1px solid var(--border-light); border-radius: 12px; padding: 10px 8px; text-align: center; }
+  .patrol-strip .pm .v { font-size: 16px; font-weight: 700; }
+  .patrol-strip .pm .l { font-size: 10.5px; color: var(--text-secondary); font-weight: 600; margin-top: 1px; }
+  .patrol-undo { background: none; border: 1px solid var(--border-light); color: #A50E0E; border-radius: 999px; padding: 4px 10px; font-size: 11.5px; font-weight: 700; cursor: pointer; font-family: inherit; }
+  .patrol-undo:hover { background: #FCE8E6; border-color: #F5C6C2; }
+
+  .list-empty {
+    padding: 14px;
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+  }
+
+  .decisions-wrap {
+    border-top: 1px solid var(--border-light);
+    max-height: 30%;
+    overflow-y: auto;
+    padding-bottom: 8px;
+  }
+
+  /* Main Workspace Area */
+  .main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    background: var(--bg-canvas);
+    min-width: 0;
+  }
+
+  .topbar {
+    height: 64px;
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+  }
+
+  .active-division-label {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .gold-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--accent-gold);
+  }
+
+  .role-chip {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 9px;
+    border-radius: 10px;
+    background: var(--accent-gold-bg);
+    border: 1px solid var(--accent-gold);
+    color: var(--text-primary);
+    text-transform: capitalize;
+  }
+
+  /* Multi-Brand Account Switcher Icon & Popover */
+  .account-wrapper {
+    position: relative;
+  }
+
+  .account-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--accent-gold-bg);
+    border: 2px solid var(--accent-gold);
+    color: var(--text-primary);
+    font-weight: 600;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    position: relative;
+  }
+
+  .avatar-badge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    background: var(--badge-red);
+    color: #FFFFFF;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 5px;
+    border-radius: 10px;
+    border: 2px solid #FFFFFF;
+  }
+
+  .brand-popover {
+    position: absolute;
+    top: 50px;
+    right: 0;
+    width: 310px;
+    background: var(--bg-sidebar);
+    border: 1px solid var(--border-light);
+    border-radius: 20px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    padding: 12px;
+    z-index: 100;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: translateY(-4px) scale(0.98);
+    transform-origin: top right;
+    transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s;
+  }
+
+  .brand-popover.open {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: translateY(0) scale(1);
+  }
+
+  .popover-header {
+    padding: 8px 12px 12px;
+    border-bottom: 1px solid var(--border-light);
+    margin-bottom: 8px;
+  }
+
+  .popover-header h4 {
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  .popover-header p {
+    font-size: 12px;
+    color: var(--text-secondary);
+  }
+
+  .brand-option {
+    padding: 10px 12px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+
+  .brand-option:hover {
+    background: var(--bg-hover);
+  }
+
+  .brand-option.selected {
+    background: var(--bg-active);
+    color: var(--text-active);
+  }
+
+  .brand-option-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .brand-logo-circle {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #FFFFFF;
+    border: 1px solid var(--accent-gold);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-primary);
+    flex-shrink: 0;
+  }
+
+  .unread-pill {
+    background: var(--badge-red);
+    color: #FFFFFF;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 12px;
+  }
+
+  .popover-footer {
+    padding: 10px 12px 4px;
+    border-top: 1px solid var(--border-light);
+    margin-top: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--text-secondary);
+  }
+
+  .link-btn {
+    border: none;
+    background: transparent;
+    color: var(--text-active);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 4px 6px;
+  }
+
+  /* Centered Hero Workspace */
+  .workspace-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .workspace-content.chatting {
+    justify-content: flex-start;
+  }
+
+  .hero-box {
+    width: 100%;
+    max-width: 720px;
+    text-align: center;
+  }
+
+  .hero-title {
+    font-size: 32px;
+    font-weight: 500;
+    margin-bottom: 24px;
+    color: var(--text-primary);
+  }
+
+  .hero-title span {
+    color: var(--accent-gold);
+  }
+
+  /* Gemini Pill Input Bar */
+  .pill-input-container {
+    background: var(--bg-sidebar);
+    border: 1px solid var(--border-light);
+    border-radius: 28px;
+    padding: 8px 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+  }
+
+  .pill-input-container:focus-within {
+    background: #FFFFFF;
+    border-color: var(--accent-gold);
+    box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+  }
+
+  .pill-input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    font-size: 15px;
+    color: var(--text-primary);
+    outline: none;
+    padding: 8px 4px;
+    min-width: 0;
+  }
+
+  .active-brand-pill {
+    background: var(--accent-gold-bg);
+    border: 1px solid var(--accent-gold);
+    color: var(--text-primary);
+    font-size: 13px;
+    font-weight: 500;
+    padding: 6px 14px;
+    border-radius: 20px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  .quick-chips {
+    margin-top: 16px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .chip {
+    padding: 8px 14px;
+    border-radius: 18px;
+    border: 1px solid var(--border-light);
+    background: #FFFFFF;
+    font-size: 13px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+
+  .chip:hover {
+    background: var(--bg-sidebar);
+    color: var(--text-primary);
+  }
+
+  /* Chat / Task toggle (under the pill) */
+  .mode-toggle {
+    margin-top: 12px;
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+  }
+
+  .mode-btn {
+    padding: 5px 16px;
+    border-radius: 999px;
+    border: 1px solid var(--border-light);
+    background: #FFFFFF;
+    font-size: 12.5px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+
+  .mode-btn.on {
+    background: var(--text-primary);
+    color: #FFFFFF;
+    border-color: var(--text-primary);
+  }
+
+  /* Bottom dock: the command pill lives here permanently (v3) */
+  .bottom-dock {
+    padding: 10px 24px 16px;
+    flex-shrink: 0;
+    display: flex;
+    justify-content: center;
+  }
+
+  .dock-inner {
+    width: 100%;
+    max-width: 720px;
+  }
+
+  /* Chat thread */
+  .chat-thread {
+    width: 100%;
+    max-width: 720px;
+    display: none;
+    flex-direction: column;
+    gap: 14px;
+    padding-top: 8px;
+  }
+
+  .chat-thread.on {
+    display: flex;
+  }
+
+  .msg-row {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+
+  .msg-row.user {
+    justify-content: flex-end;
+  }
+
+  .msg-spark {
+    color: var(--accent-gold);
+    font-size: 15px;
+    line-height: 1.5;
+    flex-shrink: 0;
+  }
+
+  .msg {
+    font-size: 14px;
+    line-height: 1.55;
+    color: var(--text-primary);
+    max-width: 88%;
+    overflow-wrap: anywhere;
+  }
+
+  .msg-row.user .msg {
+    background: var(--bg-active);
+    color: var(--text-active);
+    padding: 9px 14px;
+    border-radius: 18px;
+    border-bottom-right-radius: 6px;
+  }
+
+  .msg b { font-weight: 600; }
+
+  .action-card {
+    border: 1px solid var(--border-light);
+    background: #FFFFFF;
+    border-radius: 16px;
+    padding: 14px 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    max-width: 88%;
+  }
+
+  .action-card .ac-title {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+
+  .action-card .ac-body {
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    margin-bottom: 12px;
+  }
+
+  .action-btns {
+    display: flex;
+    gap: 8px;
+  }
+
+  .confirm-btn {
+    padding: 8px 18px;
+    border-radius: 999px;
+    border: none;
+    background: var(--text-primary);
+    color: #FFFFFF;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+  }
+
+  .confirm-btn:disabled {
+    background: var(--bg-hover);
+    color: var(--text-secondary);
+    cursor: default;
+  }
+
+  .cancel-btn {
+    padding: 8px 16px;
+    border-radius: 999px;
+    border: 1px solid var(--border-light);
+    background: #FFFFFF;
+    font-size: 13px;
+    color: var(--text-secondary);
+    cursor: pointer;
+  }
+
+  .match-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border: 1px solid var(--border-light);
+    border-radius: 14px;
+    cursor: pointer;
+    background: #FFFFFF;
+    max-width: 88%;
+  }
+
+  .match-row:hover { background: var(--bg-sidebar); }
+
+  /* Task panel */
+  .task-panel {
+    width: 100%;
+    max-width: 720px;
+    display: none;
+    flex-direction: column;
+    gap: 10px;
+    padding-top: 8px;
+  }
+
+  .task-panel.on { display: flex; }
+
+  .task-panel h3 {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
+
+  /* Detail / Edit View Card */
+  .detail-card {
+    width: 100%;
+    max-width: 760px;
+    background: #FFFFFF;
+    border: 1px solid var(--border-light);
+    border-radius: 20px;
+    padding: 24px;
+    display: none;
+    text-align: left;
+  }
+
+  .detail-card.visible {
+    display: block;
+  }
+
+  .detail-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border-light);
+    margin-bottom: 18px;
+    gap: 12px;
+  }
+
+  .stone-badge {
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+    background: var(--bg-active);
+    color: var(--text-active);
+    white-space: nowrap;
+  }
+
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+
+  .field-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .field-group.full {
+    grid-column: 1 / -1;
+  }
+
+  .field-group label {
+    font-size: 12px;
+    color: var(--text-secondary);
+    font-weight: 500;
+  }
+
+  .field-group input, .field-group select, .field-group textarea {
+    padding: 9px 12px;
+    border-radius: 12px;
+    border: 1px solid var(--border-light);
+    font-size: 14px;
+    font-family: inherit;
+    background: #FFFFFF;
+    color: var(--text-primary);
+  }
+
+  .field-group input:disabled, .field-group select:disabled, .field-group textarea:disabled {
+    background: var(--bg-sidebar);
+    color: var(--text-secondary);
+  }
+
+  .detail-note {
+    margin-top: 14px;
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    display: none;
+  }
+
+  .detail-note.on { display: block; }
+
+  .primary-save-btn {
+    margin-top: 18px;
+    padding: 10px 20px;
+    border-radius: 20px;
+    border: none;
+    background: var(--text-primary);
+    color: #FFFFFF;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+  }
+
+  .primary-save-btn:disabled {
+    background: var(--bg-hover);
+    color: var(--text-secondary);
+    cursor: default;
+  }
+
+  .danger-btn {
+    margin-top: 18px;
+    padding: 10px 20px;
+    border-radius: 20px;
+    border: 1px solid var(--badge-red);
+    background: #FFFFFF;
+    color: var(--badge-red);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+  }
+
+  /* Editor action bar (v3) */
+  .action-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 18px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border-light);
+    align-items: center;
+  }
+
+  .action-bar .primary-save-btn,
+  .action-bar .danger-btn { margin-top: 0; }
+
+  .btn-sale {
+    padding: 10px 20px;
+    border-radius: 20px;
+    border: 1px solid var(--accent-gold);
+    background: var(--accent-gold-bg);
+    color: var(--text-primary);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .btn-sale:disabled {
+    opacity: 0.45;
+    cursor: default;
+  }
+
+  .btn-out {
+    padding: 10px 20px;
+    border-radius: 20px;
+    border: 1px solid var(--border-light);
+    background: #FFFFFF;
+    color: var(--text-primary);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+  }
+
+  .btn-delete {
+    padding: 10px 20px;
+    border-radius: 20px;
+    border: 1px solid #F3C2BE;
+    background: #FCE8E6;
+    color: var(--badge-red);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-left: auto;
+  }
+
+  .btn-sale, .btn-out, .btn-delete {
+    transition: transform 0.1s ease, background 0.15s;
+  }
+
+  .btn-sale:active, .btn-out:active, .btn-delete:active { transform: scale(0.97); }
+
+  .delete-confirm {
+    display: none;
+    margin-top: 14px;
+    border: 1px solid #F3C2BE;
+    background: #FCE8E6;
+    border-radius: 14px;
+    padding: 12px 14px;
+    font-size: 13.5px;
+    line-height: 1.5;
+  }
+
+  .delete-confirm.on { display: block; }
+
+  .delete-confirm .dc-btns { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+  .delete-confirm .btn-delete { margin-left: 0; }
+
+  /* Owner patrol strip (hero) */
+  .patrol-grid {
+    margin-top: 16px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    text-align: left;
+  }
+
+  .patrol-card {
+    background: #FFFFFF;
+    border: 1px solid var(--border-light);
+    border-radius: 16px;
+    padding: 14px 16px;
+  }
+
+  .patrol-label { font-size: 12px; color: var(--text-secondary); }
+  .patrol-value { font-size: 20px; font-weight: 600; margin-top: 4px; }
+
+  /* Patrol drawer rows */
+  .patrol-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: 14px;
+    background: rgba(255,255,255,0.65);
+  }
+
+  /* Secondary views (Brief / Settings — Gallery & QR live in the drawer) */
+  .portal-view {
+    width: 100%;
+    max-width: 760px;
+    display: none;
+    text-align: left;
+  }
+
+  .portal-view.on { display: block; }
+
+  .portal-view h2 {
+    font-size: 22px;
+    font-weight: 500;
+    margin-bottom: 6px;
+  }
+
+  .portal-view .view-sub {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-bottom: 18px;
+    line-height: 1.5;
+  }
+
+  .gal-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 12px;
+  }
+
+  .gal-tile {
+    border: 1px solid var(--border-light);
+    border-radius: 16px;
+    overflow: hidden;
+    cursor: pointer;
+    background: #FFFFFF;
+  }
+
+  .gal-tile:hover { background: var(--bg-sidebar); }
+
+  .gal-tile .gal-img {
+    height: 130px;
+    background: #FAF8F5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 30px;
+    overflow: hidden;
+  }
+
+  .gal-tile .gal-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .gal-tile .gal-cap {
+    padding: 8px 10px;
+    font-size: 12px;
+  }
+
+  .gal-tile .gal-cap .t {
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .gal-tile .gal-cap .s { color: var(--text-secondary); }
+
+  .qr-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 6px;
+    border-bottom: 1px solid var(--border-light);
+    cursor: pointer;
+  }
+
+  .qr-row:hover { background: var(--bg-sidebar); }
+
+  .qr-row .grow { flex: 1; min-width: 0; }
+
+  .stat-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .stat-card {
+    border: 1px solid var(--border-light);
+    border-radius: 16px;
+    padding: 16px;
+  }
+
+  .stat-card .n {
+    font-size: 26px;
+    font-weight: 600;
+  }
+
+  .stat-card .l {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-top: 2px;
+  }
+
+  .settings-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border-light);
+    font-size: 14px;
+  }
+
+  .settings-row .k { color: var(--text-secondary); }
+  .settings-row .v { font-weight: 500; text-align: right; overflow-wrap: anywhere; }
+
+  /* PIN gate */
+  .pin-gate {
+    position: fixed;
+    inset: 0;
+    background: var(--bg-sidebar);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 200;
+    padding: 20px;
+    transition: opacity 0.3s ease, visibility 0.3s;
+  }
+
+  .pin-gate.off {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  .pin-card {
+    background: #FFFFFF;
+    border: 1px solid var(--border-light);
+    border-radius: 24px;
+    box-shadow: 0 12px 32px rgba(0,0,0,0.10);
+    padding: 36px 32px;
+    width: 100%;
+    max-width: 380px;
+    text-align: center;
+  }
+
+  .pin-logo {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--accent-gold-bg);
+    border: 2px solid var(--accent-gold);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 17px;
+    margin: 0 auto 14px;
+  }
+
+  .pin-card h2 {
+    font-size: 22px;
+    font-weight: 600;
+  }
+
+  .pin-card .pin-sub {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-top: 4px;
+  }
+
+  .pin-status {
+    margin: 18px 0 6px;
+    font-size: 13px;
+    color: var(--text-secondary);
+    min-height: 18px;
+    line-height: 1.5;
+  }
+
+  .pin-input {
+    width: 100%;
+    padding: 12px 14px;
+    border-radius: 14px;
+    border: 1px solid var(--border-light);
+    font-size: 18px;
+    text-align: center;
+    letter-spacing: 4px;
+    margin-top: 10px;
+    outline: none;
+  }
+
+  .pin-input:focus { border-color: var(--accent-gold); }
+
+  .pin-error {
+    color: var(--badge-red);
+    font-size: 13px;
+    min-height: 18px;
+    margin-top: 8px;
+    line-height: 1.45;
+  }
+
+  .pin-btn {
+    width: 100%;
+    margin-top: 12px;
+    padding: 12px 20px;
+    border-radius: 999px;
+    border: none;
+    background: var(--text-primary);
+    color: #FFFFFF;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+  }
+
+  .pin-btn:disabled {
+    background: var(--bg-hover);
+    color: var(--text-secondary);
+    cursor: default;
+  }
+
+  /* Toast — v4: pill at the top centre */
+  .toast {
+    position: fixed;
+    left: 50%;
+    top: 16px;
+    transform: translateX(-50%) translateY(-14px);
+    background: var(--text-primary);
+    color: #FFFFFF;
+    font-size: 13.5px;
+    padding: 10px 18px;
+    border-radius: 999px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s, transform 0.2s;
+    z-index: 300;
+    max-width: 90vw;
+    text-align: center;
+  }
+
+  .toast.on {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* Motion: everything animates on transform/opacity only */
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .msg-row { animation: rise 0.25s ease both; }
+  .action-card { animation: rise 0.25s ease both; }
+  .portal-view.on { animation: rise 0.22s ease both; }
+  .detail-card.visible { animation: rise 0.22s ease both; }
+  .bottom-dock { animation: rise 0.22s ease both; }
+  .pin-card { animation: rise 0.3s ease both; }
+
+  @keyframes micPulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(217,48,37,0.35); }
+    50% { box-shadow: 0 0 0 8px rgba(217,48,37,0); }
+  }
+
+  .icon-btn.listening { animation: micPulse 1.2s ease-in-out infinite; }
+
+  .confirm-btn, .cancel-btn, .chip, .primary-save-btn, .danger-btn, .pin-btn, .mode-btn {
+    transition: transform 0.1s ease, background 0.15s, color 0.15s, border-color 0.15s;
+  }
+
+  .confirm-btn:active, .cancel-btn:active, .chip:active,
+  .primary-save-btn:active, .danger-btn:active, .pin-btn:active {
+    transform: scale(0.97);
+  }
+
+  /* Catalogue loading skeleton */
+  .skel-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+  }
+
+  .skel {
+    background: var(--bg-hover);
+    border-radius: 8px;
+    animation: skelPulse 1.1s ease-in-out infinite;
+  }
+
+  @keyframes skelPulse {
+    0%, 100% { opacity: 0.55; }
+    50% { opacity: 1; }
+  }
+
+  .skel-thumb { width: 36px; height: 36px; flex-shrink: 0; }
+  .skel-lines { flex: 1; display: flex; flex-direction: column; gap: 6px; }
+  .skel-line { height: 10px; }
+
+  /* Animated ellipsis for long-running reads (photo match) */
+  .thinking-dots::after {
+    content: '';
+    animation: dots 1.2s steps(4, end) infinite;
+  }
+
+  @keyframes dots {
+    0% { content: ''; }
+    25% { content: '.'; }
+    50% { content: '..'; }
+    75% { content: '...'; }
+  }
+
+  @media (max-width: 760px) {
+    .detail-drawer {
+      position: fixed;
+      left: 64px;
+      top: 0;
+      bottom: 0;
+      box-shadow: 8px 0 24px rgba(0,0,0,0.12);
+    }
+    .batch-pop { left: 70px; }
+    .form-grid, .stat-grid { grid-template-columns: 1fr; }
+    .patrol-grid { grid-template-columns: 1fr; }
+    .hero-title { font-size: 26px; }
+    .topbar { padding: 0 12px; }
+    .workspace-content { padding: 16px; }
+    .bottom-dock { padding: 10px 12px 14px; }
+    /* The composer pill keeps its input usable on a phone: the division
+       pill is hidden here — the division still shows in the top bar and
+       switches from the avatar menu. */
+    .active-brand-pill { display: none; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- PIN gate (Store House sign-in) -->
+  <div class="pin-gate" id="pinGate">
+    <div class="pin-card">
+      <div class="pin-logo">EJ</div>
+      <h2>Elevate Select</h2>
+      <p class="pin-sub">Store House — staff sign-in</p>
+      <div class="pin-status" id="pinStatus">Checking the back end…</div>
+      <input class="pin-input" id="pinInput" type="password" inputmode="numeric" autocomplete="off" maxlength="10" placeholder="10-digit PIN" aria-label="Staff PIN">
+      <input class="pin-input" id="pinInput2" type="password" inputmode="numeric" autocomplete="off" maxlength="10" placeholder="Repeat the PIN" aria-label="Repeat the PIN" style="display:none">
+      <div class="pin-error" id="pinError"></div>
+      <button class="pin-btn" id="pinBtn" onclick="submitPin()">Sign in</button>
+      <button class="link-btn" id="pinRetry" style="display:none;margin-top:6px" onclick="checkBackend(true)">Retry connection</button>
+    </div>
+  </div>
+
+  <!-- Slim icon rail (v4 layout) -->
+  <nav class="icon-rail">
+    <div class="rail-top">
+      <button class="rail-btn" id="railCatalogBtn" onclick="openDrawer('catalog')" title="Catalog & Filters">≡<span class="chev" id="catalogChevron">›</span></button>
+      <button class="rail-btn plus-btn" onclick="openNewItem()" title="Add New Item">＋</button>
+      <button class="rail-btn" id="railGalleryBtn" onclick="showView('gallery')" title="Gallery — all product photos">🖼️</button>
+      <button class="rail-btn" id="railQrBtn" onclick="openDrawer('qr')" title="QR Code ID Directory">📱</button>
+      <button class="rail-btn" id="railPatrolBtn" onclick="openDrawer('patrol')" title="Owner Sales & Stock Patrol">💰</button>
+    </div>
+    <div class="rail-bottom">
+      <button class="rail-btn" id="railBatchBtn" onclick="toggleBatchPopover(event)" title="Quick Store Actions">🎚️</button>
+      <button class="rail-btn" id="railSettingsBtn" onclick="showView('settings')" title="Settings">⚙️</button>
+    </div>
+  </nav>
+
+  <!-- Quick Store Actions popover (v4) -->
+  <div class="batch-pop" id="batchPopover">
+    <div class="bp-title">Quick Store Actions</div>
+    <button class="batch-item" onclick="batchAddSale()"><span class="ic" style="background:#FCE8E6;color:#A50E0E">%</span><span>Add Sale<small>Start a dated promotion</small></span></button>
+    <button class="batch-item" onclick="batchOutOfStock()"><span class="ic" style="background:#FCE8E6;color:#A50E0E">⛔</span><span>Out of Stock<small>Mark the open piece, or quick-add one</small></span></button>
+    <button class="batch-item" onclick="batchShipping()"><span class="ic" style="background:#E8F0FE;color:#174EA6">🚚</span><span>Shipping: 1 Month Delay<small>Apply to the open piece</small></span></button>
+    <button class="batch-item" onclick="batchStatusUpdate()"><span class="ic" style="background:#E6F4EA;color:#137333">✓</span><span>Status Update<small>Jump to availability</small></span></button>
+  </div>
+
+  <!-- On-demand slide-out drawer: catalogue, gallery, QR directory, patrol -->
+  <aside class="detail-drawer" id="detailDrawer">
+    <div class="drawer-inner">
+      <div class="drawer-header">
+        <span class="drawer-title" id="drawerTitle">Catalog & Filters</span>
+        <button class="icon-btn" style="width:30px;height:30px;font-size:15px;" onclick="closeDrawer()" title="Close panel">✕</button>
+      </div>
+
+      <div class="drawer-section on" id="drawerCatalog">
+        <div class="section-header" style="padding-top:0">
+          <span id="catalogSectionTitle">All Products</span>
+          <button class="icon-btn" style="width:26px;height:26px;font-size:13px;" onclick="toggleFilterBar()" title="Filter Items">⧩</button>
+        </div>
+
+        <div class="filter-bar open" id="filterBar">
+          <div class="filter-inner">
+            <select class="filter-select" id="filterAvailability" onchange="queueRenderCatalog()">
+              <option value="ALL">All Availability</option>
+              <option value="In Stock">In Stock</option>
+              <option value="Not in Stock">Not in Stock (Unsure / Out)</option>
+              <option value="Custom Jewels">Custom Jewels</option>
+              <option value="Shipping: 1 Month Delay">Shipping: 1 Month Delay</option>
+            </select>
+            <select class="filter-select" id="filterOrigin" onchange="queueRenderCatalog()">
+              <option value="ALL">All Stones (Natural & Lab-Grown)</option>
+              <option value="Natural">Natural Stones Only</option>
+              <option value="Lab-Grown">Lab-Grown Stones Only</option>
+            </select>
+            <select class="filter-select" id="filterCategory" onchange="queueRenderCatalog()">
+              <option value="ALL">All Categories</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="catalog-list" id="catalogList">
+          <div class="list-empty">Sign in to load the catalogue.</div>
+        </div>
+
+        <div class="decisions-wrap" id="decisionsWrap" style="display:none">
+          <div class="section-header"><span>Recent decisions</span></div>
+          <div id="decisionsList"></div>
+        </div>
+      </div>
+
+      <div class="drawer-section" id="drawerGallery">
+        <p class="drawer-sub">Studio images from the live catalogue in this division. Select a piece to open it.</p>
+        <div class="gal-grid" id="galleryGrid" style="grid-template-columns:1fr 1fr"></div>
+      </div>
+
+      <div class="drawer-section" id="drawerQr">
+        <p class="drawer-sub">Every piece and its ID in this division. Scan a piece's QR code — or type its ID in the Workspace bar — to open it here.</p>
+        <div id="qrList"></div>
+      </div>
+
+      <div class="drawer-section" id="drawerPatrol">
+        <div class="patrol-strip">
+          <div class="pm"><div class="v" id="salesTodayValue">$0</div><div class="l">Sales Today</div></div>
+          <div class="pm"><div class="v" id="notInStockValue">0</div><div class="l">Not in Stock</div></div>
+          <div class="pm"><div class="v" id="activeSkuValue">0</div><div class="l">Active SKUs</div></div>
+        </div>
+        <p class="drawer-sub" id="patrolSub">Sales recorded today (New York).</p>
+        <div id="patrolList" style="display:flex;flex-direction:column;gap:6px"></div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Workspace -->
+  <main class="main">
+    <header class="topbar">
+      <div class="active-division-label">
+        <svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true"><defs><linearGradient id="sparkGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#4285F4"/><stop offset="35%" stop-color="#9B72CB"/><stop offset="65%" stop-color="#D96570"/><stop offset="100%" stop-color="#F9AB00"/></linearGradient></defs><path fill="url(#sparkGrad)" d="M12 1.8c.9 5.9 4.3 9.3 10.2 10.2-5.9.9-9.3 4.3-10.2 10.2C11.1 16.3 7.7 12.9 1.8 12 7.7 11.1 11.1 7.7 12 1.8z"/></svg>
+        <span style="font-weight:700;color:var(--text-primary)">Elevate Select</span>
+        <span id="topDivisionText">Elevate Jewels</span>
+        <span class="role-chip" id="roleChip" style="display:none"></span>
+        <span class="sale-pill" id="saleActivePill">🔖 Sale Active</span>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:14px">
+      <button class="icon-btn" id="inboxBtn" onclick="openInbox()" title="Inbox" style="position:relative;font-size:19px">✉️<span class="avatar-badge" id="inboxUnreadBadge" style="display:none;position:absolute;top:-4px;right:-6px">0</span></button>
+      <!-- Multi-Brand Account & Division Switcher -->
+      <div class="account-wrapper">
+        <div class="account-avatar" onclick="toggleBrandPopover()" id="activeAvatarBtn">
+          <span id="avatarInitials">EJ</span>
+          <span class="avatar-badge" id="totalUnreadBadge" style="display:none">0</span>
+        </div>
+
+        <div class="brand-popover" id="brandPopover">
+          <div class="popover-header">
+            <h4>Elevate Select</h4>
+            <p>select@elevatejewelsny.com</p>
+          </div>
+          <div id="brandOptionsList"></div>
+          <div class="popover-footer">
+            <span id="popoverUserLine">Not signed in</span>
+            <button class="link-btn" onclick="signOut()">Sign out</button>
+          </div>
+        </div>
+      </div>
+      </div>
+    </header>
+
+    <section class="workspace-content" id="workspaceContent">
+      <!-- Workspace home: hero + chat thread / task panel -->
+      <div id="viewHome" style="width:100%;display:flex;flex-direction:column;align-items:center">
+        <div class="hero-box" id="heroBox">
+          <h1 class="hero-title" id="heroTitle">Where should we start in <span id="heroBrandSpan">Elevate Jewels</span>?</h1>
+
+          <div class="quick-chips" id="quickChips">
+            <button class="chip" onclick="openNewItem()">+ Add New Item</button>
+            <button class="chip" onclick="openNewItem('Not in Stock')">+ Add Out of Stock</button>
+            <button class="chip" onclick="triggerImageUpload()">Visual Image Match</button>
+            <button class="chip" onclick="showView('brief')">Daily brief</button>
+            <button class="chip" id="pendingChip" onclick="focusPending()">Pending queue</button>
+          </div>
+
+        </div>
+
+        <div class="chat-thread" id="chatThread"></div>
+        <div class="task-panel" id="taskPanel"><h3>Tasks</h3><div id="taskList" style="display:flex;flex-direction:column;gap:10px"></div></div>
+      </div>
+
+      <!-- Item Detail / Edit Card — v4 focus view -->
+      <div class="detail-card" id="detailCard">
+        <div class="focus-breadcrumb">
+          <button class="chip-btn" onclick="showView('home')">← Back</button>
+          <span class="stone-badge" id="cardStoneBadge">—</span>
+          <span class="avail-badge status-in-stock" id="cardAvailBadge">In Stock</span>
+        </div>
+        <div class="detail-header" style="margin-top:12px">
+          <div>
+            <h3 id="cardItemHeading">Item</h3>
+            <span style="font-size:12px;color:var(--text-secondary);" id="cardDivisionSub">Elevate Jewels</span>
+          </div>
+        </div>
+
+        <div class="focus-img-wrap" id="focusImgWrap">
+          <div class="skel" id="focusImgSkel" style="height:280px"></div>
+          <img class="focus-img" id="focusImg" alt="Product photo" style="display:none">
+          <div class="focus-img-cap" id="focusImgCap">Studio Image · 01</div>
+          <div class="focus-img-actions">
+            <button class="chip-btn" onclick="openSpecsModal()">Specs</button>
+            <button class="chip-btn" onclick="focusImageField()">Replace</button>
+          </div>
+        </div>
+        <div class="qr-tag-row" id="qrTagRow" style="display:none">
+          <img id="qrTagImg" alt="Showroom QR tag">
+          <div>
+            <div class="t">Showroom QR Tag</div>
+            <div class="s">Scanning this tag opens this exact piece. The same code sits in the QR directory (rail 📱).</div>
+          </div>
+        </div>
+
+        <div class="form-grid" style="margin-top:16px">
+          <div class="field-group">
+            <label>Item ID / SKU</label>
+            <input type="text" id="fieldId" disabled>
+          </div>
+          <div class="field-group">
+            <label>Brand Division</label>
+            <select id="fieldBrand">
+              <option>Elevate Jewels</option>
+              <option>LLG</option>
+              <option>Elevate Silver</option>
+              <option>Elevate Gifts</option>
+              <option>Elevate Select</option>
+            </select>
+          </div>
+          <div class="field-group" id="statusFieldGroup">
+            <label>Availability / Order Type</label>
+            <select id="fieldAvailability">
+              <option value="In Stock">In Stock</option>
+              <option value="Not in Stock">Not in Stock (Unsure / Out)</option>
+              <option value="Custom Jewels">Custom Jewels</option>
+              <option value="Shipping: 1 Month Delay">Shipping: 1 Month Delay</option>
+            </select>
+          </div>
+          <div class="field-group">
+            <label>Product Title</label>
+            <input type="text" id="fieldTitle">
+          </div>
+          <div class="field-group">
+            <label>Category</label>
+            <input type="text" id="fieldCategory" list="categoryList" placeholder="rings, necklaces, earrings…">
+            <datalist id="categoryList"></datalist>
+          </div>
+          <div class="field-group">
+            <label>Stone Origin (Honest Labeling)</label>
+            <select id="fieldOrigin">
+              <option value="">Not specified</option>
+              <option value="Natural">Natural</option>
+              <option value="Lab-Grown">Lab-Grown</option>
+            </select>
+          </div>
+          <div class="field-group">
+            <label>Metal</label>
+            <input type="text" id="fieldMetal" placeholder="e.g. 18K Yellow Gold">
+          </div>
+          <div class="field-group">
+            <label>Carat / Metal Specs</label>
+            <input type="text" id="fieldSpecs" placeholder="e.g. 2.40 ct · 18K Yellow Gold">
+          </div>
+          <div class="field-group">
+            <label>Price ($)</label>
+            <input type="text" id="fieldPrice" placeholder="Blank = Price to confirm">
+          </div>
+          <div class="field-group full">
+            <label>Image URL</label>
+            <input type="text" id="fieldImage" placeholder="assets/…">
+          </div>
+          <div class="field-group full">
+            <label>Bench Notes / Description</label>
+            <textarea id="fieldDesc" rows="2"></textarea>
+            <div style="margin-top:8px">
+              <button class="chip-btn" id="autoDraftBtn" onclick="autoDraftCopy()">✨ Auto-Draft Website Copy</button>
+            </div>
+            <div class="draft-box" id="draftBox" style="display:none">
+              <div id="draftText"></div>
+              <div class="acts">
+                <button class="chip-btn" onclick="useDraft()">Use this copy</button>
+                <button class="chip-btn" onclick="discardDraft()">Discard</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="detail-note" id="detailNote"></div>
+
+        <div class="action-bar">
+          <button class="primary-save-btn" id="detailSaveBtn" onclick="saveDetail()">Save Item</button>
+          <button class="primary-save-btn" id="detailApproveBtn" style="display:none" onclick="approveDetail()">Approve — go live</button>
+          <button class="danger-btn" id="detailRejectBtn" style="display:none" onclick="rejectDetail()">Reject</button>
+          <button class="btn-sale" id="detailSaleBtn" style="display:none" onclick="recordSale()">Record Sale</button>
+          <button class="btn-sale" id="detailPromoBtn" style="display:none;background:#FCE8E6;color:#A50E0E" onclick="openSaleModal()">Add Sale</button>
+          <button class="btn-out" id="detailOutBtn" style="display:none" onclick="markDetailOutOfStock()">Mark Not in Stock</button>
+          <button class="btn-out" id="detailDoneBtn" onclick="showView('home')">Done</button>
+          <button class="btn-delete" id="detailDeleteBtn" style="display:none" onclick="askDelete()">Delete Item</button>
+        </div>
+        <div class="delete-confirm" id="deleteConfirm">
+          <span id="deleteConfirmText">Delete this item?</span>
+          <div class="dc-btns">
+            <button class="btn-delete" id="deleteConfirmBtn" onclick="confirmDelete()">Delete it permanently</button>
+            <button class="btn-out" onclick="cancelDelete()">Cancel</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Daily brief view -->
+      <div class="portal-view" id="viewBrief">
+        <h2>Daily brief</h2>
+        <p class="view-sub" id="briefSub">Live counts from the back end.</p>
+        <div class="stat-grid" id="briefStats"></div>
+        <div id="briefWaiting"></div>
+      </div>
+
+      <!-- Gallery view (v4): real photos, two-tier cascading filters -->
+      <div class="portal-view" id="viewGallery">
+        <h2>Gallery</h2>
+        <p class="view-sub">Every real product photo in this division. Tap a photo to select it; tap again to open the piece. The 🗑 on a selected photo is owner-only and asks twice.</p>
+        <div class="gal-filters" id="galTier1"></div>
+        <div class="gal-filters" id="galTier2a"></div>
+        <div class="gal-filters" id="galTier2b"></div>
+        <div class="gal-view-grid" id="galViewGrid"></div>
+      </div>
+
+      <!-- Settings view -->
+      <div class="portal-view" id="viewSettings">
+        <h2>Settings</h2>
+        <p class="view-sub">Connection and sign-in state, read live from the back end. Staff PINs are created by the owner; nothing here can change them.</p>
+        <div id="settingsBody"></div>
+        <h3 style="font-size:16px;margin:22px 0 4px">Promotions</h3>
+        <p class="view-sub" style="margin-bottom:8px">Dated sale records from the back end. The header pill lights up only while a promotion covers today for the division you are viewing.</p>
+        <div id="promoBody"><div class="list-empty">Sign in to load promotions.</div></div>
+        <h3 style="font-size:16px;margin:22px 0 4px">Recovery — last 7 days</h3>
+        <p class="view-sub" style="margin-bottom:8px">Every edit, status change, sale and delete is logged with the piece exactly as it was before. Restore puts that version back.</p>
+        <div id="auditBody"><div class="list-empty">Sign in to load the recovery log.</div></div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:18px">
+          <button class="primary-save-btn" onclick="refreshAll()">Reload data</button>
+          <button class="danger-btn" onclick="signOut()">Sign out</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Bottom dock: the command pill lives here (v3 layout) -->
+    <div class="bottom-dock" id="bottomDock">
+      <div class="dock-inner">
+        <div id="pillWrap">
+          <div class="pill-input-container">
+            <button class="icon-btn" onclick="triggerImageUpload()" title="Upload a photo to match an item">＋</button>
+            <input type="text" class="pill-input" id="mainSearchInput" placeholder="Chat about an item, or type an Item ID (e.g. EJ-100001)…" onkeydown="handleSearchEnter(event)">
+            <button class="active-brand-pill" onclick="toggleBrandPopover()" id="inputBrandPill">Elevate Jewels ▾</button>
+            <button class="icon-btn" id="micBtn" onclick="toggleMic()" title="Speak instead of typing">🎤</button>
+            <button class="icon-btn" onclick="sendChat()" title="Send">🔍</button>
+          </div>
+          <div class="mode-toggle" role="group" aria-label="Chat or Task mode">
+            <button class="mode-btn on" id="modeChatBtn" onclick="setMode('chat')">Chat</button>
+            <button class="mode-btn" id="modeTaskBtn" onclick="setMode('task')">Task</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <input type="file" id="hiddenFileInput" accept="image/*" style="display:none" onchange="handlePhotoMatch(event)">
+  <div class="toast" id="toast"></div>
+
+  <!-- Add Sale modal (v4): creates a real promotion record -->
+  <div class="modal-backdrop" id="saleModal">
+    <div class="modal-card">
+      <button class="modal-close" onclick="closeSaleModal()">✕</button>
+      <h3>Configure Sale</h3>
+      <p class="sub">The sale is recorded in the back end and shown across the portal while it runs. Public prices on the website are not rewritten by a promotion.</p>
+      <label style="font-size:12.5px;font-weight:600;color:var(--text-secondary)">QUICK DURATION</label>
+      <div class="dur-chips" id="durChips">
+        <button class="dur-chip" data-days="3" onclick="setSaleDuration(3)">3 Days</button>
+        <button class="dur-chip" data-days="7" onclick="setSaleDuration(7)">7 Days</button>
+        <button class="dur-chip" data-days="14" onclick="setSaleDuration(14)">14 Days</button>
+        <button class="dur-chip" data-days="30" onclick="setSaleDuration(30)">30 Days</button>
+      </div>
+      <div class="date-row">
+        <div class="field-group"><label>Start date</label><input type="date" id="saleStart" onchange="updateSaleDurationPreview()"></div>
+        <div class="field-group"><label>End date</label><input type="date" id="saleEnd" onchange="updateSaleDurationPreview()"></div>
+      </div>
+      <div class="dur-preview" id="saleDurationPreview">Duration: —</div>
+      <div class="date-row">
+        <div class="field-group"><label>Discount type</label>
+          <select id="saleDiscType"><option value="PERCENT">Percent off (%)</option><option value="MONEY">Money off ($)</option></select>
+        </div>
+        <div class="field-group"><label>Discount value</label><input type="number" id="saleDiscValue" min="0" step="any" placeholder="e.g. 15"></div>
+      </div>
+      <div class="field-group" style="margin-top:10px"><label>Applies to</label>
+        <select id="saleScope" onchange="updateSaleScopeNote()">
+          <option value="ALL_PURCHASES">All Purchases (every division)</option>
+          <option value="GIFT_CARDS">Gift Cards only</option>
+          <option value="CURRENT_BRAND">Current Brand only</option>
+        </select>
+      </div>
+      <p class="sub" id="saleScopeNote" style="margin:8px 0 4px"></p>
+      <button class="modal-primary" id="saleActivateBtn" onclick="activateSale()">Activate &amp; Save as Default</button>
+    </div>
+  </div>
+
+  <!-- Inbox modal (v4): honest empty state — no message back end exists -->
+  <div class="modal-backdrop" id="inboxModal">
+    <div class="modal-card">
+      <button class="modal-close" onclick="closeInbox()">✕</button>
+      <h3>Inbox</h3>
+      <p class="sub">Store messages for <span id="inboxDivisionName">Elevate Jewels</span>.</p>
+      <div class="inbox-empty">✉️<br><strong>No messages yet.</strong><br>There is no message feed connected to the portal yet, so nothing is collected or shown here. When a feed is connected, new messages will appear in this window.</div>
+    </div>
+  </div>
+
+  <!-- Specs modal (v4 focus view): the piece's real parameters, read-only -->
+  <div class="modal-backdrop" id="specsModal">
+    <div class="modal-card">
+      <button class="modal-close" onclick="closeSpecsModal()">✕</button>
+      <h3>Specifications</h3>
+      <p class="sub" id="specsModalSub">The piece's recorded parameters.</p>
+      <div id="specsModalBody"></div>
+    </div>
+  </div>
+
+<script>
+/* qrcode-generator 1.4.4 — QR code generation library by Kazuhiko Arase, MIT License (https://github.com/kazuhikoarase/qrcode-generator). Embedded so staff QR codes render without any network dependency. */
+var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],f={},c=function(t,r){o=function(t){for(var r=new Array(t),e=0;e<t;e+=1){r[e]=new Array(t);for(var n=0;n<t;n+=1)r[e][n]=null}return r}(i=4*e+17),l(0,0),l(i-7,0),l(0,i-7),s(),h(),d(t,r),e>=7&&v(t),null==a&&(a=p(e,n,u)),w(a,r)},l=function(t,r){for(var e=-1;e<=7;e+=1)if(!(t+e<=-1||i<=t+e))for(var n=-1;n<=7;n+=1)r+n<=-1||i<=r+n||(o[t+e][r+n]=0<=e&&e<=6&&(0==n||6==n)||0<=n&&n<=6&&(0==e||6==e)||2<=e&&e<=4&&2<=n&&n<=4)},h=function(){for(var t=8;t<i-8;t+=1)null==o[t][6]&&(o[t][6]=t%2==0);for(var r=8;r<i-8;r+=1)null==o[6][r]&&(o[6][r]=r%2==0)},s=function(){for(var t=B.getPatternPosition(e),r=0;r<t.length;r+=1)for(var n=0;n<t.length;n+=1){var i=t[r],a=t[n];if(null==o[i][a])for(var u=-2;u<=2;u+=1)for(var f=-2;f<=2;f+=1)o[i+u][a+f]=-2==u||2==u||-2==f||2==f||0==u&&0==f}},v=function(t){for(var r=B.getBCHTypeNumber(e),n=0;n<18;n+=1){var a=!t&&1==(r>>n&1);o[Math.floor(n/3)][n%3+i-8-3]=a}for(n=0;n<18;n+=1){a=!t&&1==(r>>n&1);o[n%3+i-8-3][Math.floor(n/3)]=a}},d=function(t,r){for(var e=n<<3|r,a=B.getBCHTypeInfo(e),u=0;u<15;u+=1){var f=!t&&1==(a>>u&1);u<6?o[u][8]=f:u<8?o[u+1][8]=f:o[i-15+u][8]=f}for(u=0;u<15;u+=1){f=!t&&1==(a>>u&1);u<8?o[8][i-u-1]=f:u<9?o[8][15-u-1+1]=f:o[8][15-u-1]=f}o[i-8][8]=!t},w=function(t,r){for(var e=-1,n=i-1,a=7,u=0,f=B.getMaskFunction(r),c=i-1;c>0;c-=2)for(6==c&&(c-=1);;){for(var g=0;g<2;g+=1)if(null==o[n][c-g]){var l=!1;u<t.length&&(l=1==(t[u]>>>a&1)),f(n,c-g)&&(l=!l),o[n][c-g]=l,-1==(a-=1)&&(u+=1,a=7)}if((n+=e)<0||i<=n){n-=e,e=-e;break}}},p=function(t,r,e){for(var n=A.getRSBlocks(t,r),o=b(),i=0;i<e.length;i+=1){var a=e[i];o.put(a.getMode(),4),o.put(a.getLength(),B.getLengthInBits(a.getMode(),t)),a.write(o)}var u=0;for(i=0;i<n.length;i+=1)u+=n[i].dataCount;if(o.getLengthInBits()>8*u)throw"code length overflow. ("+o.getLengthInBits()+">"+8*u+")";for(o.getLengthInBits()+4<=8*u&&o.put(0,4);o.getLengthInBits()%8!=0;)o.putBit(!1);for(;!(o.getLengthInBits()>=8*u||(o.put(236,8),o.getLengthInBits()>=8*u));)o.put(17,8);return function(t,r){for(var e=0,n=0,o=0,i=new Array(r.length),a=new Array(r.length),u=0;u<r.length;u+=1){var f=r[u].dataCount,c=r[u].totalCount-f;n=Math.max(n,f),o=Math.max(o,c),i[u]=new Array(f);for(var g=0;g<i[u].length;g+=1)i[u][g]=255&t.getBuffer()[g+e];e+=f;var l=B.getErrorCorrectPolynomial(c),h=k(i[u],l.getLength()-1).mod(l);for(a[u]=new Array(l.getLength()-1),g=0;g<a[u].length;g+=1){var s=g+h.getLength()-a[u].length;a[u][g]=s>=0?h.getAt(s):0}}var v=0;for(g=0;g<r.length;g+=1)v+=r[g].totalCount;var d=new Array(v),w=0;for(g=0;g<n;g+=1)for(u=0;u<r.length;u+=1)g<i[u].length&&(d[w]=i[u][g],w+=1);for(g=0;g<o;g+=1)for(u=0;u<r.length;u+=1)g<a[u].length&&(d[w]=a[u][g],w+=1);return d}(o,n)};f.addData=function(t,r){var e=null;switch(r=r||"Byte"){case"Numeric":e=M(t);break;case"Alphanumeric":e=x(t);break;case"Byte":e=m(t);break;case"Kanji":e=L(t);break;default:throw"mode:"+r}u.push(e),a=null},f.isDark=function(t,r){if(t<0||i<=t||r<0||i<=r)throw t+","+r;return o[t][r]},f.getModuleCount=function(){return i},f.make=function(){if(e<1){for(var t=1;t<40;t++){for(var r=A.getRSBlocks(t,n),o=b(),i=0;i<u.length;i++){var a=u[i];o.put(a.getMode(),4),o.put(a.getLength(),B.getLengthInBits(a.getMode(),t)),a.write(o)}var g=0;for(i=0;i<r.length;i++)g+=r[i].dataCount;if(o.getLengthInBits()<=8*g)break}e=t}c(!1,function(){for(var t=0,r=0,e=0;e<8;e+=1){c(!0,e);var n=B.getLostPoint(f);(0==e||t>n)&&(t=n,r=e)}return r}())},f.createTableTag=function(t,r){t=t||2;var e="";e+='<table style="',e+=" border-width: 0px; border-style: none;",e+=" border-collapse: collapse;",e+=" padding: 0px; margin: "+(r=void 0===r?4*t:r)+"px;",e+='">',e+="<tbody>";for(var n=0;n<f.getModuleCount();n+=1){e+="<tr>";for(var o=0;o<f.getModuleCount();o+=1)e+='<td style="',e+=" border-width: 0px; border-style: none;",e+=" border-collapse: collapse;",e+=" padding: 0px; margin: 0px;",e+=" width: "+t+"px;",e+=" height: "+t+"px;",e+=" background-color: ",e+=f.isDark(n,o)?"#000000":"#ffffff",e+=";",e+='"/>';e+="</tr>"}return e+="</tbody>",e+="</table>"},f.createSvgTag=function(t,r,e,n){var o={};"object"==typeof arguments[0]&&(t=(o=arguments[0]).cellSize,r=o.margin,e=o.alt,n=o.title),t=t||2,r=void 0===r?4*t:r,(e="string"==typeof e?{text:e}:e||{}).text=e.text||null,e.id=e.text?e.id||"qrcode-description":null,(n="string"==typeof n?{text:n}:n||{}).text=n.text||null,n.id=n.text?n.id||"qrcode-title":null;var i,a,u,c,g=f.getModuleCount()*t+2*r,l="";for(c="l"+t+",0 0,"+t+" -"+t+",0 0,-"+t+"z ",l+='<svg version="1.1" xmlns="http://www.w3.org/2000/svg"',l+=o.scalable?"":' width="'+g+'px" height="'+g+'px"',l+=' viewBox="0 0 '+g+" "+g+'" ',l+=' preserveAspectRatio="xMinYMin meet"',l+=n.text||e.text?' role="img" aria-labelledby="'+y([n.id,e.id].join(" ").trim())+'"':"",l+=">",l+=n.text?'<title id="'+y(n.id)+'">'+y(n.text)+"</title>":"",l+=e.text?'<description id="'+y(e.id)+'">'+y(e.text)+"</description>":"",l+='<rect width="100%" height="100%" fill="white" cx="0" cy="0"/>',l+='<path d="',a=0;a<f.getModuleCount();a+=1)for(u=a*t+r,i=0;i<f.getModuleCount();i+=1)f.isDark(a,i)&&(l+="M"+(i*t+r)+","+u+c);return l+='" stroke="transparent" fill="black"/>',l+="</svg>"},f.createDataURL=function(t,r){t=t||2,r=void 0===r?4*t:r;var e=f.getModuleCount()*t+2*r,n=r,o=e-r;return I(e,e,(function(r,e){if(n<=r&&r<o&&n<=e&&e<o){var i=Math.floor((r-n)/t),a=Math.floor((e-n)/t);return f.isDark(a,i)?0:1}return 1}))},f.createImgTag=function(t,r,e){t=t||2,r=void 0===r?4*t:r;var n=f.getModuleCount()*t+2*r,o="";return o+="<img",o+=' src="',o+=f.createDataURL(t,r),o+='"',o+=' width="',o+=n,o+='"',o+=' height="',o+=n,o+='"',e&&(o+=' alt="',o+=y(e),o+='"'),o+="/>"};var y=function(t){for(var r="",e=0;e<t.length;e+=1){var n=t.charAt(e);switch(n){case"<":r+="&lt;";break;case">":r+="&gt;";break;case"&":r+="&amp;";break;case'"':r+="&quot;";break;default:r+=n}}return r};return f.createASCII=function(t,r){if((t=t||1)<2)return function(t){t=void 0===t?2:t;var r,e,n,o,i,a=1*f.getModuleCount()+2*t,u=t,c=a-t,g={"██":"█","█ ":"▀"," █":"▄","  ":" "},l={"██":"▀","█ ":"▀"," █":" ","  ":" "},h="";for(r=0;r<a;r+=2){for(n=Math.floor((r-u)/1),o=Math.floor((r+1-u)/1),e=0;e<a;e+=1)i="█",u<=e&&e<c&&u<=r&&r<c&&f.isDark(n,Math.floor((e-u)/1))&&(i=" "),u<=e&&e<c&&u<=r+1&&r+1<c&&f.isDark(o,Math.floor((e-u)/1))?i+=" ":i+="█",h+=t<1&&r+1>=c?l[i]:g[i];h+="\n"}return a%2&&t>0?h.substring(0,h.length-a-1)+Array(a+1).join("▀"):h.substring(0,h.length-1)}(r);t-=1,r=void 0===r?2*t:r;var e,n,o,i,a=f.getModuleCount()*t+2*r,u=r,c=a-r,g=Array(t+1).join("██"),l=Array(t+1).join("  "),h="",s="";for(e=0;e<a;e+=1){for(o=Math.floor((e-u)/t),s="",n=0;n<a;n+=1)i=1,u<=n&&n<c&&u<=e&&e<c&&f.isDark(o,Math.floor((n-u)/t))&&(i=0),s+=i?g:l;for(o=0;o<t;o+=1)h+=s+"\n"}return h.substring(0,h.length-1)},f.renderTo2dContext=function(t,r){r=r||2;for(var e=f.getModuleCount(),n=0;n<e;n++)for(var o=0;o<e;o++)t.fillStyle=f.isDark(n,o)?"black":"white",t.fillRect(n*r,o*r,r,r)},f};t.stringToBytes=(t.stringToBytesFuncs={default:function(t){for(var r=[],e=0;e<t.length;e+=1){var n=t.charCodeAt(e);r.push(255&n)}return r}}).default,t.createStringToBytes=function(t,r){var e=function(){for(var e=S(t),n=function(){var t=e.read();if(-1==t)throw"eof";return t},o=0,i={};;){var a=e.read();if(-1==a)break;var u=n(),f=n()<<8|n();i[String.fromCharCode(a<<8|u)]=f,o+=1}if(o!=r)throw o+" != "+r;return i}(),n="?".charCodeAt(0);return function(t){for(var r=[],o=0;o<t.length;o+=1){var i=t.charCodeAt(o);if(i<128)r.push(i);else{var a=e[t.charAt(o)];"number"==typeof a?(255&a)==a?r.push(a):(r.push(a>>>8),r.push(255&a)):r.push(n)}}return r}};var r,e,n,o,i,a=1,u=2,f=4,c=8,g={L:1,M:0,Q:3,H:2},l=0,h=1,s=2,v=3,d=4,w=5,p=6,y=7,B=(r=[[],[6,18],[6,22],[6,26],[6,30],[6,34],[6,22,38],[6,24,42],[6,26,46],[6,28,50],[6,30,54],[6,32,58],[6,34,62],[6,26,46,66],[6,26,48,70],[6,26,50,74],[6,30,54,78],[6,30,56,82],[6,30,58,86],[6,34,62,90],[6,28,50,72,94],[6,26,50,74,98],[6,30,54,78,102],[6,28,54,80,106],[6,32,58,84,110],[6,30,58,86,114],[6,34,62,90,118],[6,26,50,74,98,122],[6,30,54,78,102,126],[6,26,52,78,104,130],[6,30,56,82,108,134],[6,34,60,86,112,138],[6,30,58,86,114,142],[6,34,62,90,118,146],[6,30,54,78,102,126,150],[6,24,50,76,102,128,154],[6,28,54,80,106,132,158],[6,32,58,84,110,136,162],[6,26,54,82,110,138,166],[6,30,58,86,114,142,170]],e=1335,n=7973,i=function(t){for(var r=0;0!=t;)r+=1,t>>>=1;return r},(o={}).getBCHTypeInfo=function(t){for(var r=t<<10;i(r)-i(e)>=0;)r^=e<<i(r)-i(e);return 21522^(t<<10|r)},o.getBCHTypeNumber=function(t){for(var r=t<<12;i(r)-i(n)>=0;)r^=n<<i(r)-i(n);return t<<12|r},o.getPatternPosition=function(t){return r[t-1]},o.getMaskFunction=function(t){switch(t){case l:return function(t,r){return(t+r)%2==0};case h:return function(t,r){return t%2==0};case s:return function(t,r){return r%3==0};case v:return function(t,r){return(t+r)%3==0};case d:return function(t,r){return(Math.floor(t/2)+Math.floor(r/3))%2==0};case w:return function(t,r){return t*r%2+t*r%3==0};case p:return function(t,r){return(t*r%2+t*r%3)%2==0};case y:return function(t,r){return(t*r%3+(t+r)%2)%2==0};default:throw"bad maskPattern:"+t}},o.getErrorCorrectPolynomial=function(t){for(var r=k([1],0),e=0;e<t;e+=1)r=r.multiply(k([1,C.gexp(e)],0));return r},o.getLengthInBits=function(t,r){if(1<=r&&r<10)switch(t){case a:return 10;case u:return 9;case f:case c:return 8;default:throw"mode:"+t}else if(r<27)switch(t){case a:return 12;case u:return 11;case f:return 16;case c:return 10;default:throw"mode:"+t}else{if(!(r<41))throw"type:"+r;switch(t){case a:return 14;case u:return 13;case f:return 16;case c:return 12;default:throw"mode:"+t}}},o.getLostPoint=function(t){for(var r=t.getModuleCount(),e=0,n=0;n<r;n+=1)for(var o=0;o<r;o+=1){for(var i=0,a=t.isDark(n,o),u=-1;u<=1;u+=1)if(!(n+u<0||r<=n+u))for(var f=-1;f<=1;f+=1)o+f<0||r<=o+f||0==u&&0==f||a==t.isDark(n+u,o+f)&&(i+=1);i>5&&(e+=3+i-5)}for(n=0;n<r-1;n+=1)for(o=0;o<r-1;o+=1){var c=0;t.isDark(n,o)&&(c+=1),t.isDark(n+1,o)&&(c+=1),t.isDark(n,o+1)&&(c+=1),t.isDark(n+1,o+1)&&(c+=1),0!=c&&4!=c||(e+=3)}for(n=0;n<r;n+=1)for(o=0;o<r-6;o+=1)t.isDark(n,o)&&!t.isDark(n,o+1)&&t.isDark(n,o+2)&&t.isDark(n,o+3)&&t.isDark(n,o+4)&&!t.isDark(n,o+5)&&t.isDark(n,o+6)&&(e+=40);for(o=0;o<r;o+=1)for(n=0;n<r-6;n+=1)t.isDark(n,o)&&!t.isDark(n+1,o)&&t.isDark(n+2,o)&&t.isDark(n+3,o)&&t.isDark(n+4,o)&&!t.isDark(n+5,o)&&t.isDark(n+6,o)&&(e+=40);var g=0;for(o=0;o<r;o+=1)for(n=0;n<r;n+=1)t.isDark(n,o)&&(g+=1);return e+=Math.abs(100*g/r/r-50)/5*10},o),C=function(){for(var t=new Array(256),r=new Array(256),e=0;e<8;e+=1)t[e]=1<<e;for(e=8;e<256;e+=1)t[e]=t[e-4]^t[e-5]^t[e-6]^t[e-8];for(e=0;e<255;e+=1)r[t[e]]=e;var n={glog:function(t){if(t<1)throw"glog("+t+")";return r[t]},gexp:function(r){for(;r<0;)r+=255;for(;r>=256;)r-=255;return t[r]}};return n}();function k(t,r){if(void 0===t.length)throw t.length+"/"+r;var e=function(){for(var e=0;e<t.length&&0==t[e];)e+=1;for(var n=new Array(t.length-e+r),o=0;o<t.length-e;o+=1)n[o]=t[o+e];return n}(),n={getAt:function(t){return e[t]},getLength:function(){return e.length},multiply:function(t){for(var r=new Array(n.getLength()+t.getLength()-1),e=0;e<n.getLength();e+=1)for(var o=0;o<t.getLength();o+=1)r[e+o]^=C.gexp(C.glog(n.getAt(e))+C.glog(t.getAt(o)));return k(r,0)},mod:function(t){if(n.getLength()-t.getLength()<0)return n;for(var r=C.glog(n.getAt(0))-C.glog(t.getAt(0)),e=new Array(n.getLength()),o=0;o<n.getLength();o+=1)e[o]=n.getAt(o);for(o=0;o<t.getLength();o+=1)e[o]^=C.gexp(C.glog(t.getAt(o))+r);return k(e,0).mod(t)}};return n}var A=function(){var t=[[1,26,19],[1,26,16],[1,26,13],[1,26,9],[1,44,34],[1,44,28],[1,44,22],[1,44,16],[1,70,55],[1,70,44],[2,35,17],[2,35,13],[1,100,80],[2,50,32],[2,50,24],[4,25,9],[1,134,108],[2,67,43],[2,33,15,2,34,16],[2,33,11,2,34,12],[2,86,68],[4,43,27],[4,43,19],[4,43,15],[2,98,78],[4,49,31],[2,32,14,4,33,15],[4,39,13,1,40,14],[2,121,97],[2,60,38,2,61,39],[4,40,18,2,41,19],[4,40,14,2,41,15],[2,146,116],[3,58,36,2,59,37],[4,36,16,4,37,17],[4,36,12,4,37,13],[2,86,68,2,87,69],[4,69,43,1,70,44],[6,43,19,2,44,20],[6,43,15,2,44,16],[4,101,81],[1,80,50,4,81,51],[4,50,22,4,51,23],[3,36,12,8,37,13],[2,116,92,2,117,93],[6,58,36,2,59,37],[4,46,20,6,47,21],[7,42,14,4,43,15],[4,133,107],[8,59,37,1,60,38],[8,44,20,4,45,21],[12,33,11,4,34,12],[3,145,115,1,146,116],[4,64,40,5,65,41],[11,36,16,5,37,17],[11,36,12,5,37,13],[5,109,87,1,110,88],[5,65,41,5,66,42],[5,54,24,7,55,25],[11,36,12,7,37,13],[5,122,98,1,123,99],[7,73,45,3,74,46],[15,43,19,2,44,20],[3,45,15,13,46,16],[1,135,107,5,136,108],[10,74,46,1,75,47],[1,50,22,15,51,23],[2,42,14,17,43,15],[5,150,120,1,151,121],[9,69,43,4,70,44],[17,50,22,1,51,23],[2,42,14,19,43,15],[3,141,113,4,142,114],[3,70,44,11,71,45],[17,47,21,4,48,22],[9,39,13,16,40,14],[3,135,107,5,136,108],[3,67,41,13,68,42],[15,54,24,5,55,25],[15,43,15,10,44,16],[4,144,116,4,145,117],[17,68,42],[17,50,22,6,51,23],[19,46,16,6,47,17],[2,139,111,7,140,112],[17,74,46],[7,54,24,16,55,25],[34,37,13],[4,151,121,5,152,122],[4,75,47,14,76,48],[11,54,24,14,55,25],[16,45,15,14,46,16],[6,147,117,4,148,118],[6,73,45,14,74,46],[11,54,24,16,55,25],[30,46,16,2,47,17],[8,132,106,4,133,107],[8,75,47,13,76,48],[7,54,24,22,55,25],[22,45,15,13,46,16],[10,142,114,2,143,115],[19,74,46,4,75,47],[28,50,22,6,51,23],[33,46,16,4,47,17],[8,152,122,4,153,123],[22,73,45,3,74,46],[8,53,23,26,54,24],[12,45,15,28,46,16],[3,147,117,10,148,118],[3,73,45,23,74,46],[4,54,24,31,55,25],[11,45,15,31,46,16],[7,146,116,7,147,117],[21,73,45,7,74,46],[1,53,23,37,54,24],[19,45,15,26,46,16],[5,145,115,10,146,116],[19,75,47,10,76,48],[15,54,24,25,55,25],[23,45,15,25,46,16],[13,145,115,3,146,116],[2,74,46,29,75,47],[42,54,24,1,55,25],[23,45,15,28,46,16],[17,145,115],[10,74,46,23,75,47],[10,54,24,35,55,25],[19,45,15,35,46,16],[17,145,115,1,146,116],[14,74,46,21,75,47],[29,54,24,19,55,25],[11,45,15,46,46,16],[13,145,115,6,146,116],[14,74,46,23,75,47],[44,54,24,7,55,25],[59,46,16,1,47,17],[12,151,121,7,152,122],[12,75,47,26,76,48],[39,54,24,14,55,25],[22,45,15,41,46,16],[6,151,121,14,152,122],[6,75,47,34,76,48],[46,54,24,10,55,25],[2,45,15,64,46,16],[17,152,122,4,153,123],[29,74,46,14,75,47],[49,54,24,10,55,25],[24,45,15,46,46,16],[4,152,122,18,153,123],[13,74,46,32,75,47],[48,54,24,14,55,25],[42,45,15,32,46,16],[20,147,117,4,148,118],[40,75,47,7,76,48],[43,54,24,22,55,25],[10,45,15,67,46,16],[19,148,118,6,149,119],[18,75,47,31,76,48],[34,54,24,34,55,25],[20,45,15,61,46,16]],r=function(t,r){var e={};return e.totalCount=t,e.dataCount=r,e},e={};return e.getRSBlocks=function(e,n){var o=function(r,e){switch(e){case g.L:return t[4*(r-1)+0];case g.M:return t[4*(r-1)+1];case g.Q:return t[4*(r-1)+2];case g.H:return t[4*(r-1)+3];default:return}}(e,n);if(void 0===o)throw"bad rs block @ typeNumber:"+e+"/errorCorrectionLevel:"+n;for(var i=o.length/3,a=[],u=0;u<i;u+=1)for(var f=o[3*u+0],c=o[3*u+1],l=o[3*u+2],h=0;h<f;h+=1)a.push(r(c,l));return a},e}(),b=function(){var t=[],r=0,e={getBuffer:function(){return t},getAt:function(r){var e=Math.floor(r/8);return 1==(t[e]>>>7-r%8&1)},put:function(t,r){for(var n=0;n<r;n+=1)e.putBit(1==(t>>>r-n-1&1))},getLengthInBits:function(){return r},putBit:function(e){var n=Math.floor(r/8);t.length<=n&&t.push(0),e&&(t[n]|=128>>>r%8),r+=1}};return e},M=function(t){var r=a,e=t,n={getMode:function(){return r},getLength:function(t){return e.length},write:function(t){for(var r=e,n=0;n+2<r.length;)t.put(o(r.substring(n,n+3)),10),n+=3;n<r.length&&(r.length-n==1?t.put(o(r.substring(n,n+1)),4):r.length-n==2&&t.put(o(r.substring(n,n+2)),7))}},o=function(t){for(var r=0,e=0;e<t.length;e+=1)r=10*r+i(t.charAt(e));return r},i=function(t){if("0"<=t&&t<="9")return t.charCodeAt(0)-"0".charCodeAt(0);throw"illegal char :"+t};return n},x=function(t){var r=u,e=t,n={getMode:function(){return r},getLength:function(t){return e.length},write:function(t){for(var r=e,n=0;n+1<r.length;)t.put(45*o(r.charAt(n))+o(r.charAt(n+1)),11),n+=2;n<r.length&&t.put(o(r.charAt(n)),6)}},o=function(t){if("0"<=t&&t<="9")return t.charCodeAt(0)-"0".charCodeAt(0);if("A"<=t&&t<="Z")return t.charCodeAt(0)-"A".charCodeAt(0)+10;switch(t){case" ":return 36;case"$":return 37;case"%":return 38;case"*":return 39;case"+":return 40;case"-":return 41;case".":return 42;case"/":return 43;case":":return 44;default:throw"illegal char :"+t}};return n},m=function(r){var e=f,n=t.stringToBytes(r),o={getMode:function(){return e},getLength:function(t){return n.length},write:function(t){for(var r=0;r<n.length;r+=1)t.put(n[r],8)}};return o},L=function(r){var e=c,n=t.stringToBytesFuncs.SJIS;if(!n)throw"sjis not supported.";!function(){var t=n("友");if(2!=t.length||38726!=(t[0]<<8|t[1]))throw"sjis not supported."}();var o=n(r),i={getMode:function(){return e},getLength:function(t){return~~(o.length/2)},write:function(t){for(var r=o,e=0;e+1<r.length;){var n=(255&r[e])<<8|255&r[e+1];if(33088<=n&&n<=40956)n-=33088;else{if(!(57408<=n&&n<=60351))throw"illegal char at "+(e+1)+"/"+n;n-=49472}n=192*(n>>>8&255)+(255&n),t.put(n,13),e+=2}if(e<r.length)throw"illegal char at "+(e+1)}};return i},D=function(){var t=[],r={writeByte:function(r){t.push(255&r)},writeShort:function(t){r.writeByte(t),r.writeByte(t>>>8)},writeBytes:function(t,e,n){e=e||0,n=n||t.length;for(var o=0;o<n;o+=1)r.writeByte(t[o+e])},writeString:function(t){for(var e=0;e<t.length;e+=1)r.writeByte(t.charCodeAt(e))},toByteArray:function(){return t},toString:function(){var r="";r+="[";for(var e=0;e<t.length;e+=1)e>0&&(r+=","),r+=t[e];return r+="]"}};return r},S=function(t){var r=t,e=0,n=0,o=0,i={read:function(){for(;o<8;){if(e>=r.length){if(0==o)return-1;throw"unexpected end of file./"+o}var t=r.charAt(e);if(e+=1,"="==t)return o=0,-1;t.match(/^\s$/)||(n=n<<6|a(t.charCodeAt(0)),o+=6)}var i=n>>>o-8&255;return o-=8,i}},a=function(t){if(65<=t&&t<=90)return t-65;if(97<=t&&t<=122)return t-97+26;if(48<=t&&t<=57)return t-48+52;if(43==t)return 62;if(47==t)return 63;throw"c:"+t};return i},I=function(t,r,e){for(var n=function(t,r){var e=t,n=r,o=new Array(t*r),i={setPixel:function(t,r,n){o[r*e+t]=n},write:function(t){t.writeString("GIF87a"),t.writeShort(e),t.writeShort(n),t.writeByte(128),t.writeByte(0),t.writeByte(0),t.writeByte(0),t.writeByte(0),t.writeByte(0),t.writeByte(255),t.writeByte(255),t.writeByte(255),t.writeString(","),t.writeShort(0),t.writeShort(0),t.writeShort(e),t.writeShort(n),t.writeByte(0);var r=a(2);t.writeByte(2);for(var o=0;r.length-o>255;)t.writeByte(255),t.writeBytes(r,o,255),o+=255;t.writeByte(r.length-o),t.writeBytes(r,o,r.length-o),t.writeByte(0),t.writeString(";")}},a=function(t){for(var r=1<<t,e=1+(1<<t),n=t+1,i=u(),a=0;a<r;a+=1)i.add(String.fromCharCode(a));i.add(String.fromCharCode(r)),i.add(String.fromCharCode(e));var f,c,g,l=D(),h=(f=l,c=0,g=0,{write:function(t,r){if(t>>>r!=0)throw"length over";for(;c+r>=8;)f.writeByte(255&(t<<c|g)),r-=8-c,t>>>=8-c,g=0,c=0;g|=t<<c,c+=r},flush:function(){c>0&&f.writeByte(g)}});h.write(r,n);var s=0,v=String.fromCharCode(o[s]);for(s+=1;s<o.length;){var d=String.fromCharCode(o[s]);s+=1,i.contains(v+d)?v+=d:(h.write(i.indexOf(v),n),i.size()<4095&&(i.size()==1<<n&&(n+=1),i.add(v+d)),v=d)}return h.write(i.indexOf(v),n),h.write(e,n),h.flush(),l.toByteArray()},u=function(){var t={},r=0,e={add:function(n){if(e.contains(n))throw"dup key:"+n;t[n]=r,r+=1},size:function(){return r},indexOf:function(r){return t[r]},contains:function(r){return void 0!==t[r]}};return e};return i}(t,r),o=0;o<r;o+=1)for(var i=0;i<t;i+=1)n.setPixel(i,o,e(i,o));var a=D();n.write(a);for(var u=function(){var t=0,r=0,e=0,n="",o={},i=function(t){n+=String.fromCharCode(a(63&t))},a=function(t){if(t<0);else{if(t<26)return 65+t;if(t<52)return t-26+97;if(t<62)return t-52+48;if(62==t)return 43;if(63==t)return 47}throw"n:"+t};return o.writeByte=function(n){for(t=t<<8|255&n,r+=8,e+=1;r>=6;)i(t>>>r-6),r-=6},o.flush=function(){if(r>0&&(i(t<<6-r),t=0,r=0),e%3!=0)for(var o=3-e%3,a=0;a<o;a+=1)n+="="},o.toString=function(){return n},o}(),f=a.toByteArray(),c=0;c<f.length;c+=1)u.writeByte(f[c]);return u.flush(),"data:image/gif;base64,"+u};return t}();qrcode.stringToBytesFuncs["UTF-8"]=function(t){return function(t){for(var r=[],e=0;e<t.length;e++){var n=t.charCodeAt(e);n<128?r.push(n):n<2048?r.push(192|n>>6,128|63&n):n<55296||n>=57344?r.push(224|n>>12,128|n>>6&63,128|63&n):(e++,n=65536+((1023&n)<<10|1023&t.charCodeAt(e)),r.push(240|n>>18,128|n>>12&63,128|n>>6&63,128|63&n))}return r}(t)},function(t){"function"==typeof define&&define.amd?define([],t):"object"==typeof exports&&(module.exports=t())}((function(){return qrcode}));
+//# sourceMappingURL=/sm/26b4b0d0b1e283d6b3ec9857ac597d7a60c76ac17be1ef4c965f03086de426bb.map
+</script>
+
+<script>
+  'use strict';
+  /* ==================================================================
+     Elevate Select — Sales & Inventory Portal (Store House)
+     Wired to the real Elevate back end:
+       - Staff PIN sign-in (owner / secretary / ai) — POST /auth/login
+       - Live catalogue — GET /products, edits via PATCH /products/:id,
+         owner-only DELETE /products/:id
+       - Record Sale — POST /products/:id/sale files a PAID invoice and
+         marks the piece sold in one step; the Owner Patrol strip and
+         drawer read GET /sales/today (America/New_York day); the
+         owner's per-sale Undo voids it via POST /invoices/:id/void
+       - Promotions (Add Sale) — GET/POST /promotions, owner-only
+         POST /promotions/:id/end; the header "Sale Active" pill and
+         the Gallery's On Sale filter read them. A promotion is a
+         back-end record only — it never rewrites catalogue prices.
+       - Recovery — GET /audit?days=7 + POST /audit/:id/restore
+         (owner-only): every edit, status change, sale, void and
+         delete is logged with the piece as it was BEFORE, and
+         Settings offers one-tap restore for 7 days.
+       - Availability is a four-state model: In Stock / Not in Stock
+         derive from the status field; Custom Jewels and
+         Shipping: 1 Month Delay live in the stored availability field.
+       - ONE shared Pending queue — GET/POST /pending,
+         PATCH /pending/:queueId, POST /pending/:queueId/approve|reject
+       - Connection state — GET /health
+     Photo matching calls the real visual-search back end (POST /match).
+     The chat is a deterministic local command parser over the loaded
+     catalogue. Only where the parser cannot match a message does it
+     consult the portal-chat back end (POST /portal-chat, Gemini),
+     which answers from a snapshot of the same loaded data and may
+     PROPOSE one action — proposals render through the same
+     confirmation cards and apply only after a Confirm tap. If that
+     service is unreachable, slow or unconfigured, the chat shows the
+     parser's original "could not match" line, unchanged.
+     API base can be overridden for testing with
+     ?api=<base>&visual=<base>&portalchat=<base>.
+     ================================================================== */
+  var params = new URLSearchParams(location.search);
+  var API_BASE = (params.get('api') || 'https://elevate-backend-240z.onrender.com').replace(/\/+$/, '');
+  var VISUAL_BASE = (params.get('visual') || 'https://elevate-visual-search-backend.onrender.com').replace(/\/+$/, '');
+  var PORTAL_CHAT_BASE = (params.get('portalchat') || 'https://elevate-portal-chat-backend.onrender.com').replace(/\/+$/, '');
+
+  var DIVISIONS = [
+    { id: 'ES',  name: 'Elevate Select', sub: 'select@elevatejewelsny.com', brands: ['Elevate Select'] },
+    { id: 'EJ',  name: 'Elevate Jewels', sub: 'Active',                     brands: ['PAVE', 'Elevate Jewels'] },
+    { id: 'SLV', name: 'Elevate Silver', sub: 'Custom Silver',              brands: ['Elevate Silver'] },
+    { id: 'GFT', name: 'Elevate Gifts',  sub: 'Custom Gifts',               brands: ['Elevate Gifts'] },
+    { id: 'LLG', name: 'LLG',            sub: 'Lab-Grown Line',             brands: ['LLG'] }
+  ];
+  var activeDivision = 'EJ';
+
+  var session = {
+    token: sessionStorage.getItem('ejPortalToken') || null,
+    role: sessionStorage.getItem('ejPortalRole') || null
+  };
+  var health = null;
+  var setupMode = false;
+  var liveProducts = [];
+  var pendingEntries = [];
+  /* v4 state: promotions (Add Sale), gallery filters, batch popover. */
+  var promotionsData = { promotions: [], active: null, defaults: null };
+  var galTier1 = 'ALL';
+  var galTier2a = 'ALL';
+  var galTier2b = 'ALL';
+  var galSelectedId = null;
+  var galClickTimer = null;
+  var galDeleteArmId = null;
+  var detailCtx = null;   // {kind:'product'|'pending'|'new', id?, queueId?}
+  var chatMode = 'chat';  // 'chat' | 'task'
+  var addFlow = null;     // conversational add-item state
+  var portalChatHistory = []; // { role: 'user' | 'assistant', text } — portal-chat fallback context
+  var portalChatDraft = null; // in-progress 'add' draft proposed by the portal-chat service
+  var recog = null;
+
+  /* ---------------- helpers ---------------- */
+  function $(id) { return document.getElementById(id); }
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+  function toast(msg) {
+    var t = $('toast');
+    t.textContent = msg;
+    t.classList.add('on');
+    clearTimeout(t._h);
+    t._h = setTimeout(function () { t.classList.remove('on'); }, 3600);
+  }
+  async function api(method, path, body) {
+    var headers = { 'Content-Type': 'application/json' };
+    if (session.token) headers['Authorization'] = 'Bearer ' + session.token;
+    var res;
+    try {
+      res = await fetch(API_BASE + path, {
+        method: method,
+        headers: headers,
+        body: body !== undefined ? JSON.stringify(body) : undefined
+      });
+    } catch (e) {
+      var netErr = new Error('back end not reachable');
+      netErr.network = true;
+      throw netErr;
+    }
+    var json = null;
+    try { json = await res.json(); } catch (_) { /* leave null */ }
+    if (!res.ok) {
+      var err = new Error((json && json.error) || ('HTTP ' + res.status));
+      err.status = res.status;
+      throw err;
+    }
+    return json;
+  }
+
+  function productTitle(p) { return (p && (p.name || p.title)) || 'Untitled piece'; }
+  function productPrice(p) {
+    if (!p) return null;
+    var n = typeof p.price === 'number' ? p.price : parseFloat(String(p.price == null ? '' : p.price).replace(/[^0-9.]/g, ''));
+    return (typeof n === 'number' && isFinite(n) && n > 0) ? n : null;
+  }
+  function fmtMoney(n) {
+    return '$' + n.toLocaleString('en-US', {
+      minimumFractionDigits: Number.isInteger(n) ? 0 : 2,
+      maximumFractionDigits: 2
+    });
+  }
+  function fmtPrice(p) {
+    var n = productPrice(p);
+    return n ? fmtMoney(n) : 'Price to confirm';
+  }
+  function statusOf(p) { return (p && p.status) || 'live'; }
+  /* -------- availability (the owner's four-state model) --------
+     Derived from real back-end fields only:
+       - "Shipping: 1 Month Delay" — the piece's own availability
+         field says so. Checked FIRST: it is an explicit store state
+         that outranks the stock-status derivation (a shipping piece
+         is usually still "live" underneath).
+       - "Custom Jewels" — the piece's stored availability field says
+         so, a custom/madeToOrder flag is set, or it is one of the EX
+         custom designs (llg-ex-* IDs).
+       - "In Stock" — a live piece (status "live").
+       - "Not in Stock" — status "out-of-stock" or "sold"
+         (the tag reads "Not in Stock (Unsure / Out)"). */
+  function isCustomDesign(p) {
+    if (!p) return false;
+    if (p.availability === 'Custom Jewels' || p.custom === true || p.madeToOrder === true) return true;
+    return /^llg-ex-/i.test(String(p.id || ''));
+  }
+  var SHIPPING_AVAIL = 'Shipping: 1 Month Delay';
+  function availOf(p) {
+    if (p && p.availability === SHIPPING_AVAIL) return SHIPPING_AVAIL;
+    if (isCustomDesign(p)) return 'Custom Jewels';
+    return statusOf(p) === 'live' ? 'In Stock' : 'Not in Stock';
+  }
+  function availClass(a) {
+    if (a === 'In Stock') return 'status-in-stock';
+    if (a === 'Custom Jewels') return 'status-custom';
+    if (a === SHIPPING_AVAIL) return 'status-shipping';
+    return 'status-not-in-stock';
+  }
+  function availTagHtml(p) {
+    var a = availOf(p);
+    return '<span class="status-tag ' + availClass(a) + '">' + a + '</span>';
+  }
+  function availLabelForStatus(s) {
+    return s === 'live' ? 'In Stock' : 'Not in Stock';
+  }
+  /* Calendar day in the store's timezone (America/New_York), as YYYY-MM-DD. */
+  function nyDateStr(d) {
+    return new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'America/New_York', year: 'numeric', month: '2-digit', day: '2-digit'
+    }).format(d);
+  }
+  function categoryIcon(cat) {
+    var c = String(cat || '').toLowerCase();
+    if (c.indexOf('ring') >= 0) return '💍';
+    if (c.indexOf('earring') >= 0) return '✨';
+    if (c.indexOf('necklace') >= 0 || c.indexOf('chain') >= 0 || c.indexOf('pendant') >= 0) return '📿';
+    if (c.indexOf('bracelet') >= 0 || c.indexOf('bangle') >= 0) return '⭕';
+    if (c.indexOf('timepiece') >= 0 || c.indexOf('watch') >= 0) return '⌚';
+    if (c.indexOf('brooch') >= 0) return '🌸';
+    if (c.indexOf('cufflink') >= 0) return '🔘';
+    return '💎';
+  }
+  function divisionOfBrand(brand) {
+    for (var i = 0; i < DIVISIONS.length; i++) {
+      if (DIVISIONS[i].brands.indexOf(brand) >= 0) return DIVISIONS[i];
+    }
+    return DIVISIONS[1]; // Elevate Jewels is the house default
+  }
+  function itemDivision(item) { return divisionOfBrand((item && item.brand) || 'Elevate Jewels'); }
+  function activeDiv() {
+    for (var i = 0; i < DIVISIONS.length; i++) if (DIVISIONS[i].id === activeDivision) return DIVISIONS[i];
+    return DIVISIONS[1];
+  }
+  function waitingEntries() {
+    return pendingEntries.filter(function (e) { return e.status !== 'approved' && e.status !== 'rejected'; });
+  }
+
+  /* ---------------- PIN gate / auth ---------------- */
+  function pinError(msg) { $('pinError').textContent = msg || ''; }
+  function setGateStatus(msg) { $('pinStatus').textContent = msg; }
+
+  async function checkBackend(manual) {
+    if (manual) { setGateStatus('Checking the back end…'); pinError(''); $('pinRetry').style.display = 'none'; }
+    try {
+      health = await api('GET', '/health');
+    } catch (e) {
+      health = null;
+      setGateStatus('The back end is not reachable yet — it may be waking up. It usually answers within a minute.');
+      $('pinRetry').style.display = '';
+      $('pinBtn').disabled = true;
+      return false;
+    }
+    $('pinBtn').disabled = false;
+    $('pinRetry').style.display = 'none';
+    if (health.staffConfigured && !health.staffConfigured.owner) {
+      setupMode = true;
+      setGateStatus('The Store House is not set up yet. Create the owner PIN to open it.');
+      $('pinInput').placeholder = 'New 10-digit owner PIN';
+      $('pinInput2').style.display = '';
+      $('pinBtn').textContent = 'Create owner PIN';
+    } else {
+      setupMode = false;
+      setGateStatus('Back end connected. Enter your staff PIN.');
+      $('pinInput').placeholder = '10-digit PIN';
+      $('pinInput2').style.display = 'none';
+      $('pinBtn').textContent = 'Sign in';
+    }
+    return true;
+  }
+
+  async function submitPin() {
+    pinError('');
+    var pin = $('pinInput').value.trim();
+    if (!/^\d{10}$/.test(pin)) { pinError('The PIN is exactly 10 digits.'); return; }
+    $('pinBtn').disabled = true;
+    try {
+      if (setupMode) {
+        var pin2 = $('pinInput2').value.trim();
+        if (pin !== pin2) { pinError('The two PINs do not match.'); $('pinBtn').disabled = false; return; }
+        await api('POST', '/auth/setup-owner', { pin: pin });
+        toast('Owner PIN created — signing you in.');
+      }
+      var r = await api('POST', '/auth/login', { pin: pin });
+      session = { token: r.token, role: r.role };
+      sessionStorage.setItem('ejPortalToken', r.token);
+      sessionStorage.setItem('ejPortalRole', r.role);
+      $('pinInput').value = ''; $('pinInput2').value = '';
+      await enterWorkspace();
+    } catch (e) {
+      $('pinBtn').disabled = false;
+      if (e.network) pinError('The back end is not reachable — wait a moment and try again.');
+      else if (e.status === 401) pinError('That PIN was not recognised.');
+      else if (e.status === 409) { pinError('An owner PIN already exists — sign in with it.'); setupMode = false; checkBackend(false); }
+      else pinError(e.message || 'Sign-in failed.');
+    }
+  }
+
+  async function enterWorkspace() {
+    $('pinGate').classList.add('off');
+    var chip = $('roleChip');
+    chip.style.display = '';
+    chip.textContent = session.role === 'secretary' ? 'Salesperson' : session.role;
+    $('popoverUserLine').textContent = 'Signed in as ' + (session.role === 'secretary' ? 'Salesperson' : session.role);
+    await refreshAll();
+  }
+
+  async function signOut() {
+    try { await api('POST', '/auth/logout'); } catch (_) { /* session is dropped locally regardless */ }
+    sessionStorage.removeItem('ejPortalToken');
+    sessionStorage.removeItem('ejPortalRole');
+    session = { token: null, role: null };
+    location.reload();
+  }
+
+  async function refreshAll() {
+    await loadData();
+  }
+
+  function renderSkeleton() {
+    var rows = [];
+    for (var i = 0; i < 6; i++) {
+      rows.push('<div class="skel-row"><div class="skel skel-thumb"></div>'
+        + '<div class="skel-lines"><div class="skel skel-line" style="width:45%"></div>'
+        + '<div class="skel skel-line" style="width:75%"></div></div></div>');
+    }
+    $('catalogList').innerHTML = rows.join('');
+  }
+
+  async function loadData() {
+    /* Health is refreshed with the data so Settings and the brief
+       never show stale counts after a change. */
+    try {
+      health = await api('GET', '/health');
+    } catch (_) { /* keep last known */ }
+    if (!liveProducts.length) renderSkeleton();
+    try {
+      var pr = await api('GET', '/products');
+      liveProducts = pr.products || [];
+    } catch (e) {
+      liveProducts = [];
+      $('catalogList').innerHTML = '<div class="list-empty">The catalogue could not be loaded (' + esc(e.message) + ').</div>';
+    }
+    try {
+      var pe = await api('GET', '/pending');
+      pendingEntries = pe.pending || [];
+    } catch (_) {
+      pendingEntries = [];
+    }
+    await loadPromotions();
+    buildCategoryFilter();
+    renderBrands();
+    renderCatalog();
+    renderDecisions();
+    updatePendingChip();
+    renderSettings();
+    if ($('viewGallery').style.display === 'block') renderGalleryView();
+    await loadSales();
+  }
+
+  /* ---------------- brands / divisions ---------------- */
+  /* Per-division emblems (v4): simple gold line marks, drawn inline. */
+  function divisionEmblem(id, size) {
+    var s = size || 15;
+    var inner = '';
+    if (id === 'EJ') inner = '<path d="M12 3l2.6 5.6L20 10l-4 4 1 6-5-2.8L7 20l1-6-4-4 5.4-1.4z"/>';
+    else if (id === 'LLG') inner = '<path d="M7 4h10l3 5-8 11L4 9z"/><path d="M4 9h16M12 20L9 9l3-5 3 5z"/>';
+    else if (id === 'SLV') inner = '<path d="M12 3a7 7 0 1 0 7 7"/><circle cx="17.5" cy="6.5" r="1.6"/>';
+    else if (id === 'GFT') inner = '<rect x="4" y="9" width="16" height="11"/><path d="M12 9v11M4 13h16M12 9c-4 0-5-1.6-5-3 0-1.2 1-2 2-2 1.8 0 3 2.4 3 5zm0 0c4 0 5-1.6 5-3 0-1.2-1-2-2-2-1.8 0-3 2.4-3 5z"/>';
+    else inner = '<path d="M12 2l2.4 7.6L22 12l-7.6 2.4L12 22l-2.4-7.6L2 12l7.6-2.4z"/>';
+    return '<svg width="' + s + '" height="' + s + '" viewBox="0 0 24 24" fill="none" stroke="#B08D2E" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true">' + inner + '</svg>';
+  }
+
+  function renderBrands() {
+    var list = $('brandOptionsList');
+    if (!list) return;
+    /* Unread SMS/email badges: the back end exposes no unread counts,
+       so the badges stay at their honest zero state (hidden). */
+    $('totalUnreadBadge').style.display = 'none';
+    var inboxBadge = $('inboxUnreadBadge');
+    if (inboxBadge) inboxBadge.style.display = 'none';
+    $('avatarInitials').innerHTML = divisionEmblem(activeDiv().id, 17);
+    list.innerHTML = DIVISIONS.map(function (b) {
+      return '<div class="brand-option ' + (b.id === activeDivision ? 'selected' : '') + '" onclick="selectBrand(\'' + b.id + '\')">'
+        + '<div class="brand-option-left"><div class="brand-logo-circle">' + divisionEmblem(b.id, 15) + '</div>'
+        + '<div><div style="font-size:13px;font-weight:500;">' + esc(b.name) + '</div>'
+        + '<div style="font-size:11px;color:var(--text-secondary);">845-596-9895 · Inbox</div></div></div></div>';
+    }).join('');
+    $('topDivisionText').textContent = activeDiv().name;
+    $('heroBrandSpan').textContent = activeDiv().name;
+    $('inputBrandPill').textContent = activeDiv().name + ' ▾';
+    $('catalogSectionTitle').textContent = activeDiv().name + ' — Products';
+    renderSalePill();
+  }
+
+  function selectBrand(id) {
+    activeDivision = id;
+    $('brandPopover').classList.remove('open');
+    renderBrands();
+    renderCatalog();
+    renderPatrol();
+    loadPromotions();
+    if (drawerTab === 'gallery') renderGallery();
+    if (drawerTab === 'qr') renderQR();
+    if ($('viewGallery').style.display !== 'none') renderGalleryView();
+    if ($('viewBrief').style.display !== 'none') renderBrief();
+  }
+
+  function toggleBrandPopover() { $('brandPopover').classList.toggle('open'); }
+  function toggleFilterBar() { $('filterBar').classList.toggle('open'); }
+
+  /* ---------------- slide-out drawer (v3) ---------------- */
+  var drawerTab = null;
+  var DRAWER_TITLES = {
+    catalog: 'Catalog & Filters',
+    gallery: 'Gallery Images',
+    qr: 'QR Code ID Directory',
+    patrol: 'Owner Sales Patrol'
+  };
+  var DRAWER_SECTIONS = { catalog: 'drawerCatalog', gallery: 'drawerGallery', qr: 'drawerQr', patrol: 'drawerPatrol' };
+  var DRAWER_BUTTONS = { catalog: 'railCatalogBtn', gallery: 'railGalleryBtn', qr: 'railQrBtn', patrol: 'railPatrolBtn' };
+
+  function openDrawer(tab) {
+    var drawer = $('detailDrawer');
+    if (drawerTab === tab && drawer.classList.contains('open')) { closeDrawer(); return; }
+    drawerTab = tab;
+    drawer.classList.add('open');
+    Object.keys(DRAWER_SECTIONS).forEach(function (k) {
+      $(DRAWER_SECTIONS[k]).classList.toggle('on', k === tab);
+      $(DRAWER_BUTTONS[k]).classList.toggle('active', k === tab);
+    });
+    $('drawerTitle').textContent = DRAWER_TITLES[tab] || 'Catalog';
+    if (tab === 'gallery') renderGallery();
+    if (tab === 'qr') renderQR();
+    if (tab === 'patrol') renderPatrol();
+  }
+
+  function closeDrawer() {
+    drawerTab = null;
+    var drawer = $('detailDrawer');
+    if (drawer) drawer.classList.remove('open');
+    Object.keys(DRAWER_BUTTONS).forEach(function (k) {
+      var b = $(DRAWER_BUTTONS[k]);
+      if (b) b.classList.remove('active');
+    });
+  }
+  function focusSearch() {
+    showView('home');
+    $('mainSearchInput').focus();
+  }
+  function focusPending() {
+    if (drawerTab !== 'catalog') openDrawer('catalog');
+    var first = waitingEntries().filter(function (e) { return itemDivision(e.product).id === activeDivision; })[0]
+      || waitingEntries()[0];
+    if (first) openPending(first.queueId);
+    else toast('The Pending queue is empty.');
+  }
+
+  /* ---------------- catalogue drawer ---------------- */
+  function buildCategoryFilter() {
+    var sel = $('filterCategory');
+    var current = sel.value;
+    var cats = {};
+    liveProducts.forEach(function (p) { if (p.category) cats[p.category] = true; });
+    pendingEntries.forEach(function (e) { if (e.product && e.product.category) cats[e.product.category] = true; });
+    var names = Object.keys(cats).sort();
+    sel.innerHTML = '<option value="ALL">All Categories</option>' + names.map(function (c) {
+      return '<option value="' + esc(c) + '">' + esc(c.charAt(0).toUpperCase() + c.slice(1)) + '</option>';
+    }).join('');
+    if (names.indexOf(current) >= 0) sel.value = current;
+    var dl = $('categoryList');
+    dl.innerHTML = names.map(function (c) { return '<option value="' + esc(c) + '">'; }).join('');
+  }
+
+  function passesFilters(p) {
+    var availF = $('filterAvailability').value;
+    var originF = $('filterOrigin').value;
+    var catF = $('filterCategory').value;
+    if (availF !== 'ALL' && availOf(p) !== availF) return false;
+    if (originF !== 'ALL' && p.origin !== originF) return false;
+    if (catF !== 'ALL' && p.category !== catF) return false;
+    return true;
+  }
+
+  var _filterTimer = null;
+  function queueRenderCatalog() {
+    clearTimeout(_filterTimer);
+    _filterTimer = setTimeout(renderCatalog, 120);
+  }
+
+  function thumbHtml(p) {
+    if (p.image) {
+      return '<div class="thumb-sq"><img src="' + esc(p.image) + '" alt="" onerror="this.parentNode.textContent=\'' + categoryIcon(p.category) + '\'"></div>';
+    }
+    return '<div class="thumb-sq">' + categoryIcon(p.category) + '</div>';
+  }
+
+  function productRowInner(p) {
+    return thumbHtml(p)
+      + '<div class="item-meta"><div class="item-id">#' + esc(p.id) + '</div>'
+      + '<div class="item-title">' + esc(productTitle(p)) + '</div>'
+      + availTagHtml(p) + '</div>';
+  }
+
+  function renderCatalog() {
+    var container = $('catalogList');
+    var keepScroll = container.scrollTop;
+    var div = activeDiv();
+    var rows = [];
+    waitingEntries().forEach(function (e) {
+      if (itemDivision(e.product).id !== div.id) return;
+      if (!passesFilters(e.product)) return;
+      rows.push('<div class="catalog-row" data-kind="pending" data-qid="' + esc(e.queueId) + '">'
+        + thumbHtml(e.product)
+        + '<div class="item-meta"><div class="item-id">#' + esc(e.queueId)
+        + ' <span class="status-pill pill-pending">Pending</span></div>'
+        + '<div class="item-title">' + esc(productTitle(e.product)) + '</div></div></div>');
+    });
+    liveProducts.forEach(function (p) {
+      if (itemDivision(p).id !== div.id) return;
+      if (!passesFilters(p)) return;
+      rows.push('<div class="catalog-row" data-kind="product" data-pid="' + esc(p.id) + '">'
+        + productRowInner(p) + '</div>');
+    });
+    container.innerHTML = rows.length ? rows.join('')
+      : '<div class="list-empty">No pieces in ' + esc(div.name) + ' yet. Add one with “New item” or through the chat.</div>';
+    container.scrollTop = keepScroll;
+  }
+
+  /* Targeted in-place row refresh after a change — no full re-render,
+     no scroll jump: the row's tag/title update where it sits. If the
+     piece no longer belongs in this list (division or filter changed)
+     it is removed; if it newly belongs, the list is rebuilt. */
+  function updateRowForProduct(p) {
+    var container = $('catalogList');
+    var row = null;
+    var all = container.querySelectorAll('.catalog-row[data-kind="product"]');
+    for (var i = 0; i < all.length; i++) {
+      if (all[i].getAttribute('data-pid') === p.id) { row = all[i]; break; }
+    }
+    var belongs = itemDivision(p).id === activeDivision && passesFilters(p);
+    if (row && belongs) {
+      row.innerHTML = productRowInner(p);
+      return;
+    }
+    if (row && !belongs) {
+      row.remove();
+      if (!container.children.length) renderCatalog();
+      return;
+    }
+    if (!row && belongs) renderCatalog();
+  }
+
+  function renderDecisions() {
+    var decided = pendingEntries.filter(function (e) {
+      return e.status === 'approved' || e.status === 'rejected';
+    }).slice(-10).reverse();
+    var wrap = $('decisionsWrap');
+    if (!decided.length) { wrap.style.display = 'none'; return; }
+    wrap.style.display = '';
+    var keepScroll = wrap.scrollTop;
+    $('decisionsList').innerHTML = decided.map(function (e) {
+      var pill = e.status === 'approved'
+        ? '<span class="status-pill pill-approved">Approved</span>'
+        : '<span class="status-pill pill-rejected">Rejected</span>';
+      return '<div class="catalog-row" data-kind="pending" data-qid="' + esc(e.queueId) + '">'
+        + thumbHtml(e.product)
+        + '<div class="item-meta"><div class="item-id">#' + esc(e.queueId) + ' ' + pill + '</div>'
+        + '<div class="item-title">' + esc(productTitle(e.product)) + '</div></div></div>';
+    }).join('');
+    wrap.scrollTop = keepScroll;
+  }
+
+  function updatePendingChip() {
+    var n = waitingEntries().length;
+    $('pendingChip').textContent = n ? ('Pending queue (' + n + ' waiting)') : 'Pending queue';
+  }
+
+  /* ---------------- views ---------------- */
+  var VIEW_IDS = { home: 'viewHome', brief: 'viewBrief', settings: 'viewSettings', gallery: 'viewGallery' };
+  function showView(name, navEl) {
+    if (name === 'qr') { openDrawer(name); return; }
+    closeDetail();
+    closeDrawer();
+    var sb = $('railSettingsBtn');
+    if (sb) sb.classList.toggle('active', name === 'settings');
+    var gb = $('railGalleryBtn');
+    if (gb) gb.classList.toggle('active', name === 'gallery');
+    Object.keys(VIEW_IDS).forEach(function (k) {
+      var el = $(VIEW_IDS[k]);
+      if (el) el.style.display = (k === name) ? (k === 'home' ? 'flex' : 'block') : 'none';
+    });
+    if (name === 'home' && !$('chatThread').children.length && !$('taskList').children.length) {
+      $('heroBox').style.display = '';
+    }
+    if (name === 'brief') renderBrief();
+    if (name === 'settings') renderSettings();
+    if (name === 'gallery') renderGalleryView();
+    $('workspaceContent').scrollTop = 0;
+  }
+
+  function renderGallery() {
+    var div = activeDiv();
+    var items = liveProducts.filter(function (p) { return itemDivision(p).id === div.id; });
+    $('galleryGrid').innerHTML = items.length ? items.map(function (p) {
+      var img = p.image
+        ? '<img src="' + esc(p.image) + '" alt="" onerror="this.parentNode.textContent=\'' + categoryIcon(p.category) + '\'">'
+        : categoryIcon(p.category);
+      return '<div class="gal-tile" data-kind="product" data-pid="' + esc(p.id) + '"><div class="gal-img">' + img + '</div>'
+        + '<div class="gal-cap"><div class="t">#' + esc(p.id) + '</div>'
+        + '<div class="s">' + esc(productTitle(p)) + ' · ' + esc(fmtPrice(p)) + '<br>' + availTagHtml(p) + '</div></div></div>';
+    }).join('') : '<div class="list-empty">No pieces in ' + esc(div.name) + ' yet.</div>';
+  }
+
+  function renderQR() {
+    var div = activeDiv();
+    var rows = [];
+    waitingEntries().forEach(function (e) {
+      if (itemDivision(e.product).id !== div.id) return;
+      rows.push('<div class="qr-row" data-kind="pending" data-qid="' + esc(e.queueId) + '"><span>📱</span>'
+        + '<span class="grow"><b>#' + esc(e.queueId) + '</b> — ' + esc(productTitle(e.product)) + '</span>'
+        + '<span class="status-pill pill-pending">Pending</span></div>');
+    });
+    liveProducts.forEach(function (p) {
+      if (itemDivision(p).id !== div.id) return;
+      rows.push('<div class="qr-row" data-kind="product" data-pid="' + esc(p.id) + '"><span>📱</span>'
+        + '<span class="grow"><b>#' + esc(p.id) + '</b> — ' + esc(productTitle(p)) + '</span>'
+        + availTagHtml(p) + '</div>');
+    });
+    $('qrList').innerHTML = rows.length ? rows.join('')
+      : '<div class="list-empty">No pieces in ' + esc(div.name) + ' yet.</div>';
+  }
+
+  function renderBrief() {
+    var div = activeDiv();
+    var items = liveProducts.filter(function (p) { return itemDivision(p).id === div.id; });
+    var inStock = items.filter(function (p) { return availOf(p) === 'In Stock'; }).length;
+    var notIn = items.filter(function (p) { return availOf(p) === 'Not in Stock'; }).length;
+    var custom = items.filter(function (p) { return availOf(p) === 'Custom Jewels'; }).length;
+    var shipping = items.filter(function (p) { return availOf(p) === SHIPPING_AVAIL; }).length;
+    var waiting = waitingEntries().filter(function (e) { return itemDivision(e.product).id === div.id; });
+    var today = nyDateStr(new Date());
+    var decidedToday = pendingEntries.filter(function (e) {
+      return (e.status === 'approved' || e.status === 'rejected') && e.decidedAt
+        && nyDateStr(new Date(e.decidedAt)) === today;
+    }).length;
+    $('briefSub').textContent = 'Live counts from the back end for ' + div.name + ' — ' + new Date().toLocaleDateString('en-US', { timeZone: 'America/New_York', weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' }) + '.';
+    $('briefStats').innerHTML = [
+      [items.length, 'Live pieces in this division'],
+      [inStock, 'In Stock'],
+      [notIn, 'Not in Stock'],
+      [custom, 'Custom Jewels'],
+      [shipping, 'Shipping: 1 Month Delay'],
+      [waiting.length, 'Waiting in Pending'],
+      [decidedToday, 'Decisions made today']
+    ].map(function (s) {
+      return '<div class="stat-card"><div class="n">' + s[0] + '</div><div class="l">' + s[1] + '</div></div>';
+    }).join('');
+    $('briefWaiting').innerHTML = waiting.length
+      ? '<h3 style="font-size:15px;font-weight:600;margin-bottom:8px;">Waiting for the owner</h3>' + waiting.map(function (e) {
+          return '<div class="qr-row" data-kind="pending" data-qid="' + esc(e.queueId) + '"><span class="grow"><b>#'
+            + esc(e.queueId) + '</b> — ' + esc(productTitle(e.product)) + ' · ' + esc(fmtPrice(e.product))
+            + ' · added by ' + esc(e.addedBy || 'staff') + '</span><span class="status-pill pill-pending">Pending</span></div>';
+        }).join('')
+      : '<p style="font-size:13px;color:var(--text-secondary);">Nothing is waiting in Pending for this division.</p>';
+  }
+
+  /* ---------------- owner patrol (real sales data) ----------------
+     The strip and the Patrol drawer read the back end's paid invoices
+     for the current America/New_York day via GET /sales/today. The
+     stock counts come from the loaded catalogue. Nothing is invented:
+     if the sales read fails, the last known numbers stay. */
+  var salesToday = { date: null, count: 0, total: 0, sales: [] };
+
+  async function loadSales() {
+    try {
+      var r = await api('GET', '/sales/today');
+      salesToday = { date: r.date, count: r.count || 0, total: r.total || 0, sales: r.sales || [] };
+    } catch (_) { /* keep last known numbers */ }
+    renderPatrol();
+  }
+
+  function renderPatrol() {
+    var notIn = liveProducts.filter(function (p) { return availOf(p) === 'Not in Stock'; }).length;
+    var sv = $('salesTodayValue');
+    if (sv) sv.textContent = fmtMoney(salesToday.total || 0);
+    var nv = $('notInStockValue');
+    if (nv) nv.textContent = String(notIn);
+    var av = $('activeSkuValue');
+    if (av) av.textContent = String(liveProducts.length);
+    var list = $('patrolList');
+    if (!list) return;
+    $('patrolSub').textContent = 'Sales recorded today (New York) — ' + salesToday.count + ' sale'
+      + (salesToday.count === 1 ? '' : 's') + ' · ' + fmtMoney(salesToday.total || 0)
+      + ' total. Paid invoices, read live from the back end.';
+    list.innerHTML = salesToday.sales.length ? salesToday.sales.map(function (s) {
+      var when = s.paidAt ? new Date(s.paidAt).toLocaleTimeString('en-US', { timeZone: 'America/New_York', hour: 'numeric', minute: '2-digit' }) : '';
+      var undo = session.role === 'owner'
+        ? '<button class="patrol-undo" onclick="undoSale(\'' + esc(s.invoiceId) + '\')" title="Void this invoice and return the piece to live">Undo</button>'
+        : '';
+      return '<div class="patrol-row"><div class="thumb-sq">💰</div>'
+        + '<div class="item-meta"><div class="item-id">' + esc(s.invoiceId) + (s.productId ? ' · #' + esc(s.productId) : '') + ' · ' + esc(fmtMoney(s.total || 0)) + '</div>'
+        + '<div class="item-title">' + esc(s.name || 'Sale') + (when ? ' · ' + esc(when) : '') + ' · by ' + esc(s.recordedBy || 'owner') + '</div></div>' + undo + '</div>';
+    }).join('') : '<div class="list-empty">No sales recorded yet today. Open any live item and tap “Record Sale”.</div>';
+  }
+
+  /* Owner Patrol Undo: voids the paid invoice through the back end
+     (the invoice stays in the books marked void) and the piece it
+     sold returns to live. Owner-only — the back end refuses others. */
+  async function undoSale(invoiceId) {
+    try {
+      var r = await api('POST', '/invoices/' + encodeURIComponent(invoiceId) + '/void');
+      if (r.product) {
+        var idx = liveProducts.findIndex(function (x) { return x.id === r.product.id; });
+        if (idx >= 0) liveProducts[idx] = r.product;
+        updateRowForProduct(r.product);
+      }
+      toast('Sale undone — ' + invoiceId + ' voided' + (r.product ? '; #' + r.product.id + ' is live again.' : '.'));
+      await loadSales();
+    } catch (e) { toast('Undo failed: ' + e.message); }
+  }
+
+  function renderSettings() {
+    var body = $('settingsBody');
+    if (!body) return;
+    if (!session.token) { body.innerHTML = '<div class="list-empty">Sign in first.</div>'; return; }
+    var h = health;
+    var rows = [
+      ['Signed in as', session.role === 'secretary' ? 'Salesperson (secretary)' : session.role],
+      ['Back end', API_BASE],
+      ['Connection', h ? 'Connected' : 'Not reachable'],
+      ['Live products (all divisions)', h && h.counts ? h.counts.products : '—'],
+      ['Waiting in Pending (all divisions)', h && h.counts ? h.counts.pending : '—'],
+      ['Owner PIN configured', h && h.staffConfigured ? (h.staffConfigured.owner ? 'Yes' : 'No') : '—'],
+      ['Salesperson PIN configured', h && h.staffConfigured ? (h.staffConfigured.secretary ? 'Yes' : 'No') : '—'],
+      ['Card payments (Stripe)', h && h.payments ? (h.payments.stripeConfigured ? ('Configured — ' + (h.payments.stripeMode || '') + ' mode') : 'Not configured') : '—'],
+      ['Photo match service', VISUAL_BASE]
+    ];
+    body.innerHTML = rows.map(function (r) {
+      return '<div class="settings-row"><span class="k">' + esc(r[0]) + '</span><span class="v">' + esc(r[1]) + '</span></div>';
+    }).join('');
+    renderPromotions();
+    renderAudit();
+  }
+
+  /* ==================================================================
+     v4 additions: promotions (Add Sale), the Quick Store Actions
+     popover, the focus view, the Gallery view, the 7-day audit /
+     recovery log in Settings, and the honest Inbox modal.
+     ================================================================== */
+
+  /* ---------------- promotions ----------------
+     Records live in the back end (GET/POST /promotions). The header
+     pill lights only when a promotion is active TODAY and covers the
+     division being viewed. A promotion never rewrites catalogue
+     prices — the public site has no sale-price field. */
+  async function loadPromotions() {
+    if (!session.token) return;
+    try {
+      var r = await api('GET', '/promotions?division=' + encodeURIComponent(activeDiv().name));
+      promotionsData = { promotions: r.promotions || [], active: r.active || null, defaults: r.defaults || null };
+    } catch (_) { /* the pill simply stays off */ }
+    renderSalePill();
+    renderPromotions();
+  }
+
+  function renderSalePill() {
+    var pill = $('saleActivePill');
+    if (!pill) return;
+    var a = promotionsData.active;
+    pill.classList.toggle('on', Boolean(a));
+    if (a) {
+      pill.textContent = '🔖 Sale Active — ' + (a.discountType === 'PERCENT' ? a.discountValue + '% off' : fmtMoney(a.discountValue) + ' off')
+        + ' · ends ' + a.endDate;
+    }
+  }
+
+  function promoCoversPieceToday(p) {
+    var today = nyDateStr(new Date());
+    return promotionsData.promotions.some(function (pr) {
+      if (pr.active === false) return false;
+      if (!(pr.startDate <= today && today <= pr.endDate)) return false;
+      if (pr.scope === 'ALL_PURCHASES') return true;
+      if (pr.scope === 'CURRENT_BRAND') return pr.division === itemDivision(p).name;
+      return false;
+    });
+  }
+
+  function promoLabel(pr) {
+    return (pr.discountType === 'PERCENT' ? pr.discountValue + '% off' : fmtMoney(pr.discountValue) + ' off')
+      + ' · ' + pr.startDate + ' → ' + pr.endDate + ' · '
+      + (pr.scope === 'ALL_PURCHASES' ? 'All Purchases' : pr.scope === 'GIFT_CARDS' ? 'Gift Cards' : 'Current Brand (' + (pr.division || '') + ')');
+  }
+
+  function renderPromotions() {
+    var body = $('promoBody');
+    if (!body) return;
+    if (!session.token) { body.innerHTML = '<div class="list-empty">Sign in to load promotions.</div>'; return; }
+    var list = promotionsData.promotions;
+    if (!list.length) {
+      body.innerHTML = '<div class="list-empty">No promotions yet. Use Add Sale (in a piece\'s card, or the 🎚️ Quick Store Actions) to start one.</div>';
+      return;
+    }
+    var today = nyDateStr(new Date());
+    body.innerHTML = list.map(function (pr) {
+      var state = pr.active === false ? 'Ended' + (pr.endedAt ? ' ' + String(pr.endedAt).slice(0, 10) : '')
+        : (pr.startDate <= today && today <= pr.endDate) ? 'Running now'
+        : pr.startDate > today ? 'Starts ' + pr.startDate : 'Window passed';
+      return '<div class="audit-row"><span class="audit-badge">' + esc(state) + '</span>'
+        + '<div class="grow"><div class="t1">' + esc(promoLabel(pr)) + '</div>'
+        + '<div class="t2">' + esc(pr.id) + ' · created by ' + esc(pr.createdBy || 'owner') + '</div></div>'
+        + (session.role === 'owner' && pr.active !== false
+          ? '<button class="restore-btn" onclick="endPromotion(\'' + esc(pr.id) + '\')">End sale</button>' : '')
+        + '</div>';
+    }).join('');
+  }
+
+  async function endPromotion(id) {
+    try {
+      await api('POST', '/promotions/' + encodeURIComponent(id) + '/end');
+      toast('Sale ended — ' + id + '.');
+      await loadPromotions();
+      if ($('viewGallery').style.display !== 'none') renderGalleryView();
+    } catch (e) { toast('Could not end the sale: ' + e.message); }
+  }
+
+  /* Sale modal */
+  function isoDay(d) {
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  }
+  function openSaleModal() {
+    if (session.role !== 'owner') { toast('Only the owner can start a sale.'); return; }
+    closeBatchPopover();
+    var d = promotionsData.defaults;
+    if (d) {
+      $('saleDiscType').value = d.discountType || 'PERCENT';
+      $('saleDiscValue').value = d.discountValue != null ? d.discountValue : '';
+      $('saleScope').value = d.scope || 'ALL_PURCHASES';
+    }
+    var today = new Date();
+    $('saleStart').value = isoDay(today);
+    setSaleDuration(7);
+    updateSaleScopeNote();
+    $('saleModal').classList.add('on');
+  }
+  function closeSaleModal() { $('saleModal').classList.remove('on'); }
+  function setSaleDuration(days) {
+    var startVal = $('saleStart').value || isoDay(new Date());
+    var start = new Date(startVal + 'T12:00:00');
+    if (isNaN(start.getTime())) start = new Date();
+    var end = new Date(start.getTime() + days * 86400000);
+    $('saleEnd').value = isoDay(end);
+    var chips = $('durChips').querySelectorAll('.dur-chip');
+    chips.forEach(function (c) { c.classList.toggle('on', Number(c.getAttribute('data-days')) === days); });
+    updateSaleDurationPreview();
+  }
+  function updateSaleDurationPreview() {
+    var s = $('saleStart').value, e = $('saleEnd').value;
+    var el = $('saleDurationPreview');
+    if (!s || !e) { el.textContent = 'Duration: pick a start and end date'; return; }
+    var days = Math.round((new Date(e + 'T12:00:00') - new Date(s + 'T12:00:00')) / 86400000);
+    el.textContent = days < 0
+      ? 'Duration: the end date is before the start date'
+      : 'Duration: ' + days + ' days active (' + s + ' → ' + e + ')';
+  }
+  function updateSaleScopeNote() {
+    var v = $('saleScope').value;
+    $('saleScopeNote').textContent = v === 'CURRENT_BRAND'
+      ? 'This sale will apply to ' + activeDiv().name + ' only (the division you are viewing now).'
+      : v === 'GIFT_CARDS' ? 'This sale applies to gift cards only — it does not light the Sale Active pill on product divisions.'
+      : 'This sale applies to every division.';
+  }
+  async function activateSale() {
+    var body = {
+      discountType: $('saleDiscType').value,
+      discountValue: parseFloat($('saleDiscValue').value),
+      startDate: $('saleStart').value,
+      endDate: $('saleEnd').value,
+      scope: $('saleScope').value
+    };
+    if (body.scope === 'CURRENT_BRAND') body.division = activeDiv().name;
+    if (!isFinite(body.discountValue) || body.discountValue <= 0) { toast('Enter a discount value first.'); return; }
+    if (!body.startDate || !body.endDate) { toast('Pick the sale dates first.'); return; }
+    var btn = $('saleActivateBtn');
+    btn.disabled = true;
+    try {
+      var r = await api('POST', '/promotions', body);
+      closeSaleModal();
+      toast('Sale active — ' + promoLabel(r.promotion) + '. Saved as your default.');
+      await loadPromotions();
+      renderPromotions();
+      if ($('viewGallery').style.display !== 'none') renderGalleryView();
+    } catch (e) {
+      toast('Sale not saved: ' + e.message);
+    } finally { btn.disabled = false; }
+  }
+
+  /* ---------------- Quick Store Actions popover ---------------- */
+  function toggleBatchPopover(ev) {
+    if (ev) ev.stopPropagation();
+    $('batchPopover').classList.toggle('on');
+  }
+  function closeBatchPopover() { $('batchPopover').classList.remove('on'); }
+  document.addEventListener('click', function (ev) {
+    var pop = $('batchPopover');
+    if (pop && pop.classList.contains('on') && !pop.contains(ev.target)) closeBatchPopover();
+    ['saleModal', 'inboxModal', 'specsModal'].forEach(function (id) {
+      var m = $(id);
+      if (m && ev.target === m) m.classList.remove('on');
+    });
+  });
+  function batchAddSale() { closeBatchPopover(); openSaleModal(); }
+  function batchOutOfStock() {
+    closeBatchPopover();
+    if (detailCtx && detailCtx.kind === 'product') { markDetailOutOfStock(); return; }
+    openNewItem('Not in Stock');
+  }
+  function batchShipping() {
+    closeBatchPopover();
+    if (!detailCtx || detailCtx.kind !== 'product') { toast('Open a piece first, then apply Shipping: 1 Month Delay.'); return; }
+    if (session.role !== 'owner') { toast('Only the owner can set the shipping state.'); return; }
+    var p = null;
+    liveProducts.forEach(function (x) { if (x.id === detailCtx.id) p = x; });
+    if (!p) { toast('That piece is no longer in the catalogue.'); return; }
+    proposeAction(uiFor(chatMode), {
+      type: 'availability', ref: { product: p }, availability: SHIPPING_AVAIL
+    });
+  }
+  function batchStatusUpdate() {
+    closeBatchPopover();
+    if (detailCtx) {
+      var sel = $('fieldAvailability');
+      sel.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      sel.focus();
+      return;
+    }
+    openDrawer('catalog');
+  }
+
+  /* ---------------- focus view ---------------- */
+  function metalOf(p) {
+    if (!p) return '';
+    if (p.metal) return p.metal;
+    var s = String(p.specs || '');
+    var m = s.match(/(\d{2}K\s*(?:Yellow|White|Rose)?\s*Gold|Platinum|Sterling Silver|Silver|Gold)/i);
+    return m ? m[0] : '';
+  }
+  function qrDataUrl(text) {
+    try {
+      if (typeof qrcode === 'undefined') return '';
+      var qr = qrcode(0, 'M');
+      qr.addData(String(text));
+      qr.make();
+      return qr.createDataURL(4, 6);
+    } catch (_) { return ''; }
+  }
+  function renderFocusView(p) {
+    var wrap = $('focusImgWrap');
+    var img = $('focusImg');
+    var skel = $('focusImgSkel');
+    var badge = $('cardAvailBadge');
+    $('draftBox').style.display = 'none';
+    if (!p) {
+      wrap.style.display = 'none';
+      $('qrTagRow').style.display = 'none';
+      badge.textContent = 'New piece';
+      badge.className = 'avail-badge status-custom';
+      return;
+    }
+    var a = availOf(p);
+    badge.textContent = a;
+    badge.className = 'avail-badge ' + availClass(a);
+    wrap.style.display = '';
+    $('focusImgCap').textContent = 'Studio Image · ' + (p.category ? p.category.charAt(0).toUpperCase() + p.category.slice(1) : 'Piece') + ' · #' + (p.id || '');
+    if (p.image) {
+      skel.style.display = '';
+      img.style.display = 'none';
+      img.onload = function () { skel.style.display = 'none'; img.style.display = ''; };
+      img.onerror = function () { skel.style.display = 'none'; img.style.display = 'none'; wrap.style.display = 'none'; };
+      img.src = p.image;
+    } else {
+      skel.style.display = 'none';
+      img.style.display = 'none';
+      wrap.style.display = 'none';
+    }
+    var qrRow = $('qrTagRow');
+    if (detailCtx && detailCtx.kind === 'product' && p.id) {
+      var url = qrDataUrl(p.id);
+      if (url) { $('qrTagImg').src = url; qrRow.style.display = ''; }
+      else qrRow.style.display = 'none';
+    } else {
+      qrRow.style.display = 'none';
+    }
+  }
+  function focusImageField() {
+    var f = $('fieldImage');
+    f.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    f.focus();
+    f.select();
+  }
+  function openSpecsModal() {
+    if (!detailCtx) return;
+    var p = null;
+    if (detailCtx.kind === 'product') liveProducts.forEach(function (x) { if (x.id === detailCtx.id) p = x; });
+    else if (detailCtx.kind === 'pending') pendingEntries.forEach(function (x) { if (x.queueId === detailCtx.queueId) p = x.product; });
+    if (!p) p = readDetailForm();
+    var rows = [
+      ['Item', productTitle(p)],
+      ['Category', p.category || '—'],
+      ['Metal', metalOf(p) || '—'],
+      ['Stone origin', p.origin || 'Not set'],
+      ['Specs', p.specs || '—'],
+      ['Availability', availOf(p)],
+      ['Price', fmtPrice(p)]
+    ];
+    $('specsModalSub').textContent = 'Recorded parameters for #' + (p.id || $('fieldId').value) + ' — exactly as stored in the back end.';
+    $('specsModalBody').innerHTML = rows.map(function (r) {
+      return '<div class="settings-row"><span class="k">' + esc(r[0]) + '</span><span class="v">' + esc(r[1]) + '</span></div>';
+    }).join('');
+    $('specsModal').classList.add('on');
+  }
+  function closeSpecsModal() { $('specsModal').classList.remove('on'); }
+
+  /* Auto-Draft Website Copy — goes through the existing /portal-chat
+     contract: the message asks the assistant for short website copy
+     from this piece's real bench notes; only its reply TEXT is used,
+     shown in a draft box for the staffer to accept or discard. Any
+     failure (service down, quota) surfaces as an honest toast — the
+     button never invents copy on its own. */
+  async function autoDraftCopy() {
+    var data = readDetailForm();
+    var btn = $('autoDraftBtn');
+    btn.disabled = true;
+    btn.textContent = 'Drafting…';
+    try {
+      var msg = 'Write 2-3 sentences of polished website product copy for this piece, using ONLY these real details — never invent a price, stone, size or feature that is not listed. Title: '
+        + (data.name || 'Untitled piece') + '. Category: ' + (data.category || 'jewellery') + '. Metal: ' + (data.metal || 'not specified')
+        + '. Specs: ' + (data.specs || 'none recorded') + '. Stone origin: ' + (data.origin || 'not specified')
+        + '. Bench notes: ' + (data.description || 'none') + '. Reply with the copy only.';
+      var res = await fetch(PORTAL_CHAT_BASE + '/portal-chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: msg, history: [], context: portalChatContext() })
+      });
+      var r = await res.json().catch(function () { return null; });
+      if (!res.ok || !r || !r.ok || !r.reply) throw new Error('no draft came back');
+      $('draftText').textContent = r.reply;
+      $('draftBox').style.display = '';
+    } catch (e) {
+      toast('Auto-Draft is unavailable right now — the assistant service did not answer. Your notes are unchanged.');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = '✨ Auto-Draft Website Copy';
+    }
+  }
+  function useDraft() {
+    $('fieldDesc').value = $('draftText').textContent;
+    $('draftBox').style.display = 'none';
+    toast('Draft placed in the description — review it, then Save.');
+  }
+  function discardDraft() { $('draftBox').style.display = 'none'; }
+
+  /* ---------------- Gallery view ---------------- */
+  var GAL_TIER1 = [
+    ['ALL', 'All Items'], ['In Stock', 'In Stock'], ['Not in Stock', 'Not in Stock'],
+    ['Custom Jewels', 'Custom Jewels'], [SHIPPING_AVAIL, 'Shipping'], ['Lab-Grown', 'Lab-Grown'],
+    ['Natural', 'Natural'], ['ON_SALE', 'On Sale']
+  ];
+  var KNOWN_METALS = ['18K Yellow Gold', '18K White Gold', '18K Rose Gold', '14K Yellow Gold', '14K White Gold', '14K Rose Gold', 'Platinum', 'Sterling Silver', 'Yellow Gold', 'White Gold', 'Rose Gold', 'Silver', 'Gold'];
+  function galPasses(p) {
+    if (galTier1 === 'ON_SALE') { if (!promoCoversPieceToday(p)) return false; }
+    else if (galTier1 === 'Lab-Grown' || galTier1 === 'Natural') { if (p.origin !== galTier1) return false; }
+    else if (galTier1 !== 'ALL') { if (availOf(p) !== galTier1) return false; }
+    if (galTier2a !== 'ALL' && p.category !== galTier2a) return false;
+    if (galTier2b !== 'ALL' && metalOf(p) !== galTier2b) return false;
+    return true;
+  }
+  function renderGalleryView() {
+    var grid = $('galViewGrid');
+    if (!grid) return;
+    var div = activeDiv();
+    var items = liveProducts.filter(function (p) { return itemDivision(p).id === div.id; });
+    $('galTier1').innerHTML = GAL_TIER1.map(function (t) {
+      return '<button class="gal-chip' + (galTier1 === t[0] ? ' on' : '') + '" data-gt1="' + esc(t[0]) + '">' + esc(t[1]) + '</button>';
+    }).join('');
+    var cats = {};
+    items.forEach(function (p) { if (p.category) cats[p.category] = true; });
+    $('galTier2a').innerHTML = '<button class="gal-chip blue' + (galTier2a === 'ALL' ? ' on' : '') + '" data-gt2a="ALL">All Categories</button>'
+      + Object.keys(cats).sort().map(function (c) {
+        return '<button class="gal-chip blue' + (galTier2a === c ? ' on' : '') + '" data-gt2a="' + esc(c) + '">' + esc(c.charAt(0).toUpperCase() + c.slice(1)) + '</button>';
+      }).join('');
+    var metals = {};
+    items.forEach(function (p) { var m = metalOf(p); if (m) metals[m] = true; });
+    $('galTier2b').innerHTML = '<button class="gal-chip gold' + (galTier2b === 'ALL' ? ' on' : '') + '" data-gt2b="ALL">All Metals</button>'
+      + Object.keys(metals).sort().map(function (m) {
+        return '<button class="gal-chip gold' + (galTier2b === m ? ' on' : '') + '" data-gt2b="' + esc(m) + '">' + esc(m) + '</button>';
+      }).join('');
+    var shown = items.filter(galPasses);
+    grid.innerHTML = shown.length ? shown.map(function (p) {
+      var img = p.image
+        ? '<img src="' + esc(p.image) + '" alt="" onerror="this.parentNode.textContent=\'' + categoryIcon(p.category) + '\'">'
+        : categoryIcon(p.category);
+      var del = session.role === 'owner'
+        ? '<button class="gal-del' + (galDeleteArmId === p.id ? ' armed' : '') + '" data-galdel="' + esc(p.id) + '" title="Delete this piece">' + (galDeleteArmId === p.id ? '✓?' : '🗑') + '</button>'
+        : '';
+      return '<div class="gal-card' + (galSelectedId === p.id ? ' selected' : '') + '" data-galpid="' + esc(p.id) + '">'
+        + del
+        + '<div class="ph">' + img + '</div>'
+        + '<div class="meta"><div class="n">' + esc(productTitle(p)) + '</div>'
+        + '<div class="p">#' + esc(p.id) + ' · ' + esc(fmtPrice(p)) + '</div>' + availTagHtml(p) + '</div></div>';
+    }).join('') : '<div class="list-empty">No pieces match these filters in ' + esc(div.name) + '.</div>';
+  }
+  function galCardClick(id, ev) {
+    if (ev && ev.target && ev.target.closest && ev.target.closest('[data-galdel]')) return;
+    if (galClickTimer) {
+      clearTimeout(galClickTimer);
+      galClickTimer = null;
+      galSelectedId = id;
+      openProduct(id);
+      return;
+    }
+    galSelectedId = id;
+    galDeleteArmId = null;
+    renderGalleryView();
+    galClickTimer = setTimeout(function () { galClickTimer = null; }, 280);
+  }
+  async function galDeleteClick(id, ev) {
+    if (ev) ev.stopPropagation();
+    if (galDeleteArmId !== id) {
+      galDeleteArmId = id;
+      renderGalleryView();
+      toast('Tap the trash icon once more to permanently delete #' + id + '.');
+      return;
+    }
+    galDeleteArmId = null;
+    try {
+      await api('DELETE', '/products/' + encodeURIComponent(id));
+      liveProducts = liveProducts.filter(function (x) { return x.id !== id; });
+      if (galSelectedId === id) galSelectedId = null;
+      renderGalleryView();
+      renderCatalog();
+      renderPatrol();
+      toast('Deleted — #' + id + ' removed. It can be restored from Settings → Recovery for 7 days.');
+    } catch (e) { toast('Delete failed: ' + e.message); }
+  }
+
+  /* ---------------- audit / recovery (Settings) ---------------- */
+  async function renderAudit() {
+    var body = $('auditBody');
+    if (!body) return;
+    if (!session.token) { body.innerHTML = '<div class="list-empty">Sign in to load the recovery log.</div>'; return; }
+    if (session.role !== 'owner') {
+      body.innerHTML = '<div class="list-empty">The recovery log is owner-only.</div>';
+      return;
+    }
+    body.innerHTML = '<div class="skel skel-row w80"></div><div class="skel skel-row w60"></div><div class="skel skel-row w40"></div>';
+    try {
+      var r = await api('GET', '/audit?days=7');
+      var entries = r.entries || [];
+      if (!entries.length) {
+        body.innerHTML = '<div class="list-empty">No changes in the last 7 days. Edits, status changes, sales and deletes will appear here with a Restore button.</div>';
+        return;
+      }
+      var labels = { edit: 'Edit', status: 'Status', sale: 'Sale', 'sale-void': 'Sale undone', delete: 'Deleted', restore: 'Restored' };
+      body.innerHTML = entries.map(function (e) {
+        var snap = e.snapshot || {};
+        var when = e.at ? new Date(e.at).toLocaleString('en-US', { timeZone: 'America/New_York', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : '';
+        return '<div class="audit-row"><span class="audit-badge">' + esc(labels[e.action] || e.action) + '</span>'
+          + '<div class="grow"><div class="t1">#' + esc(e.productId || '—') + ' — ' + esc(snap.name || snap.title || 'Piece') + '</div>'
+          + '<div class="t2">' + esc(when) + ' · by ' + esc(e.role || '') + ' · was ' + esc(snap.price != null && snap.price !== '' ? fmtMoney(Number(snap.price)) : 'Price to confirm') + ' · ' + esc(snap.status || '') + '</div></div>'
+          + (e.snapshot ? '<button class="restore-btn" data-restore="' + esc(e.id) + '">Restore</button>' : '')
+          + '</div>';
+      }).join('');
+    } catch (err) {
+      body.innerHTML = '<div class="list-empty">The recovery log could not be loaded (' + esc(err.message) + ').</div>';
+    }
+  }
+  async function restoreAuditEntry(id, btn) {
+    if (btn) { btn.disabled = true; btn.textContent = 'Restoring…'; }
+    try {
+      var r = await api('POST', '/audit/' + encodeURIComponent(id) + '/restore');
+      toast('Restored — #' + (r.product && r.product.id) + ' is back as it was.');
+      await loadData();
+      renderAudit();
+    } catch (e) {
+      toast('Restore failed: ' + e.message);
+      if (btn) { btn.disabled = false; btn.textContent = 'Restore'; }
+    }
+  }
+
+  /* ---------------- Inbox modal (honest empty state) ---------------- */
+  function openInbox() {
+    $('inboxDivisionName').textContent = activeDiv().name;
+    $('inboxModal').classList.add('on');
+  }
+  function closeInbox() { $('inboxModal').classList.remove('on'); }
+
+  /* ---------------- detail / edit card ---------------- */
+  function detailNote(msg) {
+    var n = $('detailNote');
+    n.textContent = msg || '';
+    n.classList.toggle('on', Boolean(msg));
+  }
+
+  function fillDetailForm(p) {
+    $('fieldTitle').value = productTitle(p) === 'Untitled piece' ? '' : productTitle(p);
+    var brandSel = $('fieldBrand');
+    var brandVal = p.brand || 'Elevate Jewels';
+    var known = false;
+    for (var i = 0; i < brandSel.options.length; i++) if (brandSel.options[i].value === brandVal) known = true;
+    if (!known) {
+      var opt = document.createElement('option');
+      opt.value = brandVal;
+      opt.textContent = brandVal;
+      brandSel.appendChild(opt);
+    }
+    brandSel.value = brandVal;
+    $('fieldCategory').value = p.category || '';
+    $('fieldOrigin').value = p.origin || '';
+    $('fieldMetal').value = p.metal || '';
+    $('fieldSpecs').value = p.specs || '';
+    $('fieldPrice').value = productPrice(p) ? String(productPrice(p)) : '';
+    $('fieldImage').value = p.image || '';
+    $('fieldDesc').value = p.description || '';
+    $('fieldAvailability').value = availOf(p);
+  }
+
+  function readDetailForm() {
+    var priceRaw = $('fieldPrice').value.trim();
+    var price = null;
+    if (priceRaw) {
+      var n = parseFloat(priceRaw.replace(/[^0-9.]/g, ''));
+      price = (isFinite(n) && n > 0) ? n : null;
+    }
+    var out = {
+      name: $('fieldTitle').value.trim(),
+      brand: $('fieldBrand').value,
+      category: $('fieldCategory').value.trim(),
+      metal: $('fieldMetal').value.trim(),
+      specs: $('fieldSpecs').value.trim(),
+      price: price,
+      image: $('fieldImage').value.trim(),
+      description: $('fieldDesc').value.trim(),
+      availability: $('fieldAvailability').value
+    };
+    var origin = $('fieldOrigin').value;
+    if (origin) out.origin = origin;
+    return out;
+  }
+
+  function setFormEditable(editable, statusEditable) {
+    ['fieldBrand', 'fieldTitle', 'fieldCategory', 'fieldOrigin', 'fieldMetal', 'fieldSpecs', 'fieldPrice', 'fieldImage', 'fieldDesc']
+      .forEach(function (id) { $(id).disabled = !editable; });
+    $('fieldAvailability').disabled = !(editable || statusEditable);
+    $('detailSaveBtn').style.display = (editable || statusEditable) ? '' : 'none';
+  }
+
+  function showDetailCard() {
+    Object.keys(VIEW_IDS).forEach(function (k) { $(VIEW_IDS[k]).style.display = 'none'; });
+    $('detailCard').classList.add('visible');
+    $('workspaceContent').scrollTop = 0;
+  }
+
+  function closeDetail() {
+    detailCtx = null;
+    cancelDelete();
+    $('detailCard').classList.remove('visible');
+  }
+
+  /* Editor action bar (v3): which of Sale / Out / Delete show depends
+     on the card kind and the signed-in role. Delete is owner-only —
+     the back end refuses it for anyone else as well. */
+  function setActionBar(o) {
+    $('detailSaleBtn').style.display = o.sale ? '' : 'none';
+    $('detailOutBtn').style.display = o.out ? '' : 'none';
+    $('detailDeleteBtn').style.display = o.del ? '' : 'none';
+    if (!o.promo) $('detailPromoBtn').style.display = 'none';
+    cancelDelete();
+  }
+
+  function openProduct(id) {
+    var p = null;
+    liveProducts.forEach(function (x) { if (x.id === id) p = x; });
+    if (!p) { toast('That piece is no longer in the catalogue.'); return; }
+    detailCtx = { kind: 'product', id: p.id };
+    showDetailCard();
+    $('cardItemHeading').textContent = 'Item #' + p.id;
+    $('cardDivisionSub').textContent = itemDivision(p).name + ' · ' + availOf(p) + ' · Live catalogue piece';
+    $('cardStoneBadge').textContent = p.origin || 'Origin not set';
+    $('fieldId').value = p.id;
+    fillDetailForm(p);
+    renderFocusView(p);
+    $('statusFieldGroup').style.display = '';
+    var custOpt = $('fieldAvailability').querySelector('option[value="Custom Jewels"]');
+    if (custOpt) custOpt.disabled = session.role !== 'owner';
+    var shipOpt = $('fieldAvailability').querySelector('option[value="' + SHIPPING_AVAIL + '"]');
+    if (shipOpt) shipOpt.disabled = session.role !== 'owner';
+    $('detailApproveBtn').style.display = 'none';
+    $('detailRejectBtn').style.display = 'none';
+    $('detailSaveBtn').textContent = 'Save to Catalog';
+    var owner = session.role === 'owner';
+    setFormEditable(owner, true);
+    setActionBar({ sale: true, out: statusOf(p) === 'live', del: owner });
+    $('detailPromoBtn').style.display = owner ? '' : 'none';
+    var saleBtn = $('detailSaleBtn');
+    saleBtn.disabled = statusOf(p) !== 'live';
+    saleBtn.title = statusOf(p) !== 'live'
+      ? 'Only a live piece can be sold'
+      : 'Record the sale — files a paid invoice and marks the piece sold';
+    detailNote(owner
+      ? ''
+      : 'Salesperson sign-in: you can change the availability (In Stock / Not in Stock) and record sales. Prices, details and the Custom Jewels mark are owner-only — the back end enforces this.');
+  }
+
+  function openPending(queueId) {
+    var e = null;
+    pendingEntries.forEach(function (x) { if (x.queueId === queueId) e = x; });
+    if (!e) { toast('That queue entry is no longer there.'); return; }
+    var p = e.product || {};
+    detailCtx = { kind: 'pending', queueId: e.queueId };
+    showDetailCard();
+    var decided = e.status === 'approved' || e.status === 'rejected';
+    $('cardItemHeading').textContent = 'Pending #' + e.queueId;
+    $('cardDivisionSub').textContent = itemDivision(p).name + ' · Added by ' + (e.addedBy || 'staff')
+      + (decided ? ' · ' + e.status : ' · Waiting for the owner');
+    $('cardStoneBadge').textContent = p.origin || 'Origin not set';
+    $('fieldId').value = e.productId || e.queueId;
+    fillDetailForm(p);
+    renderFocusView(p);
+    $('statusFieldGroup').style.display = '';
+    var owner = session.role === 'owner';
+    var canEdit = owner && !decided;
+    setFormEditable(canEdit, false);
+    $('detailSaveBtn').textContent = 'Save changes';
+    setActionBar({});
+    $('detailApproveBtn').style.display = (owner && !decided) ? '' : 'none';
+    $('detailRejectBtn').style.display = (owner && !decided) ? '' : 'none';
+    if (owner && !decided && !productPrice(p)) {
+      $('detailApproveBtn').disabled = true;
+      detailNote('A price is required before this piece can go live. Add the price above, save, then approve.');
+    } else if (!owner && !decided) {
+      $('detailApproveBtn').disabled = false;
+      detailNote('This piece is waiting for the owner. Only the owner can approve or reject it.');
+    } else if (decided) {
+      $('detailApproveBtn').disabled = false;
+      detailNote('This entry was ' + e.status + (e.productId ? ' as #' + e.productId : '') + '. The record is kept for the submitter.');
+    } else {
+      $('detailApproveBtn').disabled = false;
+      detailNote('');
+    }
+  }
+
+  function openNewItem(presetAvail) {
+    detailCtx = { kind: 'new' };
+    showDetailCard();
+    $('cardItemHeading').textContent = presetAvail === 'Not in Stock' ? 'Add Out of Stock Item' : 'Add New Catalog Item';
+    $('cardDivisionSub').textContent = activeDiv().name + ' · New listing — staged in Pending';
+    $('cardStoneBadge').textContent = 'New';
+    $('fieldId').value = 'Assigned when approved';
+    $('fieldTitle').value = '';
+    $('fieldBrand').value = activeDiv().name;
+    $('fieldCategory').value = '';
+    $('fieldOrigin').value = '';
+    $('fieldMetal').value = '';
+    $('fieldSpecs').value = '';
+    $('fieldPrice').value = '';
+    $('fieldImage').value = '';
+    $('fieldDesc').value = '';
+    renderFocusView(null);
+    $('fieldAvailability').value = presetAvail === 'Not in Stock' ? 'Not in Stock' : 'In Stock';
+    var custOpt2 = $('fieldAvailability').querySelector('option[value="Custom Jewels"]');
+    if (custOpt2) custOpt2.disabled = false;
+    $('statusFieldGroup').style.display = '';
+    $('detailApproveBtn').style.display = 'none';
+    $('detailRejectBtn').style.display = 'none';
+    setActionBar({});
+    setFormEditable(true, false);
+    $('detailSaveBtn').textContent = 'Stage in Pending';
+    detailNote('New pieces are staged in the shared Pending queue. The owner approves them before they go live — a price is required for approval.');
+  }
+
+  async function saveDetail() {
+    if (!detailCtx) return;
+    var data = readDetailForm();
+    if (!data.name) { toast('Give the piece a title first.'); return; }
+    var btn = $('detailSaveBtn');
+    var origText = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = 'Saving…';
+    try {
+      if (detailCtx.kind === 'product') {
+        /* Availability drives the real status field: In Stock → live,
+           Not in Stock → out-of-stock (a piece already recorded as
+           sold stays sold), Custom Jewels and Shipping: 1 Month Delay
+           → the stored availability field carries the state and the
+           status is untouched. Owners' full edit goes through
+           PATCH /products/:id; a salesperson sends status only —
+           the back end refuses anything more from their session. */
+        var curP = null;
+        liveProducts.forEach(function (x) { if (x.id === detailCtx.id) curP = x; });
+        var curStatus = curP ? statusOf(curP) : 'live';
+        var sel = $('fieldAvailability').value;
+        var newStatus = sel === 'In Stock' ? 'live'
+          : sel === 'Not in Stock' ? (curStatus === 'sold' ? 'sold' : 'out-of-stock')
+          : curStatus;
+        var patch;
+        if (session.role === 'owner') {
+          patch = Object.assign({}, data);
+          patch.status = newStatus;
+        } else {
+          patch = { status: newStatus };
+        }
+        var r = await api('PATCH', '/products/' + encodeURIComponent(detailCtx.id), patch);
+        var idx = liveProducts.findIndex(function (x) { return x.id === detailCtx.id; });
+        if (idx >= 0) liveProducts[idx] = r.product;
+        updateRowForProduct(r.product);
+        renderPatrol();
+        toast('Saved — #' + detailCtx.id + ' updated.');
+        openProduct(detailCtx.id);
+      } else if (detailCtx.kind === 'pending') {
+        var rp = await api('PATCH', '/pending/' + encodeURIComponent(detailCtx.queueId), data);
+        var ei = pendingEntries.findIndex(function (x) { return x.queueId === detailCtx.queueId; });
+        if (ei >= 0) pendingEntries[ei] = rp.entry;
+        renderCatalog(); renderDecisions();
+        toast('Saved — #' + detailCtx.queueId + ' updated.');
+        openPending(detailCtx.queueId);
+      } else if (detailCtx.kind === 'new') {
+        var rn = await api('POST', '/pending', data);
+        pendingEntries.push(rn.entry);
+        renderCatalog(); updatePendingChip();
+        toast('Staged in Pending as #' + rn.entry.queueId + ' — waiting for the owner.');
+        closeDetail();
+        showView('home');
+      }
+    } catch (e) {
+      toast('Save failed: ' + e.message);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = origText;
+    }
+  }
+
+  /* A piece staged with availability "Not in Stock" (the quick-add
+     ⛔ flow) keeps that state once approved: approval always lands a
+     piece live, so the portal immediately marks it out of stock.
+     "Custom Jewels" needs nothing — the stored availability field on
+     the product already marks it as a custom design. */
+  async function applyStagedAvailability(entry, savedProduct) {
+    if (!entry || !savedProduct || !entry.product) return;
+    if (entry.product.availability !== 'Not in Stock') return;
+    try {
+      await api('PATCH', '/products/' + encodeURIComponent(savedProduct.id), { status: 'out-of-stock' });
+    } catch (_) { /* the piece is live; its state can be set from its card */ }
+  }
+
+  /* ---------------- editor action bar: sale / out / delete ---------------- */
+  async function recordSale() {
+    if (!detailCtx || detailCtx.kind !== 'product') return;
+    var id = detailCtx.id;
+    var btn = $('detailSaleBtn');
+    var orig = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = 'Recording…';
+    try {
+      var r = await api('POST', '/products/' + encodeURIComponent(id) + '/sale', {});
+      var idx = liveProducts.findIndex(function (x) { return x.id === id; });
+      if (idx >= 0) liveProducts[idx] = r.product;
+      updateRowForProduct(r.product);
+      await loadSales();
+      toast('Sale recorded — ' + r.invoice.id + ' · ' + fmtMoney(r.invoice.total) + '. #' + id + ' is sold.');
+      openProduct(id);
+    } catch (e) {
+      toast('Sale not recorded: ' + e.message);
+      btn.disabled = false;
+      btn.textContent = orig;
+    }
+  }
+
+  function markDetailOutOfStock() {
+    if (!detailCtx || detailCtx.kind !== 'product') return;
+    $('fieldAvailability').value = 'Not in Stock';
+    saveDetail();
+  }
+
+  function askDelete() {
+    if (!detailCtx || detailCtx.kind !== 'product') return;
+    $('deleteConfirmText').textContent = 'Delete #' + detailCtx.id + ' from the live catalogue? This cannot be undone. Past invoices and approval records are kept.';
+    $('deleteConfirm').classList.add('on');
+  }
+
+  function cancelDelete() {
+    var dc = $('deleteConfirm');
+    if (dc) dc.classList.remove('on');
+  }
+
+  async function confirmDelete() {
+    if (!detailCtx || detailCtx.kind !== 'product') return;
+    var id = detailCtx.id;
+    var btn = $('deleteConfirmBtn');
+    btn.disabled = true;
+    try {
+      await api('DELETE', '/products/' + encodeURIComponent(id));
+      liveProducts = liveProducts.filter(function (x) { return x.id !== id; });
+      renderCatalog();
+      renderPatrol();
+      cancelDelete();
+      toast('Deleted — #' + id + ' removed from the catalogue.');
+      closeDetail();
+      showView('home');
+    } catch (e) {
+      toast('Delete failed: ' + e.message);
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  async function approveDetail() {
+    if (!detailCtx || detailCtx.kind !== 'pending') return;
+    var ab = $('detailApproveBtn'), rb = $('detailRejectBtn');
+    ab.disabled = true; rb.disabled = true;
+    try {
+      var entry = null;
+      pendingEntries.forEach(function (x) { if (x.queueId === detailCtx.queueId) entry = x; });
+      var r = await api('POST', '/pending/' + encodeURIComponent(detailCtx.queueId) + '/approve');
+      await applyStagedAvailability(entry, r.product);
+      await loadData();
+      toast('Approved — the piece is live as #' + (r.product && r.product.id ? r.product.id : ''));
+      closeDetail();
+      showView('home');
+    } catch (e) {
+      toast('Approval failed: ' + e.message);
+      ab.disabled = false; rb.disabled = false;
+    }
+  }
+
+  async function rejectDetail() {
+    if (!detailCtx || detailCtx.kind !== 'pending') return;
+    var ab2 = $('detailApproveBtn'), rb2 = $('detailRejectBtn');
+    ab2.disabled = true; rb2.disabled = true;
+    try {
+      await api('POST', '/pending/' + encodeURIComponent(detailCtx.queueId) + '/reject');
+      await loadData();
+      toast('Rejected — the record stays in Recent decisions.');
+      closeDetail();
+      showView('home');
+    } catch (e) {
+      toast('Rejection failed: ' + e.message);
+      ab2.disabled = false; rb2.disabled = false;
+    }
+  }
+
+  /* ---------------- chat ---------------- */
+  function setMode(m) {
+    chatMode = m;
+    $('modeChatBtn').classList.toggle('on', m === 'chat');
+    $('modeTaskBtn').classList.toggle('on', m === 'task');
+    $('chatThread').classList.toggle('on', m === 'chat' && $('chatThread').children.length > 0);
+    $('taskPanel').classList.toggle('on', m === 'task');
+  }
+
+  function enterChatMode() {
+    /* The pill already lives in the bottom dock (v3) — starting a
+       conversation just clears the hero away and opens the thread
+       in the scrolling canvas above the dock. */
+    if ($('heroBox').style.display !== 'none') {
+      $('workspaceContent').classList.add('chatting');
+      $('heroBox').style.display = 'none';
+    }
+    if (chatMode === 'chat') $('chatThread').classList.add('on');
+    if (chatMode === 'task') $('taskPanel').classList.add('on');
+  }
+
+  function scrollThread() {
+    var ws = $('workspaceContent');
+    try {
+      ws.scrollTo({ top: ws.scrollHeight, behavior: 'smooth' });
+    } catch (_) {
+      ws.scrollTop = ws.scrollHeight;
+    }
+  }
+
+  function chatSay(html) {
+    var row = document.createElement('div');
+    row.className = 'msg-row';
+    row.innerHTML = '<span class="msg-spark">✦</span><div class="msg">' + html + '</div>';
+    $('chatThread').appendChild(row);
+    scrollThread();
+    return row;
+  }
+  function chatSayText(text) { return chatSay(esc(text).replace(/\n/g, '<br>')); }
+  function chatUser(text) {
+    var row = document.createElement('div');
+    row.className = 'msg-row user';
+    row.innerHTML = '<div class="msg">' + esc(text) + '</div>';
+    $('chatThread').appendChild(row);
+    scrollThread();
+  }
+  function taskSay(html) {
+    var row = document.createElement('div');
+    row.className = 'msg-row';
+    row.innerHTML = '<span class="msg-spark">✦</span><div class="msg">' + html + '</div>';
+    $('taskList').appendChild(row);
+    scrollThread();
+    return row;
+  }
+  function taskSayText(text) { return taskSay(esc(text).replace(/\n/g, '<br>')); }
+
+  function uiFor(mode) {
+    return mode === 'task'
+      ? { say: taskSay, sayText: taskSayText, host: $('taskList') }
+      : { say: chatSay, sayText: chatSayText, host: $('chatThread') };
+  }
+
+  function handleSearchEnter(e) { if (e.key === 'Enter') sendChat(); }
+
+  function sendChat() {
+    var input = $('mainSearchInput');
+    var v = input.value.trim();
+    if (!v) return;
+    input.value = '';
+    enterChatMode();
+    if (chatMode === 'chat') chatUser(v);
+    else taskSay('<b>Task:</b> ' + esc(v));
+    portalChatHistory.push({ role: 'user', text: v });
+    if (portalChatHistory.length > 40) portalChatHistory = portalChatHistory.slice(-40);
+    routeCommand(v, uiFor(chatMode));
+    /* Keep the pill focused so the next command can be typed at once. */
+    var inp = $('mainSearchInput');
+    if (inp) inp.focus();
+  }
+
+  function normId(s) { return String(s || '').toLowerCase().replace(/[^a-z0-9]/g, ''); }
+
+  function findRef(text) {
+    var norm = normId(text);
+    var i, p, e;
+    for (i = 0; i < liveProducts.length; i++) {
+      p = liveProducts[i];
+      if (p.id && norm.indexOf(normId(p.id)) >= 0) return { kind: 'product', product: p };
+      if (p.model && norm.indexOf(normId(p.model)) >= 0) return { kind: 'product', product: p };
+    }
+    for (i = 0; i < pendingEntries.length; i++) {
+      e = pendingEntries[i];
+      if (e.queueId && norm.indexOf(normId(e.queueId)) >= 0) return { kind: 'pending', entry: e };
+      if (e.product && e.product.id && norm.indexOf(normId(e.product.id)) >= 0) return { kind: 'pending', entry: e };
+    }
+    return null;
+  }
+
+  function itemCardHtml(ref) {
+    if (ref.kind === 'product') {
+      var p = ref.product;
+      return '<b>#' + esc(p.id) + ' — ' + esc(productTitle(p)) + '</b><br>'
+        + esc(itemDivision(p).name) + ' · ' + esc(p.category || 'uncategorised') + ' · ' + esc(fmtPrice(p))
+        + '<br>' + availTagHtml(p) + (statusOf(p) === 'sold' ? ' <span style="font-size:11px;color:var(--text-secondary);">(sold)</span>' : '')
+        + (p.specs ? '<br>' + esc(p.specs) : '')
+        + (p.origin ? '<br>Stone origin: ' + esc(p.origin) : '');
+    }
+    var e = ref.entry;
+    return '<b>#' + esc(e.queueId) + ' — ' + esc(productTitle(e.product)) + '</b> (Pending)<br>'
+      + esc(itemDivision(e.product).name) + ' · ' + esc(fmtPrice(e.product)) + ' · added by ' + esc(e.addedBy || 'staff')
+      + ' · status: ' + esc(e.status || 'waiting');
+  }
+
+  function openRefButton(ref) {
+    var btn = document.createElement('button');
+    btn.className = 'chip';
+    btn.style.marginTop = '8px';
+    btn.textContent = 'Open the item card';
+    btn.onclick = function () {
+      if (ref.kind === 'product') openProduct(ref.product.id);
+      else openPending(ref.entry.queueId);
+    };
+    return btn;
+  }
+
+  /* Confirmation card for any state-changing action. Nothing is
+     applied until Confirm is tapped. */
+  function proposeAction(ui, action) {
+    var card = document.createElement('div');
+    card.className = 'action-card';
+    var title = '', body = '';
+    if (action.type === 'status' && action.status === 'sold') {
+      title = 'Record sale?';
+      body = 'Record the sale of <b>#' + esc(action.ref.product.id) + ' — ' + esc(productTitle(action.ref.product)) + '</b> at <b>'
+        + esc(fmtPrice(action.ref.product)) + '</b>. This files a paid invoice and marks the piece sold.';
+    } else if (action.type === 'status') {
+      title = 'Change availability?';
+      body = 'Mark <b>#' + esc(action.ref.product.id) + ' — ' + esc(productTitle(action.ref.product)) + '</b> as <b>'
+        + availLabelForStatus(action.status) + '</b>. This updates the live catalogue.';
+    } else if (action.type === 'availability') {
+      title = 'Change availability?';
+      body = 'Mark <b>#' + esc(action.ref.product.id) + ' — ' + esc(productTitle(action.ref.product)) + '</b> as <b>'
+        + esc(action.availability) + '</b>. This updates the live catalogue.';
+    } else if (action.type === 'edit') {
+      title = 'Edit item?';
+      body = 'Change ' + esc(action.fieldLabel) + ' of <b>#' + esc(action.ref.product.id) + ' — '
+        + esc(productTitle(action.ref.product)) + '</b> from ' + esc(action.fromText) + ' to <b>' + esc(action.toText) + '</b>.';
+    } else if (action.type === 'approve') {
+      title = 'Approve pending piece?';
+      body = '<b>#' + esc(action.ref.entry.queueId) + ' — ' + esc(productTitle(action.ref.entry.product)) + '</b> goes live in the catalogue at '
+        + esc(fmtPrice(action.ref.entry.product)) + '.';
+    } else if (action.type === 'add') {
+      title = 'Stage this new piece in Pending?';
+      body = action.summaryHtml;
+    }
+    card.innerHTML = '<div class="ac-title">' + title + '</div><div class="ac-body">' + body + '</div>';
+    var btns = document.createElement('div');
+    btns.className = 'action-btns';
+    var confirmBtn = document.createElement('button');
+    confirmBtn.className = 'confirm-btn';
+    confirmBtn.textContent = action.type === 'add' ? 'Stage it' : 'Confirm';
+    var cancelBtn = document.createElement('button');
+    cancelBtn.className = 'cancel-btn';
+    cancelBtn.textContent = 'Cancel';
+    cancelBtn.onclick = function () {
+      card.remove();
+      ui.sayText('Cancelled — nothing was changed.');
+      var inp = $('mainSearchInput');
+      if (inp) inp.focus();
+    };
+    confirmBtn.onclick = async function () {
+      confirmBtn.disabled = true;
+      cancelBtn.disabled = true;
+      var origConfirm = confirmBtn.textContent;
+      confirmBtn.textContent = 'Working…';
+      try {
+        var result = await executeAction(action);
+        card.remove();
+        ui.say(result);
+      } catch (e) {
+        confirmBtn.disabled = false;
+        cancelBtn.disabled = false;
+        confirmBtn.textContent = origConfirm;
+        ui.say('That did not go through: ' + esc(e.message) + '. Nothing was changed.');
+      }
+      var inp2 = $('mainSearchInput');
+      if (inp2) inp2.focus();
+    };
+    btns.appendChild(confirmBtn);
+    btns.appendChild(cancelBtn);
+    card.appendChild(btns);
+    if (ui.host === $('chatThread')) {
+      var row = document.createElement('div');
+      row.className = 'msg-row';
+      row.innerHTML = '<span class="msg-spark">✦</span>';
+      row.appendChild(card);
+      ui.host.appendChild(row);
+    } else {
+      ui.host.appendChild(card);
+    }
+    scrollThread();
+  }
+
+  async function executeAction(action) {
+    if (action.type === 'status') {
+      if (action.status === 'sold') {
+        /* ONE behaviour for "sold" everywhere — chat, Task mode and
+           the editor's Record Sale button all go through the sale
+           endpoint, which files the paid invoice and marks the piece
+           sold in one step. */
+        var rs = await api('POST', '/products/' + encodeURIComponent(action.ref.product.id) + '/sale', {});
+        var idxs = liveProducts.findIndex(function (x) { return x.id === action.ref.product.id; });
+        if (idxs >= 0) liveProducts[idxs] = rs.product;
+        updateRowForProduct(rs.product);
+        await loadSales();
+        return 'Sale recorded — <b>#' + esc(rs.product.id) + ' — ' + esc(productTitle(rs.product)) + '</b> is sold. Invoice <b>'
+          + esc(rs.invoice.id) + '</b> · ' + esc(fmtMoney(rs.invoice.total)) + ' (paid).';
+      }
+      var r = await api('PATCH', '/products/' + encodeURIComponent(action.ref.product.id), { status: action.status });
+      var idx = liveProducts.findIndex(function (x) { return x.id === action.ref.product.id; });
+      if (idx >= 0) liveProducts[idx] = r.product;
+      updateRowForProduct(r.product);
+      renderPatrol();
+      return 'Done — <b>#' + esc(r.product.id) + ' — ' + esc(productTitle(r.product)) + '</b> is now <b>'
+        + availLabelForStatus(action.status) + '</b>.';
+    }
+    if (action.type === 'availability') {
+      /* Availability-field states (Custom Jewels / Shipping): the
+         stored field carries the state; the stock status is left
+         exactly as it is. Owner-only at the back end too. */
+      var ra = await api('PATCH', '/products/' + encodeURIComponent(action.ref.product.id), { availability: action.availability });
+      var idxa = liveProducts.findIndex(function (x) { return x.id === action.ref.product.id; });
+      if (idxa >= 0) liveProducts[idxa] = ra.product;
+      updateRowForProduct(ra.product);
+      renderPatrol();
+      return 'Done — <b>#' + esc(ra.product.id) + ' — ' + esc(productTitle(ra.product)) + '</b> is now <b>'
+        + esc(action.availability) + '</b>.';
+    }
+    if (action.type === 'edit') {
+      var patch = {};
+      patch[action.field] = action.value;
+      var r2 = await api('PATCH', '/products/' + encodeURIComponent(action.ref.product.id), patch);
+      var idx2 = liveProducts.findIndex(function (x) { return x.id === action.ref.product.id; });
+      if (idx2 >= 0) liveProducts[idx2] = r2.product;
+      updateRowForProduct(r2.product);
+      return 'Done — ' + esc(action.fieldLabel) + ' of <b>#' + esc(r2.product.id) + '</b> is now <b>' + esc(action.toText) + '</b>.';
+    }
+    if (action.type === 'approve') {
+      var r3 = await api('POST', '/pending/' + encodeURIComponent(action.ref.entry.queueId) + '/approve');
+      await applyStagedAvailability(action.ref.entry, r3.product);
+      await loadData();
+      return 'Approved — <b>' + esc(productTitle(action.ref.entry.product)) + '</b> is live as <b>#'
+        + esc(r3.product && r3.product.id ? r3.product.id : '') + '</b>.';
+    }
+    if (action.type === 'add') {
+      var r4 = await api('POST', '/pending', action.product);
+      pendingEntries.push(r4.entry);
+      renderCatalog(); updatePendingChip();
+      return 'Staged in Pending as <b>#' + esc(r4.entry.queueId) + '</b> — <b>' + esc(productTitle(action.product)) + '</b>. '
+        + (productPrice(action.product)
+          ? 'The owner can approve it from the queue.'
+          : 'It has no price yet, so the owner must add a price before it can go live.');
+    }
+    throw new Error('unknown action');
+  }
+
+  var CAPABILITIES = 'I work from the live catalogue only. You can say things like:\n'
+    + '• “make EJ-100001 out of stock”, “mark EJ-100001 sold” or “record the sale of EJ-100001” (files the paid invoice)\n'
+    + '• “set EJ-100001 to shipping” — marks it Shipping: 1 Month Delay (owner only)\n'
+    + '• “change the price of EJ-100002 to $850”\n'
+    + '• “change the title of EJ-100002 to …”\n'
+    + '• “add new item” — I will collect every detail and stage it in Pending\n'
+    + '• “what is the price of EJ-100001?” or “show me rings”\n'
+    + '• “approve PQ-1” (owner only)';
+
+  function routeCommand(text, ui) {
+    var t = text.trim();
+    var low = t.toLowerCase();
+
+    if (addFlow) { addFlowAnswer(t, ui); return; }
+
+    if (portalChatDraft) { portalChatDraftAnswer(t, ui); return; }
+
+    if (/^(add|new)\b[\s\S]*\b(item|piece|product)\b/i.test(t) || /^add new$/i.test(t) || /^new item$/i.test(t)) {
+      startAddFlow(ui);
+      return;
+    }
+
+    var approveMatch = t.match(/approve\s+(PQ-\d+)/i);
+    if (approveMatch) {
+      var qid = approveMatch[1].toUpperCase();
+      var entry = null;
+      pendingEntries.forEach(function (e) { if (e.queueId === qid) entry = e; });
+      if (!entry) { ui.sayText('I could not find a Pending entry called ' + qid + '.'); return; }
+      if (session.role !== 'owner') { ui.sayText('Only the owner can approve pieces. This one stays in the queue for them.'); return; }
+      if (entry.status === 'approved' || entry.status === 'rejected') { ui.sayText('That entry was already ' + entry.status + '.'); return; }
+      if (!productPrice(entry.product)) { ui.sayText('That piece has no price yet — the back end requires a price before approval. Open its card to add one.'); return; }
+      proposeAction(ui, { type: 'approve', ref: { kind: 'pending', entry: entry } });
+      return;
+    }
+
+    var ref = findRef(t);
+
+    if (ref && ref.kind === 'product') {
+      var p = ref.product;
+      // shipping state (v4): an availability-field state, owner-only
+      if (/\bshipping\b/.test(low) && /\b(make|mark|set|change|put)\b/.test(low)) {
+        if (session.role !== 'owner') { ui.sayText('Only the owner can set the shipping state — a salesperson can still change In Stock / Not in Stock.'); return; }
+        if (availOf(p) === SHIPPING_AVAIL) { ui.sayText('#' + p.id + ' is already ' + SHIPPING_AVAIL + '.'); return; }
+        proposeAction(ui, { type: 'availability', ref: ref, availability: SHIPPING_AVAIL });
+        return;
+      }
+      // stock status changes
+      var newStatus = null;
+      if (/\bout of stock\b/.test(low)) newStatus = 'out-of-stock';
+      else if (/\bsold\b/.test(low) || /\brecord\b[\s\S]*\bsale\b/.test(low) || /\bsale of\b/.test(low)) newStatus = 'sold';
+      else if (/\bback in stock\b/.test(low) || /\bin stock again\b/.test(low) || /\bavailable again\b/.test(low)) newStatus = 'live';
+      if (newStatus && /\b(make|mark|set|change|put|record|ring up)\b/.test(low)) {
+        if (statusOf(p) === newStatus) { ui.sayText('#' + p.id + ' is already ' + availLabelForStatus(newStatus) + (newStatus === 'sold' ? ' (sold)' : '') + '.'); return; }
+        proposeAction(ui, { type: 'status', ref: ref, status: newStatus });
+        return;
+      }
+      // price edit
+      if (/\bprice\b/.test(low)) {
+        var pm = t.match(/\$\s*([\d,]+(?:\.\d{1,2})?)/) || t.match(/\bprice\b[^0-9]*([\d,]+(?:\.\d{1,2})?)/i);
+        if (pm && /\b(change|set|make|edit|update|to)\b/.test(low)) {
+          var val = parseFloat(pm[1].replace(/,/g, ''));
+          if (isFinite(val) && val > 0) {
+            proposeAction(ui, {
+              type: 'edit', ref: ref, field: 'price', fieldLabel: 'the price',
+              value: val, fromText: fmtPrice(p), toText: fmtMoney(val)
+            });
+            return;
+          }
+        }
+        ui.say('The price of <b>#' + esc(p.id) + ' — ' + esc(productTitle(p)) + '</b> is <b>' + esc(fmtPrice(p)) + '</b>.');
+        return;
+      }
+      // title edit
+      var tm = t.match(/(?:title|name)\s*(?:to|:)\s*(.+)$/i);
+      if (tm && /\b(change|set|rename|edit)\b/.test(low)) {
+        proposeAction(ui, {
+          type: 'edit', ref: ref, field: 'name', fieldLabel: 'the title',
+          value: tm[1].trim(), fromText: productTitle(p), toText: tm[1].trim()
+        });
+        return;
+      }
+      // specs edit
+      var sm = t.match(/specs?\s*(?:to|:)\s*(.+)$/i);
+      if (sm && /\b(change|set|edit|update)\b/.test(low)) {
+        proposeAction(ui, {
+          type: 'edit', ref: ref, field: 'specs', fieldLabel: 'the specs',
+          value: sm[1].trim(), fromText: p.specs || '(none)', toText: sm[1].trim()
+        });
+        return;
+      }
+      // availability question
+      if (/\b(stock|status|available|sold)\b/.test(low) && /\b(is|in|out)\b/.test(low)) {
+        ui.say('<b>#' + esc(p.id) + ' — ' + esc(productTitle(p)) + '</b> is <b>' + availOf(p) + '</b>'
+          + (statusOf(p) === 'sold' ? ' (sold)' : '') + '.');
+        return;
+      }
+      // bare reference → item summary
+      var rowEl = ui.say(itemCardHtml(ref));
+      if (rowEl) {
+        var msgDiv = rowEl.querySelector('.msg') || rowEl;
+        msgDiv.appendChild(document.createElement('br'));
+        msgDiv.appendChild(openRefButton(ref));
+      }
+      return;
+    }
+
+    if (ref && ref.kind === 'pending') {
+      var rowEl2 = ui.say(itemCardHtml(ref));
+      if (rowEl2) {
+        var msgDiv2 = rowEl2.querySelector('.msg') || rowEl2;
+        msgDiv2.appendChild(document.createElement('br'));
+        msgDiv2.appendChild(openRefButton(ref));
+      }
+      return;
+    }
+
+    if (/\bhow many\b/.test(low)) {
+      var div = activeDiv();
+      var inDiv = liveProducts.filter(function (x) { return itemDivision(x).id === div.id; });
+      ui.sayText('In ' + div.name + ': ' + inDiv.length + ' live pieces, '
+        + inDiv.filter(function (x) { return availOf(x) === 'In Stock'; }).length + ' in stock, '
+        + inDiv.filter(function (x) { return availOf(x) === 'Not in Stock'; }).length + ' not in stock, '
+        + inDiv.filter(function (x) { return availOf(x) === 'Custom Jewels'; }).length + ' custom jewels, '
+        + inDiv.filter(function (x) { return availOf(x) === SHIPPING_AVAIL; }).length + ' shipping (1 month delay). '
+        + waitingEntries().length + ' piece(s) are waiting in Pending across all divisions.');
+      return;
+    }
+
+    if (/^(show|list|search|find)\b/.test(low) || /\b(rings?|earrings?|necklaces?|bracelets?|bangles?|watches|timepieces|brooches|cufflinks)\b/.test(low)) {
+      var words = low.replace(/^(show|list|search|find)\s+(me\s+)?(all\s+)?/, '').trim();
+      var matches = liveProducts.filter(function (x) {
+        if (itemDivision(x).id !== activeDivision) return false;
+        var hay = (productTitle(x) + ' ' + (x.category || '') + ' ' + (x.specs || '') + ' ' + (x.brand || '')).toLowerCase();
+        return words.split(/\s+/).filter(Boolean).every(function (w) { return hay.indexOf(w) >= 0; });
+      }).slice(0, 8);
+      if (!matches.length) { ui.sayText('No live pieces match “' + words + '” in ' + activeDiv().name + '.'); return; }
+      var host = ui.say('Here is what I found in ' + esc(activeDiv().name) + ':');
+      var hostMsg = host ? (host.querySelector('.msg') || host) : null;
+      matches.forEach(function (x) {
+        var r = document.createElement('div');
+        r.className = 'match-row';
+        r.style.marginTop = '8px';
+        r.innerHTML = '<div class="item-meta"><div class="item-id">#' + esc(x.id) + '</div>'
+          + '<div class="item-title">' + esc(productTitle(x)) + ' · ' + esc(fmtPrice(x)) + '</div>'
+          + availTagHtml(x) + '</div>';
+        r.onclick = function () { openProduct(x.id); };
+        if (hostMsg) hostMsg.appendChild(r);
+      });
+      return;
+    }
+
+    if (/^(hi|hello|hey|help)\b/.test(low)) { ui.sayText(CAPABILITIES); return; }
+
+    askPortalChat(t, ui);
+  }
+
+  /* -------- Gemini fallback (elevate-portal-chat-backend) --------
+     Consulted ONLY where the local parser gives up, and while a
+     service-proposed add draft is open. The service proposes; the
+     portal's confirmation cards and the Elevate back end decide.
+     Any failure shows exactly the line the parser used before. */
+  function portalChatFallbackLine(ui) {
+    ui.sayText('I could not match that to a catalogue action. ' + CAPABILITIES);
+  }
+
+  function portalChatContext() {
+    return {
+      catalogue: liveProducts.map(function (p) {
+        return {
+          id: p.id, title: productTitle(p), category: p.category || '',
+          brand: p.brand || '', price: productPrice(p),
+          status: statusOf(p), origin: p.origin || '', specs: p.specs || ''
+        };
+      }),
+      pending: pendingEntries.map(function (e) {
+        return { queueId: e.queueId, status: e.status, product: e.product };
+      })
+    };
+  }
+
+  async function askPortalChat(text, ui) {
+    if (!PORTAL_CHAT_BASE) { portalChatFallbackLine(ui); return; }
+    /* Skeleton shimmer while the assistant thinks (v4). */
+    var skelRow = document.createElement('div');
+    skelRow.className = 'msg-row';
+    skelRow.innerHTML = '<span class="msg-spark">✦</span><div class="msg" style="flex:1"><div class="skel skel-row w60"></div><div class="skel skel-row w80"></div><div class="skel skel-row w40"></div></div>';
+    ui.host.appendChild(skelRow);
+    scrollThread();
+    var data = null;
+    try {
+      var ctrl = new AbortController();
+      var timer = setTimeout(function () { ctrl.abort(); }, 45000);
+      var res;
+      try {
+        res = await fetch(PORTAL_CHAT_BASE + '/portal-chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            message: text,
+            history: portalChatHistory.slice(-10),
+            context: portalChatContext()
+          }),
+          signal: ctrl.signal
+        });
+      } finally { clearTimeout(timer); }
+      if (!res.ok) throw new Error('portal chat HTTP ' + res.status);
+      data = await res.json();
+    } catch (e) {
+      skelRow.remove();
+      portalChatFallbackLine(ui);
+      return;
+    }
+    skelRow.remove();
+    if (!data || data.ok !== true || typeof data.reply !== 'string' || !data.reply.trim()) {
+      portalChatFallbackLine(ui);
+      return;
+    }
+    portalChatHistory.push({ role: 'assistant', text: data.reply });
+    ui.sayText(data.reply);
+    if (data.action) renderPortalChatAction(data.action, ui);
+  }
+
+  function renderPortalChatAction(action, ui) {
+    if (!action || typeof action !== 'object') return;
+    if (action.type === 'availability') {
+      /* Availability-field states proposed by the assistant go through
+         the same Confirm card + owner gate as local commands. */
+      var pa = null;
+      liveProducts.forEach(function (x) { if (x.id === action.id) pa = x; });
+      if (!pa) return;
+      var av = action.value || action.availability;
+      if (av !== SHIPPING_AVAIL && av !== 'Custom Jewels') return;
+      if (session.role !== 'owner') { ui.sayText('Only the owner can set that availability state. This one stays for them.'); return; }
+      proposeAction(ui, { type: 'availability', ref: { kind: 'product', product: pa }, availability: av });
+      return;
+    }
+    if (action.type === 'status' || action.type === 'edit') {
+      var p = null;
+      liveProducts.forEach(function (x) { if (x.id === action.id) p = x; });
+      if (!p) return; /* unknown/stale id — reply only, never a card for an item the portal does not hold */
+      var ref = { kind: 'product', product: p };
+      if (action.type === 'status') {
+        if (['live', 'out-of-stock', 'sold'].indexOf(action.value) < 0) return;
+        proposeAction(ui, { type: 'status', ref: ref, status: action.value });
+        return;
+      }
+      if (action.field === 'price') {
+        var val = typeof action.value === 'number' ? action.value : parseFloat(action.value);
+        if (!isFinite(val) || val <= 0) return;
+        proposeAction(ui, {
+          type: 'edit', ref: ref, field: 'price', fieldLabel: 'the price',
+          value: val, fromText: fmtPrice(p), toText: '$' + val.toLocaleString('en-US')
+        });
+      } else if (action.field === 'title') {
+        if (typeof action.value !== 'string' || !action.value.trim()) return;
+        proposeAction(ui, {
+          type: 'edit', ref: ref, field: 'name', fieldLabel: 'the title',
+          value: action.value, fromText: productTitle(p), toText: action.value
+        });
+      } else if (action.field === 'specs') {
+        if (typeof action.value !== 'string' || !action.value.trim()) return;
+        proposeAction(ui, {
+          type: 'edit', ref: ref, field: 'specs', fieldLabel: 'the specs',
+          value: action.value, fromText: p.specs || '(none)', toText: action.value
+        });
+      }
+      return;
+    }
+    if (action.type === 'approve') {
+      var entry = null;
+      pendingEntries.forEach(function (e) { if (e.queueId === action.id) entry = e; });
+      if (!entry) return;
+      /* The portal's own approve gates — identical to the local branch. */
+      if (session.role !== 'owner') { ui.sayText('Only the owner can approve pieces. This one stays in the queue for them.'); return; }
+      if (entry.status === 'approved' || entry.status === 'rejected') { ui.sayText('That entry was already ' + entry.status + '.'); return; }
+      if (!productPrice(entry.product)) { ui.sayText('That piece has no price yet — the back end requires a price before approval. Open its card to add one.'); return; }
+      proposeAction(ui, { type: 'approve', ref: { kind: 'pending', entry: entry } });
+      return;
+    }
+    if (action.type === 'add') {
+      var fields = (action.fields && typeof action.fields === 'object') ? action.fields : {};
+      var missing = Array.isArray(action.missing) ? action.missing.slice() : [];
+      if (missing.length) {
+        portalChatDraft = { fields: fields, missing: missing };
+        return;
+      }
+      portalChatDraft = null;
+      proposePortalChatAdd(fields, ui);
+      return;
+    }
+  }
+
+  function proposePortalChatAdd(f, ui) {
+    var specsParts = [f.carat, f.metal, f.stones].filter(Boolean);
+    var product = {
+      name: f.title,
+      category: f.category,
+      brand: f.brand || activeDiv().name,
+      specs: specsParts.join(' · '),
+      price: (typeof f.price === 'number' && f.price > 0) ? f.price : null,
+      description: f.description || ''
+    };
+    if (f.origin) product.origin = f.origin;
+    if (f.metal) product.metal = f.metal;
+    if (f.stones) product.stones = f.stones;
+    if (f.carat) product.carat = f.carat;
+    var summary = '<b>' + esc(product.name) + '</b><br>'
+      + esc(product.brand) + ' · ' + esc(product.category) + '<br>'
+      + (product.specs ? esc(product.specs) + '<br>' : '')
+      + (product.origin ? 'Stone origin: ' + esc(product.origin) + '<br>' : '')
+      + 'Price: <b>' + esc(fmtPrice(product)) + '</b>'
+      + (product.description ? '<br>' + esc(product.description) : '');
+    proposeAction(ui, { type: 'add', product: product, summaryHtml: summary });
+  }
+
+  function portalChatDraftAnswer(text, ui) {
+    var low = text.toLowerCase().trim();
+    if (low === 'cancel' || low === 'stop' || low === 'never mind') {
+      portalChatDraft = null;
+      ui.sayText('Add cancelled — nothing was staged.');
+      return;
+    }
+    askPortalChat(text, ui);
+  }
+
+  /* -------- conversational add-item flow -------- */
+  var ADD_STEPS = [
+    { key: 'name', prompt: 'What is the piece called? (its title)' },
+    { key: 'category', prompt: 'Which category? (rings, necklaces, earrings, bracelets, timepieces, brooches, cufflinks…)' },
+    { key: 'brand', prompt: 'Which division? (Elevate Jewels, LLG, Elevate Silver, Elevate Gifts or Elevate Select)' },
+    { key: 'metal', prompt: 'Metal? (e.g. 14K yellow gold — or say “skip”)' },
+    { key: 'stones', prompt: 'Stones? (e.g. round diamonds, blue sapphire — or “skip”)' },
+    { key: 'origin', prompt: 'Stone origin — natural or lab-grown? (or “skip”)' },
+    { key: 'carat', prompt: 'Carat / size details? (e.g. 2.40 ct — or “skip”)' },
+    { key: 'price', prompt: 'Price in dollars? (a number — or “skip” for Price to confirm)' },
+    { key: 'description', prompt: 'A short description? (or “skip”)' }
+  ];
+
+  function startAddFlow(ui) {
+    addFlow = { step: 0, data: {}, ui: ui };
+    ui.sayText('Let’s add a new piece. I’ll collect every detail, then stage it in Pending for the owner.\n' + ADD_STEPS[0].prompt + '\n(Say “cancel” at any point to stop.)');
+  }
+
+  function addFlowAnswer(text, ui) {
+    var low = text.toLowerCase().trim();
+    if (low === 'cancel' || low === 'stop' || low === 'never mind') {
+      addFlow = null;
+      ui.sayText('Add cancelled — nothing was staged.');
+      return;
+    }
+    var step = ADD_STEPS[addFlow.step];
+    var value = text.trim();
+    var skip = (low === 'skip' || low === 'none' || low === '-');
+    if (step.key === 'brand' && !skip) {
+      var found = null;
+      DIVISIONS.forEach(function (d) { if (d.name.toLowerCase() === low || d.id.toLowerCase() === low) found = d; });
+      if (!found) { ui.sayText('I don’t know that division. Choose one of: ' + DIVISIONS.map(function (d) { return d.name; }).join(', ') + '.'); return; }
+      value = found.name;
+    }
+    if (step.key === 'origin' && !skip) {
+      if (/lab/.test(low)) value = 'Lab-Grown';
+      else if (/natural/.test(low)) value = 'Natural';
+      else { ui.sayText('Please answer “natural” or “lab-grown” (or “skip”).'); return; }
+    }
+    if (step.key === 'price' && !skip) {
+      var n = parseFloat(value.replace(/[^0-9.]/g, ''));
+      if (!isFinite(n) || n <= 0) { ui.sayText('That does not look like a price. Give a number like 850 or 1250 — or say “skip”.'); return; }
+      value = n;
+    }
+    if ((step.key === 'name' || step.key === 'category') && skip) {
+      ui.sayText('That one is needed — every piece needs a ' + (step.key === 'name' ? 'title' : 'category') + '.');
+      return;
+    }
+    addFlow.data[step.key] = skip ? null : value;
+    addFlow.step++;
+    if (addFlow.step < ADD_STEPS.length) {
+      ui.sayText(ADD_STEPS[addFlow.step].prompt);
+      return;
+    }
+    var d = addFlow.data;
+    addFlow = null;
+    var specsParts = [d.carat, d.metal, d.stones].filter(Boolean);
+    var product = {
+      name: d.name,
+      category: d.category,
+      brand: d.brand || activeDiv().name,
+      specs: specsParts.join(' · '),
+      price: d.price || null,
+      description: d.description || ''
+    };
+    if (d.origin) product.origin = d.origin;
+    if (d.metal) product.metal = d.metal;
+    if (d.stones) product.stones = d.stones;
+    if (d.carat) product.carat = d.carat;
+    var summary = '<b>' + esc(product.name) + '</b><br>'
+      + esc(product.brand) + ' · ' + esc(product.category) + '<br>'
+      + (product.specs ? esc(product.specs) + '<br>' : '')
+      + (product.origin ? 'Stone origin: ' + esc(product.origin) + '<br>' : '')
+      + 'Price: <b>' + esc(fmtPrice(product)) + '</b>'
+      + (product.description ? '<br>' + esc(product.description) : '');
+    proposeAction(ui, { type: 'add', product: product, summaryHtml: summary });
+  }
+
+  /* ---------------- voice (dictation into the pill) ---------------- */
+  function toggleMic() {
+    var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) {
+      toast('Voice input is not available in this browser — type instead.');
+      return;
+    }
+    if (recog) { try { recog.stop(); } catch (_) { /* already stopping */ } return; }
+    var rec = new SR();
+    recog = rec;
+    rec.lang = 'en-US';
+    rec.interimResults = false;
+    $('micBtn').classList.add('listening');
+    rec.onresult = function (e) {
+      var text = e.results[0][0].transcript;
+      $('mainSearchInput').value = text;
+      sendChat();
+    };
+    rec.onend = function () { recog = null; $('micBtn').classList.remove('listening'); };
+    rec.onerror = function () { recog = null; $('micBtn').classList.remove('listening'); };
+    try { rec.start(); } catch (_) { recog = null; $('micBtn').classList.remove('listening'); }
+  }
+
+  /* ---------------- photo match (real visual-search back end) ---------------- */
+  function triggerImageUpload() { $('hiddenFileInput').click(); }
+
+  function readAsDataURL(file) {
+    return new Promise(function (resolve, reject) {
+      var reader = new FileReader();
+      reader.onload = function () { resolve(reader.result); };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+
+  async function handlePhotoMatch(e) {
+    var file = e.target.files && e.target.files[0];
+    e.target.value = '';
+    if (!file) return;
+    enterChatMode();
+    var ui = uiFor(chatMode);
+    if (chatMode === 'chat') chatUser('📷 Photo match');
+    else taskSay('<b>Task:</b> photo match');
+    ui.say('Reading the photo with the visual-search service<span class="thinking-dots"></span>');
+    var dataUrl;
+    try {
+      dataUrl = await readAsDataURL(file);
+    } catch (_) {
+      ui.sayText('That photo could not be read. Try another image file.');
+      return;
+    }
+    var json;
+    try {
+      var ctl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+      var timer = ctl ? setTimeout(function () { ctl.abort(); }, 60000) : null;
+      var res = await fetch(VISUAL_BASE + '/match', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ image: dataUrl, mimeType: file.type || 'image/jpeg' }),
+        signal: ctl ? ctl.signal : undefined
+      });
+      if (timer) clearTimeout(timer);
+      json = await res.json().catch(function () { return null; });
+      if (!res.ok || !json || !json.ok) {
+        throw new Error((json && json.error) || ('HTTP ' + res.status));
+      }
+    } catch (err) {
+      ui.sayText('Photo match could not be completed: ' + err.message + '. The piece was not changed.');
+      return;
+    }
+    if (!json.attributes) {
+      ui.sayText('That photo does not look like a jewellery piece — try a clearer photo of the piece itself.');
+      return;
+    }
+    var a = json.attributes;
+    var desc = [a.type, a.stones, a.shape, a.metal, a.style].filter(Boolean).join(' · ');
+    var host = ui.say('The photo reads as: <b>' + esc(desc || 'a jewellery piece') + '</b>. Closest pieces in the loaded catalogue:');
+    var hostMsg = host ? (host.querySelector('.msg') || host) : null;
+    var words = [a.type, a.metal, a.shape].concat(String(a.stones || '').split(/\s+/)).concat(a.keywords || [])
+      .map(function (w) { return String(w || '').toLowerCase(); }).filter(function (w) { return w.length > 2; });
+    var scored = liveProducts.map(function (p) {
+      var hay = (productTitle(p) + ' ' + (p.category || '') + ' ' + (p.specs || '') + ' ' + (p.metal || '') + ' ' + (p.stones || '')).toLowerCase();
+      var score = 0;
+      words.forEach(function (w) { if (hay.indexOf(w) >= 0) score++; });
+      if (a.type && String(p.category || '').toLowerCase().indexOf(String(a.type).toLowerCase().replace(/s$/, '')) >= 0) score += 2;
+      return { p: p, score: score };
+    }).filter(function (s) { return s.score > 0; })
+      .sort(function (x, y) { return y.score - x.score; })
+      .slice(0, 5);
+    if (!scored.length) {
+      ui.sayText('No loaded catalogue piece matches those attributes closely.');
+      return;
+    }
+    scored.forEach(function (s) {
+      var r = document.createElement('div');
+      r.className = 'match-row';
+      r.style.marginTop = '8px';
+      r.innerHTML = '<div class="item-meta"><div class="item-id">#' + esc(s.p.id) + '</div>'
+        + '<div class="item-title">' + esc(productTitle(s.p)) + ' · ' + esc(fmtPrice(s.p)) + '</div>'
+        + availTagHtml(s.p) + '</div>';
+      r.onclick = function () { openProduct(s.p.id); };
+      if (hostMsg) hostMsg.appendChild(r);
+    });
+  }
+
+  /* ---------------- global click wiring ---------------- */
+  document.addEventListener('click', function (e) {
+    /* v4 Gallery view: filter chips, card select/open, owner delete. */
+    var t = e.target;
+    if (t.closest) {
+      var delBtn = t.closest('[data-galdel]');
+      if (delBtn) { galDeleteClick(delBtn.getAttribute('data-galdel'), e); return; }
+      var c1 = t.closest('[data-gt1]');
+      if (c1) { galTier1 = c1.getAttribute('data-gt1'); renderGalleryView(); return; }
+      var c2 = t.closest('[data-gt2a]');
+      if (c2) { galTier2a = c2.getAttribute('data-gt2a'); renderGalleryView(); return; }
+      var c3 = t.closest('[data-gt2b]');
+      if (c3) { galTier2b = c3.getAttribute('data-gt2b'); renderGalleryView(); return; }
+      var card = t.closest('[data-galpid]');
+      if (card) { galCardClick(card.getAttribute('data-galpid'), e); return; }
+      var rst = t.closest('[data-restore]');
+      if (rst) { restoreAuditEntry(rst.getAttribute('data-restore'), rst); return; }
+    }
+    var row = e.target.closest ? e.target.closest('[data-kind]') : null;
+    if (row) {
+      if (row.getAttribute('data-kind') === 'product') openProduct(row.getAttribute('data-pid'));
+      else if (row.getAttribute('data-kind') === 'pending') openPending(row.getAttribute('data-qid'));
+    }
+    if (!e.target.closest || (!e.target.closest('.account-wrapper') && !e.target.closest('#inputBrandPill'))) {
+      $('brandPopover').classList.remove('open');
+    }
+  });
+  $('pinInput').addEventListener('keydown', function (e) { if (e.key === 'Enter') submitPin(); });
+  $('pinInput2').addEventListener('keydown', function (e) { if (e.key === 'Enter') submitPin(); });
+
+  /* ---------------- boot ---------------- */
+  (async function boot() {
+    if (session.token) {
+      try {
+        var me = await api('GET', '/auth/me');
+        session.role = me.role;
+        await enterWorkspace();
+        return;
+      } catch (e) {
+        if (e.status === 401) {
+          sessionStorage.removeItem('ejPortalToken');
+          sessionStorage.removeItem('ejPortalRole');
+          session = { token: null, role: null };
+        }
+        /* A network failure keeps the stored session — once the back
+           end answers again, a reload restores it. */
+      }
+    }
+    var ok = await checkBackend(false);
+    if (!ok) {
+      var tries = 0;
+      var iv = setInterval(async function () {
+        tries++;
+        var good = await checkBackend(false);
+        if (good || tries >= 10 || session.token) clearInterval(iv);
+      }, 6000);
+    }
+  })();
+</script>
+</body>
+</html>
