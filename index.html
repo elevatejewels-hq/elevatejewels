@@ -6866,11 +6866,17 @@ var PRODUCTS = [
          a figure: every price surface reads "Price to confirm", the same
          presentation the Private World queue uses for unpriced pieces. */
       function priceLabel(p) { return p && p.price > 0 ? fmt(p.price) : "Price to confirm"; }
-      /* Owner-supplied pieces (ownerSupplied in the data — the pieces the
-         owner supplied himself) are in stock at the atelier: their cards
-         carry a quiet "In stock" beside the price, priced and
+      /* "In stock" marking (owner correction, 2026-11-24): the tag may
+         appear ONLY on (1) the owner-supplied pieces (ownerSupplied in
+         the data — the pieces the owner supplied himself, with his
+         prices) and (2) every watch (isWatch). Custom designs — the
+         Exclusive llg-ex-* pieces and the Custom Jewels rail — are made
+         to order and must NEVER carry it: they hold neither flag, and
+         the llg-ex-* guard below keeps it that way even if the data
+         changes. The tag sits quietly beside the price, priced and
          "Price to confirm" pieces alike. */
-      function stockTag(p) { return p && p.ownerSupplied ? '<span class="stock-tag">In stock</span>' : ""; }
+      function isInStock(p) { return !!p && (p.ownerSupplied || p.isWatch) && !/^llg-ex-/.test(p.id || ""); }
+      function stockTag(p) { return isInStock(p) ? '<span class="stock-tag">In stock</span>' : ""; }
       /* In-stock first (owner direction, 2026-11-23): the owner's own
          in-stock pieces (ownerSupplied) lead every catalogue grid — a
          stable partition, so each side keeps its existing relative order. */
@@ -6910,6 +6916,11 @@ var PRODUCTS = [
          summary: their detail pages show this small print instead of
          PRICE_DISCLAIMER (owner direction, 2026-11-23). */
       var PRICE_APPROX_NOTE = "Price shown is approximate — it may be adjusted with the gold market.";
+      /* Watches carry a shipping small print on their piece pages
+         (owner direction, 2026-11-24): one-week shipping, and the
+         customer is asked to confirm with customer support that the
+         piece is still in stock, as it can sometimes take longer. */
+      var WATCH_SHIPPING_NOTE = "Shipping time: one week. Please check with our customer support that this item is still in stock, as it can sometimes take a little longer.";
       function priceForOrigin(price, origin, discount) {
         if (origin === "natural") return price;
         return Math.max(100, Math.round((price * (100 - discount)) / 100 / 10) * 10);
@@ -9413,7 +9424,7 @@ var PRODUCTS = [
           + '<p style="font-size:0.875rem;color:var(--muted-foreground)">Sold by <a href="#/vendor/' + v.slug + '" style="color:var(--foreground);text-decoration:underline;text-underline-offset:4px">' + esc(v.name) + "</a> · " + esc(v.city) + "</p></div>"
           + (era ? '<a href="#/heritage" class="btn-ghost" style="margin-top:1rem;display:inline-flex">Period piece · ' + esc(era.name) + ", " + esc(era.years) + "</a>" : "")
           + '<h1 style="margin-top:0.85rem;font-family:var(--font-display);font-size:2.25rem;line-height:1.15;overflow-wrap:anywhere">' + esc(p.name) + "</h1>"
-          + '<div style="margin-top:0.7rem;display:flex;flex-wrap:wrap;align-items:center;gap:0.75rem"><span style="font-family:var(--font-display);font-size:1.875rem" id="itemPrice">' + priceLabel(p) + "</span>" + (p.oneOfOne ? '<span class="chip-gold">One of one</span>' : "") + "</div></header>"
+          + '<div style="margin-top:0.7rem;display:flex;flex-wrap:wrap;align-items:center;gap:0.75rem"><span style="font-family:var(--font-display);font-size:1.875rem" id="itemPrice">' + priceLabel(p) + "</span>" + stockTag(p) + (p.oneOfOne ? '<span class="chip-gold">One of one</span>' : "") + "</div></header>"
           + '<div style="margin-top:1.5rem;border-top:1px solid rgba(184,147,90,.45);padding-top:1rem"><div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:0.75rem"><p class="eyebrow">The piece</p>'
           + '<a class="btn-ghost" href="' + EJ._bespokeLink(p) + '">' + icon("wand", 14) + "Customize this piece</a></div>"
           + '<p style="margin-top:1rem;font-size:0.9375rem;line-height:1.7;color:color-mix(in oklab, var(--foreground) 85%, transparent)">' + esc(p.description) + "</p></div>";
@@ -9711,6 +9722,7 @@ var PRODUCTS = [
           + '</p>'
           + (p.isWatch ? '<p style="margin-top:0.5rem;font-size:0.75rem;color:var(--muted-foreground)">Watches carry one price — the same on the natural and lab-grown options.</p>' : "")
           + '<div class="glass" style="margin-top:1rem;border-radius:0.25rem;border:1px solid color-mix(in oklab, var(--gold) 20%, transparent);padding:1rem"><p style="font-size:11px;line-height:1.65;color:var(--muted-foreground)">' + (p.ownerSupplied ? PRICE_APPROX_NOTE : PRICE_DISCLAIMER) + '</p>'
+          + (p.isWatch ? '<p style="margin-top:0.75rem;font-size:11px;line-height:1.65;color:var(--muted-foreground)">' + WATCH_SHIPPING_NOTE + '</p>' : "")
           + '<div style="margin-top:1rem"><button type="button" class="btn-ghost" onclick="EJ.stoneConfirm()">' + icon("message", 14) + "Message atelier to confirm price &amp; availability</button></div></div></div>";
       }
       EJ.stoneSet = function (origin) {
