@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Elevate Select — Sales & Inventory Portal</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
 <style>
   :root {
     --bg-canvas: #FFFFFF;
@@ -99,6 +100,33 @@
     box-shadow: 0 2px 6px rgba(122,92,30,.4);
   }
   .rail-btn { position: relative; }
+
+  /* Material Symbols (Google) — one uniform icon system for the rail,
+     top bar and composer bar, replacing the emoji glyphs. Colour is
+     inherited from each button's existing palette. */
+  .material-symbols-rounded {
+    font-family: 'Material Symbols Rounded';
+    font-weight: normal;
+    font-style: normal;
+    line-height: 1;
+    letter-spacing: normal;
+    text-transform: none;
+    display: inline-block;
+    white-space: nowrap;
+    word-wrap: normal;
+    direction: ltr;
+    -webkit-font-smoothing: antialiased;
+    font-variation-settings: 'FILL' 0, 'wght' 500, 'GRAD' 0, 'opsz' 24;
+    font-size: 22px;
+    user-select: none;
+  }
+  .rail-btn .material-symbols-rounded { font-size: 22px; }
+  .rail-btn .chev .material-symbols-rounded { font-size: 11px; font-variation-settings: 'FILL' 0, 'wght' 700, 'GRAD' 0, 'opsz' 20; }
+  .icon-btn .material-symbols-rounded { font-size: 21px; }
+  .batch-item .ic .material-symbols-rounded { font-size: 17px; }
+  .sale-pill .material-symbols-rounded { font-size: 14px; vertical-align: -2px; }
+  .active-brand-pill .material-symbols-rounded { font-size: 15px; vertical-align: -3px; }
+  .modal-close .material-symbols-rounded { font-size: 20px; }
 
   /* v4: white round add button */
   .rail-btn.plus-btn {
@@ -1461,6 +1489,100 @@
     75% { content: '...'; }
   }
 
+  /* QR directory rows: circular photo thumbnail, truncating meta and
+     the quick-action (more_vert) menu beside the availability badge. */
+  .thumb-round {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #FAF8F5;
+    border: 1px solid var(--border-light);
+    flex-shrink: 0;
+    overflow: hidden;
+    position: relative;
+  }
+  .thumb-round img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .thumb-round .thumb-ph { position: absolute; inset: 0; background: var(--bg-hover); }
+  .qr-row .item-id .id-txt { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+  .qr-row .status-tag { flex-shrink: 0; margin-top: 0; }
+  .qr-menu-btn {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: none;
+    background: transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: auto;
+  }
+  .qr-menu-btn:hover { background: var(--bg-hover); color: var(--text-primary); }
+  .qr-menu-btn .material-symbols-rounded { font-size: 20px; }
+  .qr-menu {
+    position: fixed;
+    z-index: 200;
+    min-width: 208px;
+    background: #FFFFFF;
+    border: 1px solid var(--border-light);
+    border-radius: 14px;
+    box-shadow: 0 10px 32px rgba(32,33,36,.18);
+    padding: 6px;
+  }
+  .qr-menu .qm-head { font-size: 11px; font-weight: 600; color: var(--text-secondary); padding: 6px 10px 4px; letter-spacing: .3px; }
+  .qr-menu button {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 9px 10px;
+    border: none;
+    background: transparent;
+    border-radius: 9px;
+    font-size: 13.5px;
+    font-family: inherit;
+    color: var(--text-primary);
+    cursor: pointer;
+    text-align: left;
+  }
+  .qr-menu button:hover { background: var(--bg-sidebar); }
+  .qr-menu button .material-symbols-rounded { font-size: 19px; color: var(--text-secondary); }
+  .qr-menu button.qm-danger { color: var(--badge-red); }
+  .qr-menu button.qm-danger .material-symbols-rounded { color: var(--badge-red); }
+  .qr-menu button.qm-danger.armed { background: #FCE8E6; font-weight: 600; }
+
+  /* Responsive hardening (all widths): form fields and grid items may
+     shrink below their content size, so nothing forces the split view
+     wider than the screen and clips at the right edge. */
+  .field-group { min-width: 0; }
+  .field-group input, .field-group select, .field-group textarea { width: 100%; min-width: 0; }
+  .form-grid { min-width: 0; }
+  .detail-card { min-width: 0; }
+  .active-division-label { min-width: 0; }
+  #topDivisionText { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .topbar { gap: 12px; }
+  .pill-input-container { min-width: 0; }
+  .dock-inner { min-width: 0; }
+
+  /* Tablet / iPad widths: the drawer floats over the workspace instead
+     of crushing it, so the split view and the detail form keep a
+     usable width at 768-1024px. */
+  @media (max-width: 1024px) {
+    .detail-drawer {
+      position: fixed;
+      left: 64px;
+      top: 0;
+      bottom: 0;
+      box-shadow: 8px 0 24px rgba(0,0,0,0.12);
+      z-index: 60;
+    }
+    .detail-drawer.open { width: min(310px, calc(100vw - 64px)); }
+    .drawer-inner { width: 100%; }
+    .batch-pop { left: 70px; }
+  }
+
   @media (max-width: 760px) {
     .detail-drawer {
       position: fixed;
@@ -1503,25 +1625,25 @@
   <!-- Slim icon rail (v4 layout) -->
   <nav class="icon-rail">
     <div class="rail-top">
-      <button class="rail-btn" id="railCatalogBtn" onclick="openDrawer('catalog')" title="Catalog & Filters">≡<span class="chev" id="catalogChevron">›</span></button>
-      <button class="rail-btn plus-btn" onclick="openNewItem()" title="Add New Item">＋</button>
-      <button class="rail-btn" id="railGalleryBtn" onclick="showView('gallery')" title="Gallery — all product photos">🖼️</button>
-      <button class="rail-btn" id="railQrBtn" onclick="openDrawer('qr')" title="QR Code ID Directory">📱</button>
-      <button class="rail-btn" id="railPatrolBtn" onclick="openDrawer('patrol')" title="Owner Sales & Stock Patrol">💰</button>
+      <button class="rail-btn" id="railCatalogBtn" onclick="openDrawer('catalog')" title="Catalog & Filters"><span class="material-symbols-rounded">menu</span><span class="chev" id="catalogChevron"><span class="material-symbols-rounded">chevron_right</span></span></button>
+      <button class="rail-btn plus-btn" onclick="openNewItem()" title="Add New Item"><span class="material-symbols-rounded">add</span></button>
+      <button class="rail-btn" id="railGalleryBtn" onclick="showView('gallery')" title="Gallery — all product photos"><span class="material-symbols-rounded">photo_library</span></button>
+      <button class="rail-btn" id="railQrBtn" onclick="openDrawer('qr')" title="QR Code ID Directory"><span class="material-symbols-rounded">qr_code_2</span></button>
+      <button class="rail-btn" id="railPatrolBtn" onclick="openDrawer('patrol')" title="Owner Sales & Stock Patrol"><span class="material-symbols-rounded">paid</span></button>
     </div>
     <div class="rail-bottom">
-      <button class="rail-btn" id="railBatchBtn" onclick="toggleBatchPopover(event)" title="Quick Store Actions">🎚️</button>
-      <button class="rail-btn" id="railSettingsBtn" onclick="showView('settings')" title="Settings">⚙️</button>
+      <button class="rail-btn" id="railBatchBtn" onclick="toggleBatchPopover(event)" title="Quick Store Actions"><span class="material-symbols-rounded">tune</span></button>
+      <button class="rail-btn" id="railSettingsBtn" onclick="showView('settings')" title="Settings"><span class="material-symbols-rounded">settings</span></button>
     </div>
   </nav>
 
   <!-- Quick Store Actions popover (v4) -->
   <div class="batch-pop" id="batchPopover">
     <div class="bp-title">Quick Store Actions</div>
-    <button class="batch-item" onclick="batchAddSale()"><span class="ic" style="background:#FCE8E6;color:#A50E0E">%</span><span>Add Sale<small>Start a dated promotion</small></span></button>
-    <button class="batch-item" onclick="batchOutOfStock()"><span class="ic" style="background:#FCE8E6;color:#A50E0E">⛔</span><span>Out of Stock<small>Mark the open piece, or quick-add one</small></span></button>
-    <button class="batch-item" onclick="batchShipping()"><span class="ic" style="background:#E8F0FE;color:#174EA6">🚚</span><span>Shipping: 1 Month Delay<small>Apply to the open piece</small></span></button>
-    <button class="batch-item" onclick="batchStatusUpdate()"><span class="ic" style="background:#E6F4EA;color:#137333">✓</span><span>Status Update<small>Jump to availability</small></span></button>
+    <button class="batch-item" onclick="batchAddSale()"><span class="ic" style="background:#FCE8E6;color:#A50E0E"><span class="material-symbols-rounded">percent</span></span><span>Add Sale<small>Start a dated promotion</small></span></button>
+    <button class="batch-item" onclick="batchOutOfStock()"><span class="ic" style="background:#FCE8E6;color:#A50E0E"><span class="material-symbols-rounded">block</span></span><span>Out of Stock<small>Mark the open piece, or quick-add one</small></span></button>
+    <button class="batch-item" onclick="batchShipping()"><span class="ic" style="background:#E8F0FE;color:#174EA6"><span class="material-symbols-rounded">local_shipping</span></span><span>Shipping: 1 Month Delay<small>Apply to the open piece</small></span></button>
+    <button class="batch-item" onclick="batchStatusUpdate()"><span class="ic" style="background:#E6F4EA;color:#137333"><span class="material-symbols-rounded">check_circle</span></span><span>Status Update<small>Jump to availability</small></span></button>
   </div>
 
   <!-- On-demand slide-out drawer: catalogue, gallery, QR directory, patrol -->
@@ -1529,13 +1651,13 @@
     <div class="drawer-inner">
       <div class="drawer-header">
         <span class="drawer-title" id="drawerTitle">Catalog & Filters</span>
-        <button class="icon-btn" style="width:30px;height:30px;font-size:15px;" onclick="closeDrawer()" title="Close panel">✕</button>
+        <button class="icon-btn" style="width:30px;height:30px;font-size:15px;" onclick="closeDrawer()" title="Close panel"><span class="material-symbols-rounded">close</span></button>
       </div>
 
       <div class="drawer-section on" id="drawerCatalog">
         <div class="section-header" style="padding-top:0">
           <span id="catalogSectionTitle">All Products</span>
-          <button class="icon-btn" style="width:26px;height:26px;font-size:13px;" onclick="toggleFilterBar()" title="Filter Items">⧩</button>
+          <button class="icon-btn" style="width:26px;height:26px;font-size:13px;" onclick="toggleFilterBar()" title="Filter Items"><span class="material-symbols-rounded">filter_list</span></button>
         </div>
 
         <div class="filter-bar open" id="filterBar">
@@ -1598,11 +1720,11 @@
         <span style="font-weight:700;color:var(--text-primary)">Elevate Select</span>
         <span id="topDivisionText">Elevate Jewels</span>
         <span class="role-chip" id="roleChip" style="display:none"></span>
-        <span class="sale-pill" id="saleActivePill">🔖 Sale Active</span>
+        <span class="sale-pill" id="saleActivePill"><span class="material-symbols-rounded">sell</span> Sale Active</span>
       </div>
 
       <div style="display:flex;align-items:center;gap:14px">
-      <button class="icon-btn" id="inboxBtn" onclick="openInbox()" title="Inbox" style="position:relative;font-size:19px">✉️<span class="avatar-badge" id="inboxUnreadBadge" style="display:none;position:absolute;top:-4px;right:-6px">0</span></button>
+      <button class="icon-btn" id="inboxBtn" onclick="openInbox()" title="Inbox" style="position:relative;font-size:19px"><span class="material-symbols-rounded">mail</span><span class="avatar-badge" id="inboxUnreadBadge" style="display:none;position:absolute;top:-4px;right:-6px">0</span></button>
       <!-- Multi-Brand Account & Division Switcher -->
       <div class="account-wrapper">
         <div class="account-avatar" onclick="toggleBrandPopover()" id="activeAvatarBtn">
@@ -1672,7 +1794,7 @@
           <img id="qrTagImg" alt="Showroom QR tag">
           <div>
             <div class="t">Showroom QR Tag</div>
-            <div class="s">Scanning this tag opens this exact piece. The same code sits in the QR directory (rail 📱).</div>
+            <div class="s">Scanning this tag opens this exact piece. The same code sits in the QR directory (rail QR icon).</div>
           </div>
         </div>
 
@@ -1811,11 +1933,11 @@
       <div class="dock-inner">
         <div id="pillWrap">
           <div class="pill-input-container">
-            <button class="icon-btn" onclick="triggerImageUpload()" title="Upload a photo to match an item">＋</button>
+            <button class="icon-btn" onclick="triggerImageUpload()" title="Upload a photo to match an item"><span class="material-symbols-rounded">add</span></button>
             <input type="text" class="pill-input" id="mainSearchInput" placeholder="Chat about an item, or type an Item ID (e.g. EJ-100001)…" onkeydown="handleSearchEnter(event)">
-            <button class="active-brand-pill" onclick="toggleBrandPopover()" id="inputBrandPill">Elevate Jewels ▾</button>
-            <button class="icon-btn" id="micBtn" onclick="toggleMic()" title="Speak instead of typing">🎤</button>
-            <button class="icon-btn" onclick="sendChat()" title="Send">🔍</button>
+            <button class="active-brand-pill" onclick="toggleBrandPopover()" id="inputBrandPill">Elevate Jewels <span class="material-symbols-rounded">expand_more</span></button>
+            <button class="icon-btn" id="micBtn" onclick="toggleMic()" title="Speak instead of typing"><span class="material-symbols-rounded">mic</span></button>
+            <button class="icon-btn" onclick="sendChat()" title="Send"><span class="material-symbols-rounded">search</span></button>
           </div>
           <div class="mode-toggle" role="group" aria-label="Chat or Task mode">
             <button class="mode-btn on" id="modeChatBtn" onclick="setMode('chat')">Chat</button>
@@ -1827,12 +1949,13 @@
   </main>
 
   <input type="file" id="hiddenFileInput" accept="image/*" style="display:none" onchange="handlePhotoMatch(event)">
+  <div class="qr-menu" id="qrActionMenu" style="display:none"></div>
   <div class="toast" id="toast"></div>
 
   <!-- Add Sale modal (v4): creates a real promotion record -->
   <div class="modal-backdrop" id="saleModal">
     <div class="modal-card">
-      <button class="modal-close" onclick="closeSaleModal()">✕</button>
+      <button class="modal-close" onclick="closeSaleModal()"><span class="material-symbols-rounded">close</span></button>
       <h3>Configure Sale</h3>
       <p class="sub">The sale is recorded in the back end and shown across the portal while it runs. Public prices on the website are not rewritten by a promotion.</p>
       <label style="font-size:12.5px;font-weight:600;color:var(--text-secondary)">QUICK DURATION</label>
@@ -1868,17 +1991,17 @@
   <!-- Inbox modal (v4): honest empty state — no message back end exists -->
   <div class="modal-backdrop" id="inboxModal">
     <div class="modal-card">
-      <button class="modal-close" onclick="closeInbox()">✕</button>
+      <button class="modal-close" onclick="closeInbox()"><span class="material-symbols-rounded">close</span></button>
       <h3>Inbox</h3>
       <p class="sub">Store messages for <span id="inboxDivisionName">Elevate Jewels</span>.</p>
-      <div class="inbox-empty">✉️<br><strong>No messages yet.</strong><br>There is no message feed connected to the portal yet, so nothing is collected or shown here. When a feed is connected, new messages will appear in this window.</div>
+      <div class="inbox-empty"><span class="material-symbols-rounded" style="font-size:34px;color:var(--text-secondary)">mail</span><br><strong>No messages yet.</strong><br>There is no message feed connected to the portal yet, so nothing is collected or shown here. When a feed is connected, new messages will appear in this window.</div>
     </div>
   </div>
 
   <!-- Specs modal (v4 focus view): the piece's real parameters, read-only -->
   <div class="modal-backdrop" id="specsModal">
     <div class="modal-card">
-      <button class="modal-close" onclick="closeSpecsModal()">✕</button>
+      <button class="modal-close" onclick="closeSpecsModal()"><span class="material-symbols-rounded">close</span></button>
       <h3>Specifications</h3>
       <p class="sub" id="specsModalSub">The piece's recorded parameters.</p>
       <div id="specsModalBody"></div>
@@ -2224,6 +2347,27 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     renderSettings();
     if ($('viewGallery').style.display === 'block') renderGalleryView();
     await loadSales();
+    maybeOpenItemParam();
+  }
+
+  /* Deep link: select-portal.html?item=EJ-... opens that piece
+     directly (the same ?item= the Showroom QR tags carry). One-shot
+     per page load; unknown IDs are ignored quietly. */
+  var itemParamOpened = false;
+  function normalizeEjId(raw) {
+    var s = String(raw || '').trim().toUpperCase().replace(/^EJ-?/, '');
+    return /^\d+$/.test(s) ? 'EJ-' + s : null;
+  }
+  function maybeOpenItemParam() {
+    if (itemParamOpened) return;
+    itemParamOpened = true;
+    var raw = params.get('item');
+    if (!raw) return;
+    var id = normalizeEjId(raw);
+    if (!id) return;
+    var found = null;
+    liveProducts.forEach(function (x) { if (x.id === id) found = x; });
+    if (found) openProduct(found.id);
   }
 
   /* ---------------- brands / divisions ---------------- */
@@ -2480,24 +2624,145 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     }).join('') : '<div class="list-empty">No pieces in ' + esc(div.name) + ' yet.</div>';
   }
 
+  function qrThumbHtml(p) {
+    var img = p && p.image
+      ? '<img src="' + esc(p.image) + '" alt="" loading="lazy" onerror="this.remove()">'
+      : '';
+    return '<div class="thumb-round"><div class="thumb-ph"></div>' + img + '</div>';
+  }
   function renderQR() {
     var div = activeDiv();
+    var sec = $('drawerQr');
+    var keepScroll = sec ? sec.scrollTop : 0;
     var rows = [];
     waitingEntries().forEach(function (e) {
       if (itemDivision(e.product).id !== div.id) return;
-      rows.push('<div class="qr-row" data-kind="pending" data-qid="' + esc(e.queueId) + '"><span>📱</span>'
-        + '<span class="grow"><b>#' + esc(e.queueId) + '</b> — ' + esc(productTitle(e.product)) + '</span>'
-        + '<span class="status-pill pill-pending">Pending</span></div>');
+      rows.push('<div class="qr-row" data-kind="pending" data-qid="' + esc(e.queueId) + '">'
+        + qrThumbHtml(e.product)
+        + '<div class="item-meta"><div class="item-id"><span class="id-txt">#' + esc(e.queueId) + '</span>'
+        + '<span class="status-pill pill-pending">Pending</span></div>'
+        + '<div class="item-title">' + esc(productTitle(e.product)) + '</div></div></div>');
     });
     liveProducts.forEach(function (p) {
       if (itemDivision(p).id !== div.id) return;
-      rows.push('<div class="qr-row" data-kind="product" data-pid="' + esc(p.id) + '"><span>📱</span>'
-        + '<span class="grow"><b>#' + esc(p.id) + '</b> — ' + esc(productTitle(p)) + '</span>'
-        + availTagHtml(p) + '</div>');
+      rows.push('<div class="qr-row" data-kind="product" data-pid="' + esc(p.id) + '">'
+        + qrThumbHtml(p)
+        + '<div class="item-meta"><div class="item-id"><span class="id-txt">#' + esc(p.id) + '</span>'
+        + availTagHtml(p)
+        + '<button class="qr-menu-btn" data-qrmenu="' + esc(p.id) + '" onclick="qrMenuBtnClick(event,\'' + esc(p.id) + '\')" title="Quick actions for #' + esc(p.id) + '" aria-label="Quick actions for #' + esc(p.id) + '"><span class="material-symbols-rounded">more_vert</span></button></div>'
+        + '<div class="item-title">' + esc(productTitle(p)) + ' · ' + esc(fmtPrice(p)) + '</div></div></div>');
     });
     $('qrList').innerHTML = rows.length ? rows.join('')
       : '<div class="list-empty">No pieces in ' + esc(div.name) + ' yet.</div>';
+    if (sec) sec.scrollTop = keepScroll;
   }
+
+  /* ---------------- QR directory quick actions (the ⋮ menu) ----------------
+     Every action saves through the SAME back-end paths the detail
+     editor uses, with the same role split (see saveDetail):
+       - Mark In / Out of Stock -> PATCH /products/:id. Owners also
+         carry the availability label in the patch, exactly like the
+         editor's full save; staff send status only (the back end
+         refuses detail fields from a staff session).
+       - Price to Confirm -> PATCH /products/:id with price 0, the
+         editor's price field through the same path. Owner-only, like
+         every price edit in the portal.
+       - Delete -> DELETE /products/:id, owner-only and ask-twice,
+         like the detail card's Delete and the Gallery trash icon. */
+  var qrMenuFor = null;
+  var qrDeleteArm = { id: null, at: 0 };
+  function closeQrMenu() {
+    qrMenuFor = null;
+    qrDeleteArm = { id: null, at: 0 };
+    var m = $('qrActionMenu');
+    if (m) m.style.display = 'none';
+  }
+  function qrMenuBtnClick(e, id) {
+    if (e) { e.stopPropagation(); e.preventDefault(); }
+    if (qrMenuFor === id) { closeQrMenu(); return; }
+    var p = null;
+    liveProducts.forEach(function (x) { if (x.id === id) p = x; });
+    if (!p) return;
+    qrMenuFor = id;
+    qrDeleteArm = { id: null, at: 0 };
+    var owner = session.role === 'owner';
+    var items = '<div class="qm-head">#' + esc(p.id) + ' — ' + esc(availOf(p)) + '</div>'
+      + '<button onclick="qrMenuAction(\'in\',event)"><span class="material-symbols-rounded">check_circle</span>Mark In Stock</button>'
+      + '<button onclick="qrMenuAction(\'out\',event)"><span class="material-symbols-rounded">remove_circle</span>Mark Out of Stock</button>';
+    if (owner) {
+      items += '<button onclick="qrMenuAction(\'price\',event)"><span class="material-symbols-rounded">money_off</span>Price to Confirm</button>'
+        + '<button class="qm-danger" id="qrMenuDeleteBtn" onclick="qrMenuAction(\'del\',event)"><span class="material-symbols-rounded">delete</span>Delete</button>';
+    }
+    var m = $('qrActionMenu');
+    m.innerHTML = items;
+    m.style.display = 'block';
+    var btn = e.currentTarget || e.target;
+    var r = btn.getBoundingClientRect();
+    var mw = 216;
+    m.style.left = Math.max(8, Math.min(r.right - mw, window.innerWidth - mw - 8)) + 'px';
+    m.style.top = Math.min(r.bottom + 6, window.innerHeight - (owner ? 224 : 144)) + 'px';
+  }
+  async function qrMenuAction(kind, e) {
+    if (e) e.stopPropagation();
+    var id = qrMenuFor;
+    if (!id) return;
+    var p = null;
+    liveProducts.forEach(function (x) { if (x.id === id) p = x; });
+    if (!p) { closeQrMenu(); return; }
+    if (kind === 'del') {
+      if (session.role !== 'owner') { toast('Only the owner can delete a piece.'); closeQrMenu(); return; }
+      var now = Date.now();
+      if (qrDeleteArm.id !== id || now - qrDeleteArm.at > 5000) {
+        qrDeleteArm = { id: id, at: now };
+        var db = $('qrMenuDeleteBtn');
+        if (db) {
+          db.classList.add('armed');
+          db.innerHTML = '<span class="material-symbols-rounded">delete</span>Tap again to delete #' + esc(id);
+        }
+        toast('Tap Delete once more to permanently delete #' + id + '.');
+        return;
+      }
+      closeQrMenu();
+      try {
+        await api('DELETE', '/products/' + encodeURIComponent(id));
+        liveProducts = liveProducts.filter(function (x) { return x.id !== id; });
+        renderQR();
+        renderCatalog();
+        renderPatrol();
+        toast('Deleted — #' + id + ' removed. It can be restored from Settings → Recovery for 7 days.');
+      } catch (err) { toast('Delete failed: ' + err.message); }
+      return;
+    }
+    closeQrMenu();
+    try {
+      var patch;
+      if (kind === 'in' || kind === 'out') {
+        var curStatus = statusOf(p);
+        var newStatus = kind === 'in' ? 'live' : (curStatus === 'sold' ? 'sold' : 'out-of-stock');
+        patch = { status: newStatus };
+        if (session.role === 'owner') patch.availability = kind === 'in' ? 'In Stock' : 'Not in Stock';
+      } else if (kind === 'price') {
+        if (session.role !== 'owner') { toast('Only the owner can change prices.'); return; }
+        patch = { price: 0 };
+      } else return;
+      var r = await api('PATCH', '/products/' + encodeURIComponent(id), patch);
+      var idx = liveProducts.findIndex(function (x) { return x.id === id; });
+      if (idx >= 0 && r.product) liveProducts[idx] = r.product;
+      if (r.product) updateRowForProduct(r.product);
+      renderQR();
+      renderPatrol();
+      toast(kind === 'price'
+        ? '#' + id + ' is now Price to confirm.'
+        : 'Saved — #' + id + ' is now ' + availOf(r.product || p) + '.');
+    } catch (err) { toast('Save failed: ' + err.message); }
+  }
+  document.addEventListener('click', function (e) {
+    if (!qrMenuFor) return;
+    if (e.target.closest && (e.target.closest('#qrActionMenu') || e.target.closest('[data-qrmenu]'))) return;
+    closeQrMenu();
+  });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeQrMenu(); });
+  (function () { var dq = $('drawerQr'); if (dq) dq.addEventListener('scroll', closeQrMenu); })();
 
   function renderBrief() {
     var div = activeDiv();
@@ -2813,6 +3078,11 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     var m = s.match(/(\d{2}K\s*(?:Yellow|White|Rose)?\s*Gold|Platinum|Sterling Silver|Silver|Gold)/i);
     return m ? m[0] : '';
   }
+  /* Showroom QR tags encode the piece's public link, never the bare
+     SKU: a phone camera opens a link, while plain text is treated as
+     a search. The public site reads ?item= and opens the piece. */
+  var SHOWROOM_ITEM_BASE = 'https://elevatejewelsny.com/?item=';
+  function qrUrlFor(id) { return SHOWROOM_ITEM_BASE + encodeURIComponent(String(id)); }
   function qrDataUrl(text) {
     try {
       if (typeof qrcode === 'undefined') return '';
@@ -2853,7 +3123,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     }
     var qrRow = $('qrTagRow');
     if (detailCtx && detailCtx.kind === 'product' && p.id) {
-      var url = qrDataUrl(p.id);
+      var url = qrDataUrl(qrUrlFor(p.id));
       if (url) { $('qrTagImg').src = url; qrRow.style.display = ''; }
       else qrRow.style.display = 'none';
     } else {
