@@ -17309,5 +17309,67 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
       }
     })();
   </script>
+  <script>
+    /* ============ Showroom QR deep link: ?item=EJ-... ============
+       Showroom tags encode https://elevatejewelsny.com/?item=EJ-XXXXXX.
+       The EJ number belongs to the back end's catalogue (the same list
+       the Elevate Select portal shows), so the piece is resolved by
+       identity, never by guessing a position: the back-end record's
+       siteId is matched against this page's PRODUCTS (with a name +
+       price cross-check), falling back to a unique name + price match
+       for records without a siteId (the watch houses). Any failure —
+       back end unreachable, unknown number, no unique match — leaves
+       the shop exactly as it loads without the parameter. */
+    (function () {
+      var m = /[?&]item=([^&#]+)/.exec(location.search || "");
+      if (!m) return;
+      var raw = "";
+      try { raw = decodeURIComponent(m[1]); } catch (e) { raw = m[1]; }
+      var digits = String(raw).trim().toUpperCase().replace(/^EJ-?/, "");
+      if (!/^\d+$/.test(digits)) return;
+      var targetId = "EJ-" + digits;
+      var base = String(window.EJ_BACKEND_URL || "https://elevate-backend-240z.onrender.com").replace(/\/+$/, "");
+      function resolve(rec) {
+        var prods = window.PRODUCTS || [];
+        var hit = null;
+        if (rec.siteId) {
+          for (var i = 0; i < prods.length; i++) {
+            if (prods[i].id === rec.siteId) { hit = prods[i]; break; }
+          }
+          if (hit && Number(hit.price) !== Number(rec.price)) hit = null;
+        }
+        if (!hit) {
+          var cand = [];
+          for (var j = 0; j < prods.length; j++) {
+            if (prods[j].name === rec.name && Number(prods[j].price) === Number(rec.price)) cand.push(prods[j]);
+          }
+          if (cand.length === 1) hit = cand[0];
+        }
+        return hit;
+      }
+      function attempt(n) {
+        fetch(base + "/products", { headers: { "Accept": "application/json" } })
+          .then(function (r) { return r.ok ? r.json() : null; })
+          .then(function (data) {
+            var list = data && data.products;
+            if (!list || !list.length) {
+              if (n < 2) setTimeout(function () { attempt(n + 1); }, 1500);
+              return;
+            }
+            var rec = null;
+            for (var i = 0; i < list.length; i++) {
+              if (list[i].id === targetId) { rec = list[i]; break; }
+            }
+            if (!rec) return;
+            var hit = resolve(rec);
+            if (hit) location.hash = "#/item/" + hit.id;
+          })
+          .catch(function () {
+            if (n < 2) setTimeout(function () { attempt(n + 1); }, 1500);
+          });
+      }
+      attempt(0);
+    })();
+  </script>
 </body>
 </html>
