@@ -1911,9 +1911,10 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
          (owner-only): every edit, status change, sale, void and
          delete is logged with the piece as it was BEFORE, and
          Settings offers one-tap restore for 7 days.
-       - Availability is a four-state model: In Stock / Not in Stock
-         derive from the status field; Custom Jewels and
-         Shipping: 1 Month Delay live in the stored availability field.
+       - Availability follows the owner's rule (2026-11-25), computed
+         in availOf: In Stock = ONLY owner-supplied pieces WITH a
+         price, plus watches; sold/out status always wins; every
+         other piece is Custom Jewels, never In Stock.
        - ONE shared Pending queue — GET/POST /pending,
          PATCH /pending/:queueId, POST /pending/:queueId/approve|reject
        - Connection state — GET /health
@@ -2022,28 +2023,41 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     return n ? fmtMoney(n) : 'Price to confirm';
   }
   function statusOf(p) { return (p && p.status) || 'live'; }
-  /* -------- availability (the owner's four-state model) --------
-     Derived from real back-end fields only:
+  /* -------- availability (the owner's rule, 2026-11-25) --------
+     Computed HERE from real back-end fields — a stored availability
+     string is never trusted on its own (older seed data marked whole
+     groups wrong in both directions: APEX custom designs carried no
+     custom mark at all, and priced owner-supplied pieces were stored
+     as "Custom Jewels"):
+       - "Not in Stock" — status "sold" or "out-of-stock". A sold or
+         out piece is never In Stock, whatever else is stored.
        - "Shipping: 1 Month Delay" — the piece's own availability
-         field says so. Checked FIRST: it is an explicit store state
-         that outranks the stock-status derivation (a shipping piece
-         is usually still "live" underneath).
-       - "Custom Jewels" — the piece's stored availability field says
-         so, a custom/madeToOrder flag is set, or it is one of the EX
-         custom designs (llg-ex-* IDs).
-       - "In Stock" — a live piece (status "live").
-       - "Not in Stock" — status "out-of-stock" or "sold"
-         (the tag reads "Not in Stock (Unsure / Out)"). */
+         field says so (an explicit owner-set store state; watches
+         keep their one-week shipping note on the public site).
+       - "In Stock" — ONLY (a) a piece the owner supplied WITH a
+         price (ownerSupplied === true and a real price), or
+         (b) a watch (isWatch === true).
+       - "Custom Jewels" — everything else: all custom/design pieces
+         (llg-ex-*, llg-ns-*, APEX designs, and any piece without an
+         owner-given price) are made-to-order, never In Stock. */
+  function isOwnerPriced(p) {
+    return !!(p && p.ownerSupplied === true && productPrice(p));
+  }
+  function isWatchPiece(p) {
+    return !!(p && p.isWatch === true);
+  }
   function isCustomDesign(p) {
     if (!p) return false;
-    if (p.availability === 'Custom Jewels' || p.custom === true || p.madeToOrder === true) return true;
-    return /^llg-ex-/i.test(String(p.id || ''));
+    return !(isOwnerPriced(p) || isWatchPiece(p));
   }
   var SHIPPING_AVAIL = 'Shipping: 1 Month Delay';
   function availOf(p) {
-    if (p && p.availability === SHIPPING_AVAIL) return SHIPPING_AVAIL;
-    if (isCustomDesign(p)) return 'Custom Jewels';
-    return statusOf(p) === 'live' ? 'In Stock' : 'Not in Stock';
+    if (!p) return 'Not in Stock';
+    var s = statusOf(p);
+    if (s === 'sold' || s === 'out-of-stock') return 'Not in Stock';
+    if (p.availability === SHIPPING_AVAIL) return SHIPPING_AVAIL;
+    if (isOwnerPriced(p) || isWatchPiece(p)) return 'In Stock';
+    return 'Custom Jewels';
   }
   function availClass(a) {
     if (a === 'In Stock') return 'status-in-stock';
@@ -2920,13 +2934,36 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     ['Custom Jewels', 'Custom Jewels'], [SHIPPING_AVAIL, 'Shipping'], ['Lab-Grown', 'Lab-Grown'],
     ['Natural', 'Natural'], ['ON_SALE', 'On Sale']
   ];
-  var KNOWN_METALS = ['18K Yellow Gold', '18K White Gold', '18K Rose Gold', '14K Yellow Gold', '14K White Gold', '14K Rose Gold', 'Platinum', 'Sterling Silver', 'Yellow Gold', 'White Gold', 'Rose Gold', 'Silver', 'Gold'];
+  var GAL_METALS = [
+    ['ALL', 'All Metals'], ['YELLOW', 'Yellow gold'], ['WHITE', 'White gold'],
+    ['ROSE', 'Rose gold'], ['MIXED', 'Two-tone / mixed'], ['PLATINUM', 'Platinum']
+  ];
+  /* Normalized metal groups from the piece's free-text metal string
+     (the catalogue stores dozens of raw variants like "14K or 18K
+     gold — white, yellow or rose"): keyword match on yellow / white
+     / rose / platinum. A piece whose metal names 2+ tones matches
+     Two-tone / mixed AND each of its own tones, so a combined filter
+     can no longer come back empty for pieces that exist. */
+  function metalGroupsOf(p) {
+    var t = String(metalOf(p) || '').toLowerCase();
+    var g = {
+      YELLOW: /yellow/.test(t), WHITE: /white/.test(t),
+      ROSE: /rose/.test(t), PLATINUM: /platinum/.test(t)
+    };
+    var tones = (g.YELLOW ? 1 : 0) + (g.WHITE ? 1 : 0) + (g.ROSE ? 1 : 0) + (g.PLATINUM ? 1 : 0);
+    g.MIXED = tones >= 2;
+    return g;
+  }
+  function metalGroupPasses(p, group) {
+    if (!group || group === 'ALL') return true;
+    return !!metalGroupsOf(p)[group];
+  }
   function galPasses(p) {
     if (galTier1 === 'ON_SALE') { if (!promoCoversPieceToday(p)) return false; }
     else if (galTier1 === 'Lab-Grown' || galTier1 === 'Natural') { if (p.origin !== galTier1) return false; }
     else if (galTier1 !== 'ALL') { if (availOf(p) !== galTier1) return false; }
     if (galTier2a !== 'ALL' && p.category !== galTier2a) return false;
-    if (galTier2b !== 'ALL' && metalOf(p) !== galTier2b) return false;
+    if (!metalGroupPasses(p, galTier2b)) return false;
     return true;
   }
   function renderGalleryView() {
@@ -2943,12 +2980,9 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
       + Object.keys(cats).sort().map(function (c) {
         return '<button class="gal-chip blue' + (galTier2a === c ? ' on' : '') + '" data-gt2a="' + esc(c) + '">' + esc(c.charAt(0).toUpperCase() + c.slice(1)) + '</button>';
       }).join('');
-    var metals = {};
-    items.forEach(function (p) { var m = metalOf(p); if (m) metals[m] = true; });
-    $('galTier2b').innerHTML = '<button class="gal-chip gold' + (galTier2b === 'ALL' ? ' on' : '') + '" data-gt2b="ALL">All Metals</button>'
-      + Object.keys(metals).sort().map(function (m) {
-        return '<button class="gal-chip gold' + (galTier2b === m ? ' on' : '') + '" data-gt2b="' + esc(m) + '">' + esc(m) + '</button>';
-      }).join('');
+    $('galTier2b').innerHTML = GAL_METALS.map(function (g) {
+      return '<button class="gal-chip gold' + (galTier2b === g[0] ? ' on' : '') + '" data-gt2b="' + g[0] + '">' + g[1] + '</button>';
+    }).join('');
     var shown = items.filter(galPasses);
     grid.innerHTML = shown.length ? shown.map(function (p) {
       var img = p.image
