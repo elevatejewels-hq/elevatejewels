@@ -125,7 +125,6 @@
   .icon-btn .material-symbols-rounded { font-size: 21px; }
   .batch-item .ic .material-symbols-rounded { font-size: 17px; }
   .sale-pill .material-symbols-rounded { font-size: 14px; vertical-align: -2px; }
-  .active-brand-pill .material-symbols-rounded { font-size: 15px; vertical-align: -3px; }
   .modal-close .material-symbols-rounded { font-size: 20px; }
 
   /* v4: white round add button */
@@ -746,18 +745,6 @@
     outline: none;
     padding: 8px 4px;
     min-width: 0;
-  }
-
-  .active-brand-pill {
-    background: var(--accent-gold-bg);
-    border: 1px solid var(--accent-gold);
-    color: var(--text-primary);
-    font-size: 13px;
-    font-weight: 500;
-    padding: 6px 14px;
-    border-radius: 20px;
-    cursor: pointer;
-    white-space: nowrap;
   }
 
   .quick-chips {
@@ -1598,10 +1585,8 @@
     .topbar { padding: 0 12px; }
     .workspace-content { padding: 16px; }
     .bottom-dock { padding: 10px 12px 14px; }
-    /* The composer pill keeps its input usable on a phone: the division
-       pill is hidden here — the division still shows in the top bar and
-       switches from the avatar menu. */
-    .active-brand-pill { display: none; }
+    /* The composer pill carries no division pill at any size — the
+       division shows in the top bar and switches from the avatar menu. */
   }
 </style>
 </head>
@@ -1933,11 +1918,10 @@
       <div class="dock-inner">
         <div id="pillWrap">
           <div class="pill-input-container">
-            <button class="icon-btn" onclick="triggerImageUpload()" title="Upload a photo to match an item"><span class="material-symbols-rounded">add</span></button>
+            <button class="icon-btn" onclick="triggerImageUpload()" title="Add a photo to match an item"><span class="material-symbols-rounded">add_photo_alternate</span></button>
             <input type="text" class="pill-input" id="mainSearchInput" placeholder="Chat about an item, or type an Item ID (e.g. EJ-100001)…" onkeydown="handleSearchEnter(event)">
-            <button class="active-brand-pill" onclick="toggleBrandPopover()" id="inputBrandPill">Elevate Jewels <span class="material-symbols-rounded">expand_more</span></button>
             <button class="icon-btn" id="micBtn" onclick="toggleMic()" title="Speak instead of typing"><span class="material-symbols-rounded">mic</span></button>
-            <button class="icon-btn" onclick="sendChat()" title="Send"><span class="material-symbols-rounded">search</span></button>
+            <button class="icon-btn" onclick="sendChat()" title="Send"><span class="material-symbols-rounded">arrow_upward</span></button>
           </div>
           <div class="mode-toggle" role="group" aria-label="Chat or Task mode">
             <button class="mode-btn on" id="modeChatBtn" onclick="setMode('chat')">Chat</button>
@@ -2400,7 +2384,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     }).join('');
     $('topDivisionText').textContent = activeDiv().name;
     $('heroBrandSpan').textContent = activeDiv().name;
-    $('inputBrandPill').textContent = activeDiv().name + ' ▾';
+    var ibp = $('inputBrandPill'); if (ibp) ibp.textContent = activeDiv().name + ' ▾';
     $('catalogSectionTitle').textContent = activeDiv().name + ' — Products';
     renderSalePill();
   }
@@ -4504,7 +4488,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
       if (row.getAttribute('data-kind') === 'product') openProduct(row.getAttribute('data-pid'));
       else if (row.getAttribute('data-kind') === 'pending') openPending(row.getAttribute('data-qid'));
     }
-    if (!e.target.closest || (!e.target.closest('.account-wrapper') && !e.target.closest('#inputBrandPill'))) {
+    if (!e.target.closest || !e.target.closest('.account-wrapper')) {
       $('brandPopover').classList.remove('open');
     }
   });
