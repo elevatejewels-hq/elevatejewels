@@ -1206,6 +1206,9 @@
       .item-main img { display: block; width: 100%; height: 100%; object-fit: contain; padding: 1.5rem; transition: transform 0.3s; }
       .item-main.zoomed { cursor: zoom-out; }
       .item-main.zoomed img { transform: scale(2.1); }
+      .item-qr-card { margin-top: 2rem; display: flex; align-items: center; gap: 1.25rem; background: #F9F6F0; border: 1px solid rgba(184,147,90,.45); border-radius: 0.25rem; padding: 1rem 1.25rem; }
+      .item-qr-tile { flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; background: #fff; border: 1px solid var(--border); border-radius: 4px; padding: 6px; line-height: 0; }
+      @media (max-width: 480px) { .item-qr-card { gap: 1rem; padding: 0.875rem 1rem; } }
       /* 2026-11-12 photo round — swipe counters, AI voice spinner and
          the desktop home headline fix (desktop only, min-width 1024px;
          phone rules untouched). Product photos already sit whole
@@ -11399,6 +11402,7 @@ var PRODUCTS = [
           + '<button type="button" class="btn-ghost" id="itemWishBtn" onclick="EJ.itemToggleWish(this)">' + icon("heart", 16) + (wished ? "Saved to wishlist" : "Wishlist") + "</button>"
           + '<a class="btn-ghost" href="#/consultation">' + icon("calendar", 16) + "Book viewing</a></div>";
         h += trustBadgesHtml();
+        h += itemQrHtml(p);
         /* vendor enquiry */
         h += '<section class="glass-soft" style="margin-top:2rem;border-radius:0.25rem;padding:1.25rem"><p class="eyebrow" style="letter-spacing:0.14em">' + esc(v.house) + "</p>"
           + '<div style="margin-top:0.75rem;display:flex;align-items:flex-start;gap:0.75rem"><span style="flex-shrink:0">' + brandMarkHtml(v, "md") + '</span><div style="min-width:0"><h2 style="font-size:1.25rem">' + esc(v.name) + '</h2><p style="margin-top:0.25rem;font-size:0.75rem;color:var(--muted-foreground)">' + esc(v.city) + " · Master jeweler " + esc(v.master) + " · since " + v.founded + "</p></div></div>"
@@ -14425,6 +14429,53 @@ var PRODUCTS = [
           });
         });
       }
+      /* Item-page share QR (2026-11-26): every piece page carries a
+         small card whose QR encodes the piece's canonical deep link
+         https://elevatejewelsny.com/?item=<EJ> — the same URL the
+         Showroom tags carry, opened by the ?item= resolver script.
+         Generation reuses the house pattern (hwPaintQrs): the
+         embedded qrcode-generator library via EJ._hwLoadQrLib, a
+         per-URL cache, and the qr icon as the pre-paint placeholder.
+         The card is rebuilt with every item render and painted by
+         itemPaintQr() from the router, so it can never show another
+         piece's code. */
+      function itemQrEj(p) {
+        if (!p) return "";
+        return p.ej || (window.EJ_BY_SLUG && window.EJ_BY_SLUG[p.id]) || "";
+      }
+      function itemQrHtml(p) {
+        var ej = itemQrEj(p);
+        if (!ej) return "";
+        var url = "https://elevatejewelsny.com/?item=" + ej;
+        return '<div class="item-qr-card"><span class="item-qr-tile" data-item-qr="' + esc(url) + '">' + icon("qr", 104) + "</span>"
+          + '<div style="min-width:0"><p class="eyebrow-gold">Share this piece</p>'
+          + '<p style="margin-top:0.375rem;font-family:var(--font-display);font-size:1.25rem;line-height:1.2">Scan to open this piece</p>'
+          + '<p style="margin-top:0.375rem;font-size:0.8125rem;line-height:1.6;color:var(--muted-foreground)">Point any phone camera at the code to revisit or share this exact piece.</p>'
+          + '<p style="margin-top:0.5rem;font-size:0.75rem;letter-spacing:0.18em;color:var(--gold)">' + esc(ej) + "</p></div></div>";
+      }
+      function itemPaintQr() {
+        var el = document.querySelector("[data-item-qr]");
+        if (!el) return;
+        var url = el.getAttribute("data-item-qr");
+        if (!url) return;
+        EJ._itemQrCache = EJ._itemQrCache || {};
+        function put(dataUrl) {
+          el.innerHTML = '<img src="' + dataUrl + '" alt="QR code — scan to open this piece" style="width:104px;height:104px;border-radius:4px" />';
+        }
+        if (EJ._itemQrCache[url]) { put(EJ._itemQrCache[url]); return; }
+        EJ._hwLoadQrLib().then(function (ok) {
+          if (!ok || !el.isConnected) return;
+          if (EJ._itemQrCache[url]) { put(EJ._itemQrCache[url]); return; }
+          try {
+            var qrObj = window.qrcode(0, "M");
+            qrObj.addData(url);
+            qrObj.make();
+            var cell = Math.max(2, Math.round(208 / qrObj.getModuleCount()));
+            var dataUrl = qrObj.createDataURL(cell, 2);
+            if (dataUrl) { EJ._itemQrCache[url] = dataUrl; put(dataUrl); }
+          } catch (e) { /* the placeholder icon stays */ }
+        });
+      }
       function pageHouseWorkspace(view, query) {
         var unlocked = !!(EJ._houseUnlocked || EJ._pwRole);
         if (!unlocked) return pageHouse();
@@ -16834,6 +16885,7 @@ var PRODUCTS = [
           if (slot) slot.outerHTML = connectTopbarHtml();
         }
         if (name === "house") hwAfterRender();
+        if (name === "item") itemPaintQr();
         if (name !== "item") { EJ._item = null; EJ._conciergeOpen = false; }
         EJ.updateChrome();
         EJ.renderConcierge();
